@@ -27,6 +27,15 @@ const EVENTS = [
     summary: "A full day on track at Horizon Beranang Circuit, with open categories for scooters of every class. Riders must bring full racing gear, and transponders are used for timing.",
   },
   {
+    title: "Timeless Scooter Ride",
+    subtitle: "2026 · V.1",
+    date: "2026-11-13",
+    place: "Seri Nipah, Bachok, Kelantan",
+    image: "assets/img/event-timeless-scooter-ride-2026.jpg",
+    whatsapp: "010-9277076",
+    summary: "A scooter ride to the coast of Bachok, Kelantan. Contact the organiser on WhatsApp for details and registration.",
+  },
+  {
     title: "Italian Scooter Day",
     subtitle: "Vol. 2",
     date: "2026-11-29",
@@ -76,9 +85,12 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&
 const ICON = {
   cal: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="1"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
   pin: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+  phone: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>',
   arrow: '<svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M0 6h16M11 1l5 5-5 5"/></svg>',
 };
 
+// "010-9277076" -> "https://wa.me/60109277076"
+const waLink = (n) => `https://wa.me/6${String(n).replace(/\D/g, "")}`;
 const isPostponed = (e) => e.status === "postponed";
 
 function splitEvents(now = new Date()) {
@@ -103,6 +115,7 @@ function cardHTML(ev, isPast) {
         <div class="card__date">${postponed ? "Postponed · New date TBA" : esc(fmtDate(ev))}</div>
         <h3>${esc(ev.title)} ${ev.subtitle ? `<span class="muted">${esc(ev.subtitle)}</span>` : ""}</h3>
         <p>${esc(ev.place)}</p>
+        ${ev.whatsapp && !isPast ? `<p><a class="card__contact" href="${waLink(ev.whatsapp)}" target="_blank" rel="noopener">${ICON.phone} WhatsApp ${esc(ev.whatsapp)}</a></p>` : ""}
       </div>
     </article>`;
 }
@@ -119,6 +132,7 @@ function featuredHTML(ev) {
         <ul class="meta">
           <li>${ICON.cal}${esc(fmtDate(ev))}</li>
           <li>${ICON.pin}${esc(ev.place)}</li>
+          ${ev.whatsapp ? `<li>${ICON.phone}<a href="${waLink(ev.whatsapp)}" target="_blank" rel="noopener">WhatsApp ${esc(ev.whatsapp)}</a></li>` : ""}
         </ul>
         <div class="countdown" data-countdown="${esc(ev.date)}" aria-live="polite">
           <div><strong data-u="d">00</strong><span>Days</span></div>
