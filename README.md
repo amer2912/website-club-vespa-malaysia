@@ -14,6 +14,9 @@ website-club-vespa-malaysia/
 ├── events.html     Events & News (+ Google Calendar)
 ├── shop.html       Shop (Coming soon)
 ├── contact.html    Contact Us (+ peta)
+├── ahli/           Portal ahli (log masuk, profil, kad ahli, renew FPX) + panel AJK
+├── supabase/       Pangkalan data dan fungsi bayaran untuk portal ahli
+├── docs/           Panduan persediaan sistem keahlian
 └── assets/
     ├── css/style.css
     ├── js/main.js  Senarai acara + pautan borang keahlian
@@ -27,6 +30,12 @@ website-club-vespa-malaysia/
 **Tukar pautan borang keahlian.** Edit `membershipForm` di bahagian atas `assets/js/main.js`. Semua butang "Join membership" akan ikut pautan ini.
 
 **Tukar gambar.** Letakkan fail baharu dalam `assets/img/` dengan nama yang sama, atau ubah laluan gambar dalam fail HTML yang berkenaan.
+
+## Portal ahli
+
+Halaman `ahli/` ialah portal untuk ahli log masuk dengan emel, melengkapkan profil, melihat kad ahli digital dan memperbaharui keahlian melalui FPX (ToyyibPay). AJK juga boleh menguruskan senarai ahli di `ahli/admin.html`.
+
+Portal ini perlu disambungkan ke Supabase dan ToyyibPay sebelum boleh digunakan. Ikut panduan langkah demi langkah di [docs/SETUP-KEAHLIAN.md](docs/SETUP-KEAHLIAN.md). Selagi belum disambungkan, halaman `ahli/` cuma memaparkan mesej "coming soon".
 
 ## Menerbitkan (percuma)
 
