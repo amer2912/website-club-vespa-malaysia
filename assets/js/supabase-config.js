@@ -7,10 +7,10 @@
    only allows what the database rules allow.
    NEVER put a secret key (sb_secret_...) or service_role key here.
 
-   While these are empty, the member portal shows a
+   If these are emptied, the member portal shows a
    "coming soon" message instead of the login form.
    ========================================================= */
 window.VCM_SUPABASE = {
-  url: "",      // e.g. "https://abcdefghijkl.supabase.co"
-  anonKey: "",  // publishable key: "sb_publishable_..."
+  url: "https://klqlpnoghudrdtvnseag.supabase.co",
+  anonKey: "sb_publishable_YovHOrqevxs6bx0DV38wvw_oMG2_q50", // publishable key (safe to be public)
 };
