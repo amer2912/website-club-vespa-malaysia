@@ -62,6 +62,14 @@ vespaclubmalaysia.com/ahli/   (GitHub Pages: halaman log masuk, profil, kad, ren
 
 Kalau tertekan **Run** dua kali, tiada masalah. Fail ini selamat untuk dijalankan semula.
 
+### 2b. Alat edit untuk AJK
+Ulang langkah yang sama untuk fail kedua, [`supabase/migrations/002_admin_edit.sql`](../supabase/migrations/002_admin_edit.sql). Fail ini menambah tiga ciri pada panel AJK:
+- butang **Edit** untuk mengubah nombor ahli, profil dan tarikh "Valid until";
+- kaedah bayaran **Old Google Form**, untuk ahli yang sudah bayar melalui borang lama;
+- senarai **Pre-registered**, untuk menambah ahli yang belum pernah log masuk.
+
+Jalankan fail `001` dahulu, kemudian `002`. Kedua-duanya selamat untuk dijalankan semula.
+
 ## Langkah 3: Tetapan log masuk emel
 
 ### 3a. Alamat laman
@@ -141,6 +149,18 @@ ali@gmail.com,VCM0012,Ali Bin Abu,0123456789,2026-12-31,2019-08-02
 select setval('public.member_no_seq', 120);
 ```
 Kalau terlupa langkah ini pun, sistem akan langkau nombor yang sudah diambil secara automatik.
+
+## Panel AJK: kemas kini ahli secara manual
+
+Buka portal, tekan **AJK admin**, dan anda boleh buat perkara berikut.
+
+| Mahu buat | Cara |
+|---|---|
+| Beri atau tukar nombor ahli | Tekan **Edit** pada baris ahli, isi **Member no.**, kemudian **Save changes**. Sistem menolak nombor yang sudah digunakan orang lain. |
+| Tanda ahli **sudah bayar 2026** (melalui Google Form lama) | Tekan **Payment**, pilih tahun `2026`, kaedah **Old Google Form**, dan isi jumlah (RM0 jika tidak tahu). Status akan menjadi Active hingga 31 Dis 2026, dan bayaran itu tercatat dalam sejarah. |
+| Tanda ahli **belum bayar** (betulkan kesilapan) | Tekan **Edit**, **kosongkan** tarikh **Valid until**, kemudian **Save changes**. |
+| Tambah ahli yang **belum log masuk** | Di bahagian **Pre-registered**, tekan **Add member** dan isi emel, nombor ahli serta tarikh sah. Bila ahli itu log masuk kali pertama dengan emel tersebut, semua maklumat ini terus dipindahkan ke akaunnya. |
+| Rekod bayaran tunai atau pindahan bank | Tekan **Payment** dan pilih **Cash** atau **Bank transfer**. |
 
 ## Langkah 7: Akaun ToyyibPay (mula dengan sandbox)
 

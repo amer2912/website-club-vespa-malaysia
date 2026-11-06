@@ -272,7 +272,7 @@
     const rows = (data || []).filter((p) => p.status === "paid");
     const list = $("#history");
     list.innerHTML = rows.length
-      ? rows.map((p) => `<li><div><strong>Membership ${p.coverage_year}</strong><div class="muted">${esc(fmtDate(p.paid_at || p.created_at))} · ${p.method === "fpx" ? "FPX" : p.method === "cash" ? "Cash" : "Bank transfer"}</div></div><strong>${rm(p.amount_cents)}</strong></li>`).join("")
+      ? rows.map((p) => `<li><div><strong>Membership ${p.coverage_year}</strong><div class="muted">${esc(fmtDate(p.paid_at || p.created_at))} · ${({ fpx: "FPX", cash: "Cash", transfer: "Bank transfer", legacy: "Google Form" })[p.method] || p.method}</div></div><strong>${p.amount_cents ? rm(p.amount_cents) : "Paid"}</strong></li>`).join("")
       : `<li class="muted">No payments yet.</li>`;
   }
 

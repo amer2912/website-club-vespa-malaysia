@@ -18,6 +18,8 @@
   };
   const statusOf = (m) => (!m.expires_on ? "new" : m.expires_on >= todayMYT() ? "active" : "expired");
   const LABEL = { active: "Active", expired: "Expired", new: "Never paid" };
+  const METHOD = { fpx: "FPX", cash: "Cash", transfer: "Transfer", legacy: "Old Google Form" };
+  const orNull = (v) => { const t = String(v ?? "").trim(); return t === "" ? null : t; };
   const note = (el, text, kind = "info") => { el.textContent = text || ""; el.className = `notice notice--${kind}`; el.hidden = !text; };
   const view = (id) => ["adm-loading", "adm-denied", "adm-main"].forEach((v) => { $(`#${v}`).hidden = v !== id; });
 
@@ -30,7 +32,9 @@
   const sb = window.supabase.createClient(cfg.url, cfg.anonKey, { auth: { persistSession: true, autoRefreshToken: true } });
 
   let members = [];
+  let imports = [];
   let current = null;
+  let editing = null;
 
   async function init() {
     const { data } = await sb.auth.getSession();
@@ -39,6 +43,7 @@
     if (isAdmin !== true) { deny("Admins only", "Your account does not have AJK admin access. Ask the club secretary to add your email to the admins list."); return; }
     view("adm-main");
     await Promise.all([loadMembers(), loadPayments()]);
+    await loadImports();
   }
 
   async function loadMembers() {
@@ -55,8 +60,8 @@
       .eq("status", "paid").order("paid_at", { ascending: false }).limit(20);
     $("#adm-payments").innerHTML = (data || []).length
       ? data.map((p) => `<li><div><strong>${esc(p.members?.full_name || "—")}</strong> <span class="muted">${esc(p.members?.member_no || "")}</span>
-          <div class="muted">${esc(fmtDate(p.paid_at))} · ${p.method === "fpx" ? "FPX" : p.method === "cash" ? "Cash" : "Transfer"} · ${p.coverage_year}${p.recorded_by ? ` · by ${esc(p.recorded_by)}` : ""}</div></div>
-          <strong>${rm(p.amount_cents)}</strong></li>`).join("")
+          <div class="muted">${esc(fmtDate(p.paid_at))} · ${METHOD[p.method] || esc(p.method)} · ${p.coverage_year}${p.recorded_by ? ` · by ${esc(p.recorded_by)}` : ""}</div></div>
+          <strong>${p.amount_cents ? rm(p.amount_cents) : "—"}</strong></li>`).join("")
       : `<li class="muted">No payments yet.</li>`;
   }
 
@@ -94,7 +99,10 @@
         <td>${esc(m.vespa_model || "—")}<div class="muted">${esc(m.plate_no || "")}</div></td>
         <td class="num">${esc(fmtDate(m.expires_on))}</td>
         <td><span class="pill pill--${st}">${LABEL[st]}</span></td>
-        <td><button class="btn btn--line btn--small" type="button" data-pay="${esc(m.id)}">Record payment</button></td>
+        <td><div class="form-actions" style="flex-wrap:nowrap">
+          <button class="btn btn--line btn--small" type="button" data-edit="${esc(m.id)}">Edit</button>
+          <button class="btn btn--line btn--small" type="button" data-pay="${esc(m.id)}">Payment</button>
+        </div></td>
       </tr>`;
     }).join("") || `<tr><td colspan="8" class="muted">No members match.</td></tr>`;
     $("#adm-count").textContent = `Showing ${rows.length} of ${members.length}`;
@@ -145,18 +153,109 @@
     e.preventDefault();
     const year = Number($("#pay-year").value);
     const cents = Math.round(Number($("#pay-amount").value) * 100);
-    if (!(year >= 2019 && year <= 2100) || !(cents > 0)) { note($("#pay-msg"), "Check the year and amount.", "error"); return; }
+    const method = $("#pay-method").value;
+    const amountOk = cents > 0 || (method === "legacy" && cents === 0);
+    if (!(year >= 2019 && year <= 2100) || !amountOk) { note($("#pay-msg"), "Check the year and amount.", "error"); return; }
     const btn = e.submitter || $("#pay-form button[type=submit]");
     btn.disabled = true;
     const { error } = await sb.rpc("admin_record_payment", {
       p_member_id: current.id, p_coverage_year: year, p_amount_cents: cents,
-      p_method: $("#pay-method").value, p_note: $("#pay-note").value.trim() || null,
+      p_method: method, p_note: $("#pay-note").value.trim() || null,
     });
     btn.disabled = false;
     if (error) { note($("#pay-msg"), `Could not save: ${error.message}`, "error"); return; }
     dialog.close();
     note($("#adm-msg"), `Payment saved for ${current.full_name || current.email}.`, "success");
     await Promise.all([loadMembers(), loadPayments()]);
+    await loadImports();
+  });
+
+  /* ---------- edit member ---------- */
+  const editDialog = $("#edit-dialog");
+  const ED = ["member_no", "full_name", "phone", "state", "vespa_model", "plate_no", "expires_on"];
+  $("#adm-rows").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-edit]");
+    if (!btn) return;
+    editing = members.find((m) => m.id === btn.dataset.edit);
+    if (!editing) return;
+    ED.forEach((f) => { $(`#ed-${f}`).value = editing[f] ?? ""; });
+    $("#edit-email").textContent = editing.email;
+    note($("#edit-msg"), "");
+    editDialog.showModal();
+  });
+  $("#edit-cancel").addEventListener("click", () => editDialog.close());
+  $("#edit-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const v = Object.fromEntries(ED.map((f) => [f, orNull($(`#ed-${f}`).value)]));
+    if (v.phone && !/^\+?[0-9][0-9 -]{7,18}$/.test(v.phone)) { note($("#edit-msg"), "Please enter a valid phone number.", "error"); return; }
+    const btn = e.submitter || $("#edit-form button[type=submit]");
+    btn.disabled = true;
+    const { error } = await sb.rpc("admin_update_member", {
+      p_member_id: editing.id, p_member_no: v.member_no, p_full_name: v.full_name, p_phone: v.phone,
+      p_state: v.state, p_vespa_model: v.vespa_model, p_plate_no: v.plate_no, p_expires_on: v.expires_on,
+    });
+    btn.disabled = false;
+    if (error) { note($("#edit-msg"), error.message, "error"); return; }
+    editDialog.close();
+    note($("#adm-msg"), `Saved changes for ${v.full_name || editing.email}.`, "success");
+    await loadMembers();
+  });
+
+  /* ---------- pre-registered members (not logged in yet) ---------- */
+  async function loadImports() {
+    const { data, error } = await sb.from("member_import").select("*").order("member_no", { ascending: true, nullsFirst: false });
+    if (error) { $("#pre-rows").innerHTML = `<tr><td colspan="6" class="muted">Could not load: ${esc(error.message)}</td></tr>`; return; }
+    const withAccount = new Set(members.map((m) => m.email));
+    imports = (data || []).filter((r) => !withAccount.has(r.email));
+    $("#pre-rows").innerHTML = imports.map((r) => `<tr>
+        <td>${esc(r.email)}</td>
+        <td class="num">${esc(r.member_no || "—")}</td>
+        <td>${esc(r.full_name || "—")}</td>
+        <td>${esc(r.phone || "—")}</td>
+        <td class="num">${esc(fmtDate(r.expires_on))}</td>
+        <td><div class="form-actions" style="flex-wrap:nowrap">
+          <button class="btn btn--line btn--small" type="button" data-pre-edit="${esc(r.email)}">Edit</button>
+          <button class="text-btn" type="button" data-pre-del="${esc(r.email)}">Remove</button>
+        </div></td>
+      </tr>`).join("") || `<tr><td colspan="6" class="muted">No pre-registered members waiting to log in.</td></tr>`;
+  }
+
+  const preDialog = $("#pre-dialog");
+  const PRE = ["email", "member_no", "full_name", "phone", "expires_on"];
+  function openPre(row) {
+    PRE.forEach((f) => { $(`#pre-${f}`).value = row?.[f] ?? ""; });
+    $("#pre-email").readOnly = !!row;
+    $("#pre-title").textContent = row ? "Edit pre-registered member" : "Add member";
+    note($("#pre-msg"), "");
+    preDialog.showModal();
+  }
+  $("#pre-add").addEventListener("click", () => openPre(null));
+  $("#pre-cancel").addEventListener("click", () => preDialog.close());
+  $("#pre-rows").addEventListener("click", async (e) => {
+    const ed = e.target.closest("[data-pre-edit]");
+    if (ed) { openPre(imports.find((r) => r.email === ed.dataset.preEdit)); return; }
+    const del = e.target.closest("[data-pre-del]");
+    if (!del) return;
+    if (!window.confirm(`Remove ${del.dataset.preDel} from the pre-registered list?`)) return;
+    const { error } = await sb.rpc("admin_delete_import", { p_email: del.dataset.preDel });
+    note($("#adm-msg"), error ? `Could not remove: ${error.message}` : `Removed ${del.dataset.preDel}.`, error ? "error" : "success");
+    await loadImports();
+  });
+  $("#pre-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const v = Object.fromEntries(PRE.map((f) => [f, orNull($(`#pre-${f}`).value)]));
+    if (!v.email || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.email)) { note($("#pre-msg"), "Please enter a valid email address.", "error"); return; }
+    if (v.phone && !/^\+?[0-9][0-9 -]{7,18}$/.test(v.phone)) { note($("#pre-msg"), "Please enter a valid phone number.", "error"); return; }
+    const btn = e.submitter || $("#pre-form button[type=submit]");
+    btn.disabled = true;
+    const { error } = await sb.rpc("admin_upsert_import", {
+      p_email: v.email, p_member_no: v.member_no, p_full_name: v.full_name, p_phone: v.phone, p_expires_on: v.expires_on,
+    });
+    btn.disabled = false;
+    if (error) { note($("#pre-msg"), error.message, "error"); return; }
+    preDialog.close();
+    note($("#adm-msg"), `Saved ${v.email}. Their details will be copied when they first log in.`, "success");
+    await loadImports();
   });
 
   init();

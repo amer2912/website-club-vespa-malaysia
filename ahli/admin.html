@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/style.css?v=6">
+<link rel="stylesheet" href="../assets/css/style.css?v=7">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -84,6 +84,22 @@
       <p class="muted" id="adm-count" style="font-size:.85rem;margin-top:10px"></p>
 
       <div class="panel" style="margin-top:28px">
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:12px">
+          <div>
+            <h2>Pre-registered (not logged in yet)</h2>
+            <p class="muted" style="margin:4px 0 0">Add existing members before they log in. Their member number and expiry are copied to their account on first login.</p>
+          </div>
+          <button class="btn btn--small" type="button" id="pre-add">Add member</button>
+        </div>
+        <div class="table-scroll" style="margin-top:18px">
+          <table class="table">
+            <thead><tr><th>Email</th><th>Member no.</th><th>Name</th><th>Phone</th><th>Valid until</th><th></th></tr></thead>
+            <tbody id="pre-rows"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:28px">
         <h2>Latest payments</h2>
         <ul class="history" id="adm-payments"></ul>
       </div>
@@ -97,17 +113,87 @@
           <p style="margin:0">Member: <strong id="pay-member"></strong></p>
           <div class="form-row">
             <div class="field"><label for="pay-year">Membership year</label><input id="pay-year" type="number" min="2019" max="2100" required></div>
-            <div class="field"><label for="pay-amount">Amount (RM)</label><input id="pay-amount" type="number" min="1" step="0.01" required></div>
+            <div class="field"><label for="pay-amount">Amount (RM)</label><input id="pay-amount" type="number" min="0" step="0.01" required></div>
           </div>
           <div class="field">
             <label for="pay-method">Method</label>
-            <select id="pay-method"><option value="cash">Cash</option><option value="transfer">Bank transfer</option></select>
+            <select id="pay-method"><option value="cash">Cash</option><option value="transfer">Bank transfer</option><option value="legacy">Old Google Form (paid before the portal)</option></select>
+            <span class="hint">For "Old Google Form" you may enter RM0 if the amount is not known.</span>
           </div>
           <div class="field"><label for="pay-note">Note</label><input id="pay-note" maxlength="200" placeholder="e.g. Paid at Vespa Day booth"></div>
           <div id="pay-msg" class="notice" hidden aria-live="polite"></div>
           <div class="form-actions">
             <button class="btn" type="submit">Save payment</button>
             <button class="btn btn--line" type="button" id="pay-cancel">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </dialog>
+
+    <dialog class="modal" id="edit-dialog">
+      <div class="panel">
+        <h2>Edit member</h2>
+        <p id="edit-email" class="muted"></p>
+        <form id="edit-form" class="form" novalidate>
+          <div class="form-row">
+            <div class="field"><label for="ed-member_no">Member no.</label><input id="ed-member_no" maxlength="20" placeholder="e.g. VCM0012" autocapitalize="characters"></div>
+            <div class="field"><label for="ed-expires_on">Valid until</label><input id="ed-expires_on" type="date"><span class="hint">Clear it to mark as not paid.</span></div>
+          </div>
+          <div class="field"><label for="ed-full_name">Full name</label><input id="ed-full_name" maxlength="120"></div>
+          <div class="form-row">
+            <div class="field"><label for="ed-phone">Phone</label><input id="ed-phone" type="tel" maxlength="20"></div>
+            <div class="field"><label for="ed-state">State</label>
+              <select id="ed-state">
+                <option value="">—</option>
+                <option>Johor</option>
+                <option>Kedah</option>
+                <option>Kelantan</option>
+                <option>Melaka</option>
+                <option>Negeri Sembilan</option>
+                <option>Pahang</option>
+                <option>Perak</option>
+                <option>Perlis</option>
+                <option>Pulau Pinang</option>
+                <option>Sabah</option>
+                <option>Sarawak</option>
+                <option>Selangor</option>
+                <option>Terengganu</option>
+                <option>W.P. Kuala Lumpur</option>
+                <option>W.P. Labuan</option>
+                <option>W.P. Putrajaya</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label for="ed-vespa_model">Vespa model</label><input id="ed-vespa_model" maxlength="80"></div>
+            <div class="field"><label for="ed-plate_no">Plate number</label><input id="ed-plate_no" maxlength="20"></div>
+          </div>
+          <p class="muted" style="margin:0;font-size:.85rem">To mark a 2026 payment made through the old Google Form, use <strong>Record payment</strong> with "Old Google Form" instead, so it shows in the payment history.</p>
+          <div id="edit-msg" class="notice" hidden aria-live="polite"></div>
+          <div class="form-actions">
+            <button class="btn" type="submit">Save changes</button>
+            <button class="btn btn--line" type="button" id="edit-cancel">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </dialog>
+
+    <dialog class="modal" id="pre-dialog">
+      <div class="panel">
+        <h2 id="pre-title">Add member</h2>
+        <p>For members who have not logged in to the portal yet.</p>
+        <form id="pre-form" class="form" novalidate>
+          <div class="field"><label for="pre-email">Email <span class="req">*</span></label><input id="pre-email" type="email" inputmode="email" required><span class="hint">Must be the email they will use to log in.</span></div>
+          <div class="form-row">
+            <div class="field"><label for="pre-member_no">Member no.</label><input id="pre-member_no" maxlength="20" placeholder="e.g. VCM0012" autocapitalize="characters"></div>
+            <div class="field"><label for="pre-expires_on">Valid until</label><input id="pre-expires_on" type="date"><span class="hint">e.g. 31 Dec 2026 if paid for 2026</span></div>
+          </div>
+          <div class="field"><label for="pre-full_name">Full name</label><input id="pre-full_name" maxlength="120"></div>
+          <div class="field"><label for="pre-phone">Phone</label><input id="pre-phone" type="tel" maxlength="20"></div>
+          <div id="pre-msg" class="notice" hidden aria-live="polite"></div>
+          <div class="form-actions">
+            <button class="btn" type="submit">Save</button>
+            <button class="btn btn--line" type="button" id="pre-cancel">Cancel</button>
           </div>
         </form>
       </div>
@@ -156,8 +242,8 @@
   </div>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
-<script src="../assets/js/supabase-config.js?v=6"></script>
-<script src="../assets/js/main.js?v=6"></script>
-<script src="../assets/js/admin.js?v=6"></script>
+<script src="../assets/js/supabase-config.js?v=7"></script>
+<script src="../assets/js/main.js?v=7"></script>
+<script src="../assets/js/admin.js?v=7"></script>
 </body>
 </html>
