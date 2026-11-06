@@ -136,6 +136,9 @@ h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.05; margin: 0;
 .menu-open .menu-toggle span::after { transform: translateY(-7px) rotate(-45deg); }
 
 @media (max-width: 960px) {
+  /* backdrop-filter would turn the header into the containing block of the
+     fixed menu panel and squash it to the header's height, so drop it here. */
+  .site-header { backdrop-filter: none; -webkit-backdrop-filter: none; background: #fff; }
   .menu-toggle { display: inline-flex; }
   .nav {
     position: fixed; inset: var(--header-h) 0 0 0; background: #fff; color: var(--ink);
