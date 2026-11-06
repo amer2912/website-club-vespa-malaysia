@@ -4,6 +4,9 @@
    To add / update an event, edit the EVENTS list below.
    Events move from "Upcoming" to "Past" automatically
    once their date has passed (Malaysia time).
+   To postpone an event, add  status: "postponed"  to it:
+   it stays listed with a "Postponed" tag, but is skipped
+   by the "Next on the calendar" countdown.
    ========================================================= */
 
 const VCM = {
@@ -18,6 +21,7 @@ const EVENTS = [
     title: "Selangor Scooter Phobia Track Day",
     subtitle: "Vol. 1",
     date: "2026-11-07",
+    status: "postponed",
     place: "Horizon Beranang Circuit, Selangor",
     image: "assets/img/event-scooter-phobia-2026.jpg",
     summary: "A full day on track at Horizon Beranang Circuit, with open categories for scooters of every class. Riders must bring full racing gear, and transponders are used for timing.",
@@ -75,21 +79,28 @@ const ICON = {
   arrow: '<svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M0 6h16M11 1l5 5-5 5"/></svg>',
 };
 
+const isPostponed = (e) => e.status === "postponed";
+
 function splitEvents(now = new Date()) {
-  const upcoming = EVENTS.filter((e) => endOf(e.date) >= now).sort((a, b) => startOf(a.date) - startOf(b.date));
-  const past = EVENTS.filter((e) => endOf(e.date) < now).sort((a, b) => startOf(b.date) - startOf(a.date));
-  return { upcoming, past };
+  const scheduled = EVENTS.filter((e) => !isPostponed(e));
+  const upcoming = scheduled.filter((e) => endOf(e.date) >= now).sort((a, b) => startOf(a.date) - startOf(b.date));
+  const past = scheduled.filter((e) => endOf(e.date) < now).sort((a, b) => startOf(b.date) - startOf(a.date));
+  const postponed = EVENTS.filter(isPostponed);
+  return { upcoming, past, postponed };
 }
 
 function cardHTML(ev, isPast) {
+  const postponed = isPostponed(ev);
+  const tag = postponed ? "Postponed" : isPast ? "Past event" : "Upcoming";
+  const tagClass = postponed ? "card__tag--postponed" : isPast ? "card__tag--past" : "";
   return `
     <article class="card reveal">
       <div class="card__media">
         <img src="${esc(ev.image)}" alt="${esc(ev.title)} ${esc(ev.subtitle || "")} poster" loading="lazy">
-        <span class="card__tag ${isPast ? "card__tag--past" : ""}">${isPast ? "Past event" : "Upcoming"}</span>
+        <span class="card__tag ${tagClass}">${tag}</span>
       </div>
       <div class="card__body">
-        <div class="card__date">${esc(fmtDate(ev))}</div>
+        <div class="card__date">${postponed ? "Postponed · New date TBA" : esc(fmtDate(ev))}</div>
         <h3>${esc(ev.title)} ${ev.subtitle ? `<span class="muted">${esc(ev.subtitle)}</span>` : ""}</h3>
         <p>${esc(ev.place)}</p>
       </div>
@@ -122,7 +133,7 @@ function featuredHTML(ev) {
 }
 
 function renderEvents() {
-  const { upcoming, past } = splitEvents();
+  const { upcoming, past, postponed } = splitEvents();
 
   const featured = $("[data-featured-event]");
   if (featured) {
@@ -133,8 +144,9 @@ function renderEvents() {
 
   const up = $("[data-events-upcoming]");
   if (up) {
-    up.innerHTML = upcoming.length
-      ? upcoming.map((e) => cardHTML(e, false)).join("")
+    const listed = [...upcoming, ...postponed];
+    up.innerHTML = listed.length
+      ? listed.map((e) => cardHTML(e, false)).join("")
       : `<p class="lead">No upcoming events right now. Check back soon or follow us on Facebook and Instagram.</p>`;
   }
   const pa = $("[data-events-past]");
