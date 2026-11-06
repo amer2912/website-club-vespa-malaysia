@@ -10,13 +10,33 @@
 //   TOYYIBPAY_CATEGORY_CODE  category code created in ToyyibPay
 //   TOYYIBPAY_BASE_URL       https://dev.toyyibpay.com (sandbox) or https://toyyibpay.com (live)
 //   SITE_URL                 https://vespaclubmalaysia.com
-// SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY are provided by Supabase.
+// SUPABASE_URL and the project keys are provided by Supabase automatically.
+// Optional: VCM_SECRET_KEY (an sb_secret_ key) if Supabase stops providing one.
 
-import { createClient } from "npm:@supabase/supabase-js@2.45.4";
+import { createClient } from "npm:@supabase/supabase-js@2.118.0";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+// Keys: works with both the legacy keys (anon / service_role) and the new
+// sb_publishable_ / sb_secret_ keys. Supabase provides these automatically.
+function firstKey(...names: string[]): string {
+  for (const name of names) {
+    const raw = Deno.env.get(name);
+    if (!raw) continue;
+    if (raw.trim().startsWith("{")) {
+      // SUPABASE_SECRET_KEYS / SUPABASE_PUBLISHABLE_KEYS are JSON maps of named keys
+      try {
+        const map = JSON.parse(raw) as Record<string, string>;
+        const value = map["default"] ?? Object.values(map)[0];
+        if (value) return value;
+      } catch { /* not JSON, ignore */ }
+      continue;
+    }
+    return raw;
+  }
+  return "";
+}
+const SERVICE_KEY = firstKey("SUPABASE_SECRET_KEYS", "SUPABASE_SERVICE_ROLE_KEY", "VCM_SECRET_KEY");
+const SERVER_PUBLIC_KEY = firstKey("SUPABASE_PUBLISHABLE_KEYS", "SUPABASE_ANON_KEY");
 const TP_BASE = (Deno.env.get("TOYYIBPAY_BASE_URL") ?? "https://dev.toyyibpay.com").replace(/\/+$/, "");
 const TP_SECRET = Deno.env.get("TOYYIBPAY_SECRET_KEY") ?? "";
 const TP_CATEGORY = Deno.env.get("TOYYIBPAY_CATEGORY_CODE") ?? "";
@@ -51,16 +71,20 @@ Deno.serve(async (req) => {
   if (!TP_SECRET || !TP_CATEGORY) return json(req, 500, { error: "Payment is not set up yet. Please contact the AJK." });
 
   const authHeader = req.headers.get("Authorization");
-  if (!authHeader) return json(req, 401, { error: "Please log in again." });
+  if (!authHeader?.startsWith("Bearer ")) return json(req, 401, { error: "Please log in again." });
+  // The portal sends the project's public key with every request.
+  const publicKey = req.headers.get("apikey") || SERVER_PUBLIC_KEY;
+  if (!publicKey || !SERVICE_KEY) return json(req, 500, { error: "Server keys are not configured." });
 
   // Acts as the member: row level security applies.
-  const asMember = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  const asMember = createClient(SUPABASE_URL, publicKey, {
     global: { headers: { Authorization: authHeader } },
     auth: { persistSession: false },
   });
-  const service = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
+  const service = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
-  const { data: userData, error: userError } = await asMember.auth.getUser();
+  // Checks the login token with Supabase Auth (works with JWT verification off).
+  const { data: userData, error: userError } = await asMember.auth.getUser(authHeader.slice(7));
   if (userError || !userData?.user) return json(req, 401, { error: "Please log in again." });
 
   const { data: payment, error: startError } = await asMember.rpc("start_renewal");
