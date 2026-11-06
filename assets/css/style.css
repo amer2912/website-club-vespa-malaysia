@@ -447,7 +447,7 @@ h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.05; margin: 0;
 .member-card {
   position: relative; color: #fff; border-radius: 18px; padding: 26px 26px 22px; gap: 14px;
   background: radial-gradient(120% 140% at 100% 0%, rgba(54,211,164,.45), transparent 55%), linear-gradient(135deg, #14215c, #0b1238);
-  box-shadow: 0 24px 48px -24px rgba(20,33,92,.6); aspect-ratio: 1.586; max-width: 100%; display: flex; flex-direction: column; justify-content: space-between;
+  box-shadow: 0 24px 48px -24px rgba(20,33,92,.6); min-height: 220px; max-width: 100%; display: flex; flex-direction: column; justify-content: space-between;
 }
 .member-card__top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .member-card__top img { width: 54px; height: 54px; }
