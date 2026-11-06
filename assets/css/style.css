@@ -17,8 +17,10 @@
   --red: #d71920;
   --yellow: #f5b800;
 
-  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --font-body: "Inter", "Helvetica Neue", Arial, sans-serif;
+  /* Apple devices use their built-in SF Pro (as on apple.com); other
+     devices get Inter, which is drawn very close to SF Pro. */
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
   --wrap: 1240px;
   --gutter: clamp(16px, 4vw, 48px);
@@ -49,7 +51,7 @@ button { font: inherit; cursor: pointer; }
 .skip:focus { left: 16px; top: 16px; }
 
 /* ---------- Typography ---------- */
-h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.05; margin: 0; letter-spacing: -.01em; }
+h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.05; margin: 0; letter-spacing: -.02em; }
 .display { font-size: clamp(2.6rem, 7vw, 6rem); font-weight: 800; text-transform: uppercase; letter-spacing: -.02em; }
 .h2 { font-size: clamp(2rem, 4.4vw, 3.5rem); font-weight: 800; text-transform: uppercase; }
 .h3 { font-size: clamp(1.3rem, 2.2vw, 1.75rem); font-weight: 700; }
