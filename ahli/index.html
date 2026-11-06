@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Member Portal | Vespa Club Malaysia</title>
+<meta name="description" content="Vespa Club Malaysia member portal: log in with your email, update your profile and renew your membership with FPX.">
+<meta name="theme-color" content="#111214">
+<link rel="icon" type="image/png" href="../assets/img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css?v=5">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../index.html" aria-label="Vespa Club Malaysia home">
+      <img src="../assets/img/logo.png" alt="" width="46" height="46">
+      <span class="brand-text">Vespa Club Malaysia<small>Kelab Vespa Malaysia</small></span>
+    </a>
+    <button class="menu-toggle" aria-label="Menu" aria-expanded="false" aria-controls="site-nav"><span></span></button>
+    <nav class="nav" id="site-nav" aria-label="Main">
+      <a href="../index.html">Home</a>
+      <a href="../about.html">About</a>
+      <a href="../team.html">Team</a>
+      <a href="../events.html">Events</a>
+      <a href="../shop.html">Shop</a>
+      <a href="../contact.html">Contact</a>
+      <a href="./" aria-current="page">Members</a>
+      <a class="btn" data-join href="https://forms.gle/Zg8sRTTM9LAaRp6EA">Join the club</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="portal">
+  <div class="wrap">
+<noscript><div class="notice notice--warn">Please turn on JavaScript to use the member portal.</div></noscript>
+
+    <!-- Loading -->
+    <section id="view-loading" class="center" style="padding:80px 0" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <p class="muted">Loading your membership…</p>
+    </section>
+
+    <!-- Not configured yet -->
+    <section id="view-setup" hidden>
+      <div class="portal-head">
+        <span class="eyebrow">Members</span>
+        <h1>Member portal</h1>
+        <p class="lead">Online login and FPX renewal are coming soon.</p>
+      </div>
+      <div class="panel panel--narrow">
+        <h2>Join or renew today</h2>
+        <p>Until the portal opens, use our membership form. The AJK will contact you to complete your registration.</p>
+        <a class="btn btn--mint" data-join href="https://forms.gle/Zg8sRTTM9LAaRp6EA">Membership form <svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M0 6h16M11 1l5 5-5 5"/></svg></a>
+      </div>
+    </section>
+
+    <!-- Login -->
+    <section id="view-login" hidden>
+      <div class="portal-head">
+        <span class="eyebrow">Members</span>
+        <h1>Member login</h1>
+        <p class="lead">Log in with your email. No password needed.</p>
+      </div>
+      <div class="panel panel--narrow">
+        <div id="login-step-email">
+          <form id="login-form" class="form" novalidate>
+            <div class="field">
+              <label for="login-email">Email address</label>
+              <input id="login-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" required>
+              <span class="hint">New to the portal? Use the email you registered with. If we don't have it yet, a new member account is created for you.</span>
+            </div>
+            <div class="form-actions"><button class="btn" type="submit">Send login code <svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M0 6h16M11 1l5 5-5 5"/></svg></button></div>
+          </form>
+        </div>
+        <div id="login-step-code" hidden>
+          <p>We sent a login code to <strong id="code-email"></strong>. Enter it below, or tap the link in the email on this device.</p>
+          <form id="code-form" class="form" novalidate>
+            <div class="field">
+              <label for="login-code">Login code</label>
+              <input id="login-code" name="code" class="code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="••••••" required>
+              <span class="hint">Can't find it? Check your spam or promotions folder.</span>
+            </div>
+            <div class="form-actions"><button class="btn" type="submit">Log in <svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M0 6h16M11 1l5 5-5 5"/></svg></button></div>
+            <div class="form-actions">
+              <button type="button" class="text-btn" id="resend-code">Resend code</button>
+              <button type="button" class="text-btn" id="change-email">Use a different email</button>
+            </div>
+            <div id="code-msg" class="notice" hidden aria-live="polite"></div>
+          </form>
+        </div>
+        <div id="login-msg" class="notice" hidden aria-live="polite" style="margin-top:18px"></div>
+      </div>
+    </section>
+
+    <!-- Profile -->
+    <section id="view-profile" hidden>
+      <div class="portal-head">
+        <span class="eyebrow">Your details</span>
+        <h1>Member profile</h1>
+      </div>
+      <div class="panel">
+        <div id="profile-required" class="notice notice--warn" style="margin-bottom:22px">Please complete your profile to continue. You need a complete profile before you can view your card or renew.</div>
+        <form id="profile-form" class="form" novalidate>
+          <p style="margin:0">Logged in as <strong id="pf-email"></strong></p>
+          <div class="field">
+            <label for="pf-full_name">Full name <span class="req">*</span></label>
+            <input id="pf-full_name" autocomplete="name" maxlength="120" required>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label for="pf-phone">Phone (WhatsApp) <span class="req">*</span></label>
+              <input id="pf-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="012-345 6789" maxlength="20" required>
+            </div>
+            <div class="field">
+              <label for="pf-state">State <span class="req">*</span></label>
+              <select id="pf-state" required>
+                  <option value="">Choose your state</option>
+                  <option>Johor</option>
+                  <option>Kedah</option>
+                  <option>Kelantan</option>
+                  <option>Melaka</option>
+                  <option>Negeri Sembilan</option>
+                  <option>Pahang</option>
+                  <option>Perak</option>
+                  <option>Perlis</option>
+                  <option>Pulau Pinang</option>
+                  <option>Sabah</option>
+                  <option>Sarawak</option>
+                  <option>Selangor</option>
+                  <option>Terengganu</option>
+                  <option>W.P. Kuala Lumpur</option>
+                  <option>W.P. Labuan</option>
+                  <option>W.P. Putrajaya</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label for="pf-vespa_model">Vespa model <span class="req">*</span></label>
+              <input id="pf-vespa_model" placeholder="e.g. Primavera 150, PX 150, GTS 300" maxlength="80" required>
+            </div>
+            <div class="field">
+              <label for="pf-plate_no">Plate number</label>
+              <input id="pf-plate_no" placeholder="e.g. WXY 1234" maxlength="20" autocapitalize="characters">
+              <span class="hint">Optional</span>
+            </div>
+          </div>
+          <p class="muted" style="margin:0;font-size:.85rem">Your details are used only for Vespa Club Malaysia membership. Only you and the AJK can see them.</p>
+          <div id="profile-msg" class="notice" hidden aria-live="polite"></div>
+          <div class="form-actions">
+            <button class="btn" type="submit">Save profile</button>
+            <button class="btn btn--line" type="button" id="profile-cancel">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Dashboard -->
+    <section id="view-dashboard" hidden>
+      <div class="portal-head" style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px">
+        <div>
+          <span class="eyebrow">Member portal</span>
+          <h1 id="dash-greeting">Hi</h1>
+        </div>
+        <div class="form-actions">
+          <a id="admin-link" class="btn btn--small" href="admin.html" hidden>AJK admin</a>
+          <button class="btn btn--line btn--small" type="button" id="edit-profile">Edit profile</button>
+          <button class="text-btn" type="button" id="logout">Log out</button>
+        </div>
+      </div>
+      <div id="dash-msg" class="notice" hidden aria-live="polite" style="margin-bottom:20px"></div>
+      <div class="portal-grid">
+        <div class="panel">
+          <div class="member-card" role="group" aria-label="Digital membership card">
+            <div class="member-card__top">
+              <div class="member-card__club">Vespa Club Malaysia<small>Member card</small></div>
+              <img src="../assets/img/logo.png" alt="" width="54" height="54">
+            </div>
+            <div>
+              <div class="member-card__name" id="card-name"></div>
+              <span id="card-status" class="pill" style="margin-top:10px"></span>
+            </div>
+            <div class="member-card__meta">
+              <div><small>Member no.</small><strong id="card-no"></strong></div>
+              <div style="text-align:right"><small>Valid until</small><strong id="card-until"></strong></div>
+            </div>
+          </div>
+          <ul class="kv" id="profile-summary" style="margin-top:24px"></ul>
+        </div>
+        <div>
+          <div class="panel" id="renew-box" hidden>
+            <span class="eyebrow">Renewal</span>
+            <h2 id="renew-title" style="margin-top:12px">Membership renewal</h2>
+            <div class="renew-price" id="renew-price"></div>
+            <p id="renew-text" class="muted"></p>
+            <button class="btn btn--mint" type="button" id="renew-btn" hidden>Pay with FPX <svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M0 6h16M11 1l5 5-5 5"/></svg></button>
+            <div id="renew-msg" class="notice" hidden aria-live="polite" style="margin-top:16px"></div>
+            <p class="muted" style="font-size:.82rem;margin:16px 0 0">Payments are processed securely by ToyyibPay through FPX online banking. You will come back here after paying.</p>
+          </div>
+          <div class="panel">
+            <h2>Payment history</h2>
+            <ul class="history" id="history"><li class="muted">Loading…</li></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <img src="../assets/img/logo.png" alt="Vespa Club Malaysia badge" width="72" height="72" loading="lazy">
+        <strong>Kelab Vespa Malaysia</strong>
+        <p>Vespa Club Malaysia. Registered with the Registrar of Societies Malaysia (ROS), PPM-010-14-02082019.</p>
+      </div>
+      <div>
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="../about.html">About us</a></li>
+          <li><a href="../team.html">Team</a></li>
+          <li><a href="../events.html">Events &amp; news</a></li>
+          <li><a href="../shop.html">Shop</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="mailto:vespaclubmalaysia1946@gmail.com">vespaclubmalaysia1946@gmail.com</a></li>
+          <li>40, Jalan 8/23E, Taman Danau Kota, 53300 Kuala Lumpur</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Follow us</h4>
+        <div class="socials">
+          <a href="https://www.facebook.com/vespaclubmalaysia/" target="_blank" rel="noopener" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 22v-8h2.7l.4-3.1h-3.1V8.9c0-.9.3-1.5 1.6-1.5h1.7V4.6c-.3 0-1.3-.1-2.5-.1-2.4 0-4.1 1.5-4.1 4.2v2.3H7.5V14h2.7v8h3.3z"/></svg></a>
+          <a href="https://www.instagram.com/vespaclubmalaysia/" target="_blank" rel="noopener" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg></a>
+          <a href="mailto:vespaclubmalaysia1946@gmail.com" aria-label="Email"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="m3 7 9 6 9-6"/></svg></a>
+        </div>
+        <p style="margin-top:22px"><a class="link-arrow" data-join href="https://forms.gle/Zg8sRTTM9LAaRp6EA" style="color:#fff">Join membership <svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M0 6h16M11 1l5 5-5 5"/></svg></a></p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; <span data-year>2026</span> Kelab Vespa Malaysia (Vespa Club Malaysia). All rights reserved.</span>
+      <span>More than just a ride.</span>
+    </div>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="../assets/js/supabase-config.js?v=5"></script>
+<script src="../assets/js/main.js?v=5"></script>
+<script src="../assets/js/portal.js?v=5"></script>
+</body>
+</html>
