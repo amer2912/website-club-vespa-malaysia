@@ -9,10 +9,29 @@
 //
 // Secret: TOYYIBPAY_BASE_URL (same as create-bill).
 
-import { createClient } from "npm:@supabase/supabase-js@2.45.4";
+import { createClient } from "npm:@supabase/supabase-js@2.118.0";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+// Keys: works with both the legacy keys (anon / service_role) and the new
+// sb_publishable_ / sb_secret_ keys. Supabase provides these automatically.
+function firstKey(...names: string[]): string {
+  for (const name of names) {
+    const raw = Deno.env.get(name);
+    if (!raw) continue;
+    if (raw.trim().startsWith("{")) {
+      // SUPABASE_SECRET_KEYS / SUPABASE_PUBLISHABLE_KEYS are JSON maps of named keys
+      try {
+        const map = JSON.parse(raw) as Record<string, string>;
+        const value = map["default"] ?? Object.values(map)[0];
+        if (value) return value;
+      } catch { /* not JSON, ignore */ }
+      continue;
+    }
+    return raw;
+  }
+  return "";
+}
+const SERVICE_KEY = firstKey("SUPABASE_SECRET_KEYS", "SUPABASE_SERVICE_ROLE_KEY", "VCM_SECRET_KEY");
 const TP_BASE = (Deno.env.get("TOYYIBPAY_BASE_URL") ?? "https://dev.toyyibpay.com").replace(/\/+$/, "");
 
 const CORS = {
@@ -53,7 +72,8 @@ Deno.serve(async (req) => {
   const billCode = (await readBillCode(req))?.trim();
   if (!billCode || !/^[A-Za-z0-9]{4,32}$/.test(billCode)) return reply(400, { error: "Missing bill code" });
 
-  const service = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
+  if (!SERVICE_KEY) return reply(500, { error: "Server keys are not configured." });
+  const service = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
   const { data: payment, error: findError } = await service
     .from("payments")
     .select("id, amount_cents, status")

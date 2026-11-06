@@ -69,8 +69,10 @@ Buka **Authentication → URL Configuration**:
 - **Site URL:** `https://vespaclubmalaysia.com/ahli/`
 - **Redirect URLs:** tambah `https://vespaclubmalaysia.com/ahli/` dan `https://www.vespaclubmalaysia.com/ahli/`
 
-### 3b. Templat emel (supaya ahli dapat kod 6 digit)
-Buka **Authentication → Emails → Magic Link**, kemudian tukar kandungannya kepada:
+### 3b. Templat emel (supaya ahli dapat kod 6 digit): buat SELEPAS 3c
+Supabase hanya membenarkan templat diubah **selepas Custom SMTP (3c) disediakan**. Sebelum itu, emel lalai cuma mengandungi pautan **Sign in**. Pautan itu tetap boleh digunakan untuk log masuk, jadi anda boleh terus ke Langkah 4 dan menguji sistem dengan pautan dahulu.
+
+Selepas 3c siap, buka **Authentication → Emails → Magic Link**, kemudian tukar kandungannya kepada:
 
 - **Subject:** `Kod log masuk Vespa Club Malaysia`
 - **Body:**
@@ -83,7 +85,7 @@ Buka **Authentication → Emails → Magic Link**, kemudian tukar kandungannya k
 ```
 Gunakan templat yang sama untuk **Confirm signup**. Emel ini dihantar kepada ahli yang log masuk buat kali pertama.
 
-### 3c. Penghantar emel (SMTP), WAJIB untuk kegunaan sebenar
+### 3c. Penghantar emel (SMTP), WAJIB sebelum dibuka kepada ahli
 Penghantar emel bawaan Supabase hanya sesuai untuk ujian. Had penghantarannya sangat rendah (beberapa emel sejam), dan ia mungkin hanya menghantar kepada ahli pasukan projek. Untuk ahli sebenar, sambungkan perkhidmatan emel percuma seperti **Resend** atau **Brevo**:
 
 1. Daftar akaun di Resend (https://resend.com) atau Brevo (https://brevo.com).
@@ -97,20 +99,20 @@ Penghantar emel bawaan Supabase hanya sesuai untuk ujian. Had penghantarannya sa
 
 ## Langkah 4: Sambungkan laman web ke Supabase
 
-1. Di Supabase, buka **Project Settings → API** (atau **Data API**) dan salin:
-   - **Project URL**, contohnya `https://abcdefghijkl.supabase.co`
-   - kunci **anon public**
+1. Di Supabase, salin dua nilai ini:
+   - **Project URL**, contohnya `https://abcdefghijkl.supabase.co`. Ia boleh didapati di **Project Settings → Data API**, atau dengan menekan butang **Connect** di bahagian atas.
+   - **Publishable key** (bermula dengan `sb_publishable_...`), di **Project Settings → API Keys**. Gunakan kunci baharu ini kerana kunci legacy (`anon`) akan ditamatkan pada awal 2027.
 2. Di GitHub, buka [`assets/js/supabase-config.js`](../assets/js/supabase-config.js) dan klik ikon pensel ✏️.
 3. Isi kedua-dua nilai:
 ```js
 window.VCM_SUPABASE = {
   url: "https://abcdefghijkl.supabase.co",
-  anonKey: "eyJhbGciOi...",
+  anonKey: "sb_publishable_...",
 };
 ```
 4. Klik **Commit changes**. Laman akan dikemas kini dalam 1 hingga 2 minit.
 
-⚠️ **Jangan sekali-kali** letak kunci **service_role** dalam fail ini atau di mana-mana tempat dalam repo. Kunci anon memang dibenarkan untuk umum. Kunci service_role pula boleh membuka semua data.
+⚠️ **Jangan sekali-kali** letak **secret key** (`sb_secret_...`) atau kunci **service_role** dalam fail ini, atau di mana-mana tempat dalam repo. Publishable key memang dibenarkan untuk umum. Secret key pula boleh membuka semua data.
 
 ## Langkah 5: Jadikan AJK sebagai admin
 
@@ -168,8 +170,14 @@ Di Supabase, buka **Edge Functions → Secrets** dan tambah:
 
 ### 8c. Fungsi `toyyibpay-callback`
 1. Ulang langkah 8b dengan nama `toyyibpay-callback` dan fail [`supabase/functions/toyyibpay-callback/index.ts`](../supabase/functions/toyyibpay-callback/index.ts).
-2. Selepas deploy, buka tetapan fungsi ini dan **matikan "Enforce JWT Verification"** (Verify JWT). ToyyibPay tidak boleh menghantar token log masuk Supabase. Fungsi ini tetap selamat kerana ia sentiasa menyemak semula status bayaran dengan ToyyibPay sebelum mengaktifkan keahlian.
-3. Pastikan `create-bill` **kekal** dengan Verify JWT dihidupkan.
+
+### 8d. Matikan "Verify JWT" untuk KEDUA-DUA fungsi
+Untuk setiap fungsi (`create-bill` dan `toyyibpay-callback`), buka **Details** atau tetapan fungsi, kemudian **matikan "Enforce JWT Verification"** (Verify JWT) dan simpan.
+
+- `toyyibpay-callback`: ToyyibPay tidak boleh menghantar token log masuk Supabase. Fungsi ini tetap selamat kerana ia sentiasa menyemak semula status bayaran dengan ToyyibPay sebelum mengaktifkan keahlian.
+- `create-bill`: semakan JWT automatik Supabase tidak serasi dengan kunci API baharu (`sb_publishable_` / `sb_secret_`). Fungsi ini tetap selamat kerana ia **menyemak sendiri** token log masuk ahli dengan Supabase Auth, dan menolak permintaan yang tidak log masuk.
+
+Fungsi-fungsi ini mengambil kunci projek daripada Supabase secara automatik, jadi anda tidak perlu menambah kunci secara manual. Jika suatu hari log fungsi menunjukkan *"Server keys are not configured"*, tambah secret `VCM_SECRET_KEY` dengan nilai **secret key** (`sb_secret_...`) daripada **Project Settings → API Keys**.
 
 ## Langkah 9: Uji dengan sandbox
 
@@ -203,7 +211,7 @@ Pada pelan percuma, Supabase akan pause projek yang tiada aktiviti selama 7 hari
    - **URL:** `https://<PROJECT-REF>.supabase.co/rest/v1/rpc/ping`
    - **Schedule:** setiap 3 hari
    - **Advanced → Request method:** `POST`
-   - **Headers:** `apikey: <kunci anon public>` dan `Content-Type: application/json`
+   - **Headers:** `apikey: <publishable key>` dan `Content-Type: application/json`
    - **Request body:** `{}`
 3. Simpan, dan hidupkan notifikasi emel jika gagal.
 
