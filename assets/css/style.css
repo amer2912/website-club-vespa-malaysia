@@ -511,3 +511,12 @@ dialog.modal .panel { border: 0; }
 .fee-option.is-off .fee-option__head strong, .fee-option.is-off .fee-option__price { color: var(--muted); }
 .fee-option.is-off .fee-option__note::before { content: "Not for you · "; font-weight: 600; }
 .fee-option.is-off .btn, .fee-option .btn[disabled] { background: #dfe2e6; border-color: #dfe2e6; color: #7a8089; opacity: 1; }
+
+/* Profile form sections */
+.form-section { border: 0; border-top: 1px solid var(--line); margin: 6px 0 0; padding: 22px 0 0; display: grid; gap: 18px; min-width: 0; }
+.form-section legend { font-family: var(--font-display); font-weight: 700; font-size: .78rem; letter-spacing: .16em; text-transform: uppercase; color: var(--mint-dark); padding: 0 10px 0 0; }
+.field textarea { resize: vertical; min-height: 80px; }
+.check { display: grid; grid-template-columns: 24px 1fr; gap: 12px; align-items: start; padding: 16px; background: var(--paper-2); border-radius: 10px; cursor: pointer; font-size: .95rem; }
+.check input { width: 22px; height: 22px; margin: 2px 0 0; accent-color: var(--mint-dark); }
+.check[aria-invalid="true"] { outline: 2px solid var(--red); }
+.claimed { margin-top: 4px; font-size: .75rem; font-weight: 600; color: #a05a00; white-space: nowrap; }

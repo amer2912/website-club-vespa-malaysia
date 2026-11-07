@@ -85,7 +85,7 @@
     return members.filter((m) => {
       if (f === "incomplete" ? m.profile_completed_at : f !== "all" && statusOf(m) !== f) return false;
       if (!q) return true;
-      return [m.member_no, m.full_name, m.email, m.phone, m.plate_no, m.state, m.vespa_model]
+      return [m.member_no, m.claimed_member_no, m.full_name, m.email, m.phone, m.plate_no, m.state, m.vespa_model, m.nric]
         .some((v) => String(v || "").toLowerCase().includes(q));
     });
   }
@@ -95,7 +95,8 @@
     $("#adm-rows").innerHTML = rows.map((m) => {
       const st = statusOf(m);
       return `<tr>
-        <td class="num">${esc(m.member_no || "—")}</td>
+        <td class="num">${esc(m.member_no || "—")}${m.claimed_member_no && m.claimed_member_no !== m.member_no
+          ? `<div class="claimed" title="Number typed by the member, for checking">claims ${esc(m.claimed_member_no)}</div>` : ""}</td>
         <td><strong>${esc(m.full_name || "(no name yet)")}</strong>${m.profile_completed_at ? "" : '<div class="muted" style="font-size:.8rem">Profile incomplete</div>'}</td>
         <td><div>${esc(m.email)}</div><div class="muted">${esc(m.phone || "")}</div></td>
         <td>${esc(m.state || "—")}</td>
@@ -121,7 +122,9 @@
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   $("#adm-export").addEventListener("click", () => {
-    const cols = ["member_no", "full_name", "email", "phone", "state", "vespa_model", "plate_no", "expires_on", "joined_on"];
+    const cols = ["member_no", "claimed_member_no", "full_name", "nationality", "nric", "gender", "age", "email", "phone",
+      "address", "state", "beneficiary_name", "beneficiary_nric", "beneficiary_relation", "oku",
+      "vespa_model", "plate_no", "tshirt_size", "club_group", "remark", "expires_on", "joined_on", "declaration_accepted_at"];
     const lines = [[...cols, "status"].join(",")].concat(
       filtered().map((m) => [...cols.map((c) => csvCell(m[c])), LABEL[statusOf(m)]].join(","))
     );

@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/style.css?v=9">
+<link rel="stylesheet" href="../assets/css/style.css?v=10">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -103,53 +103,171 @@
         <h1>Member profile</h1>
       </div>
       <div class="panel">
-        <div id="profile-required" class="notice notice--warn" style="margin-bottom:22px">Please complete your profile to continue. You need a complete profile before you can view your card or renew.</div>
+        <div id="profile-required" class="notice notice--warn" style="margin-bottom:22px">Please complete your profile to continue. These details are required for membership registration with the Registrar of Societies (ROS).</div>
         <form id="profile-form" class="form" novalidate>
           <p style="margin:0">Logged in as <strong id="pf-email"></strong></p>
-          <div class="field">
-            <label for="pf-full_name">Full name <span class="req">*</span></label>
-            <input id="pf-full_name" autocomplete="name" maxlength="120" required>
-          </div>
-          <div class="form-row">
+
+          <fieldset class="form-section">
+            <legend>Personal details</legend>
             <div class="field">
-              <label for="pf-phone">Phone (WhatsApp) <span class="req">*</span></label>
-              <input id="pf-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="012-345 6789" maxlength="20" required>
+              <label for="pf-full_name">Full name (as in NRIC) <span class="req">*</span></label>
+              <input id="pf-full_name" autocomplete="name" maxlength="120" autocapitalize="characters" required>
+              <span class="hint">Saved in CAPITAL letters.</span>
+            </div>
+            <div class="form-row">
+              <div class="field">
+                <label for="pf-nationality">Nationality <span class="req">*</span></label>
+                <select id="pf-nationality" required>
+                  <option value="">Choose</option>
+                  <option>Malaysia</option>
+                  <option value="__other">Other</option>
+                </select>
+              </div>
+              <div class="field" id="pf-nationality_other-wrap" hidden>
+                <label for="pf-nationality_other">Country <span class="req">*</span></label>
+                <input id="pf-nationality_other" maxlength="60">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="field">
+                <label for="pf-nric">NRIC / passport number <span class="req">*</span></label>
+                <input id="pf-nric" inputmode="text" maxlength="24" placeholder="e.g. 950205145050" required>
+              </div>
+              <div class="field">
+                <label for="pf-gender">Gender <span class="req">*</span></label>
+                <select id="pf-gender" required><option value="">Choose</option><option>Male</option><option>Female</option></select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="field">
+                <label for="pf-age">Age <span class="req">*</span></label>
+                <input id="pf-age" type="number" inputmode="numeric" min="5" max="120" required>
+              </div>
+              <div class="field">
+                <label for="pf-phone">Mobile number (WhatsApp) <span class="req">*</span></label>
+                <input id="pf-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="012-345 6789" maxlength="20" required>
+              </div>
+            </div>
+            <div class="field">
+              <label for="pf-address">Address <span class="req">*</span></label>
+              <textarea id="pf-address" rows="3" maxlength="300" autocomplete="street-address" required></textarea>
             </div>
             <div class="field">
               <label for="pf-state">State <span class="req">*</span></label>
               <select id="pf-state" required>
-                  <option value="">Choose your state</option>
-                  <option>Johor</option>
-                  <option>Kedah</option>
-                  <option>Kelantan</option>
-                  <option>Melaka</option>
-                  <option>Negeri Sembilan</option>
-                  <option>Pahang</option>
-                  <option>Perak</option>
-                  <option>Perlis</option>
-                  <option>Pulau Pinang</option>
-                  <option>Sabah</option>
-                  <option>Sarawak</option>
-                  <option>Selangor</option>
-                  <option>Terengganu</option>
-                  <option>W.P. Kuala Lumpur</option>
-                  <option>W.P. Labuan</option>
-                  <option>W.P. Putrajaya</option>
+                <option value="">Choose your state</option>
+                <option>Johor</option>
+                <option>Kedah</option>
+                <option>Kelantan</option>
+                <option>Melaka</option>
+                <option>Negeri Sembilan</option>
+                <option>Pahang</option>
+                <option>Perak</option>
+                <option>Perlis</option>
+                <option>Pulau Pinang</option>
+                <option>Sabah</option>
+                <option>Sarawak</option>
+                <option>Selangor</option>
+                <option>Terengganu</option>
+                <option>W.P. Kuala Lumpur</option>
+                <option>W.P. Labuan</option>
+                <option>W.P. Putrajaya</option>
               </select>
             </div>
-          </div>
-          <div class="form-row">
+          </fieldset>
+
+          <fieldset class="form-section">
+            <legend>Beneficiary</legend>
             <div class="field">
-              <label for="pf-vespa_model">Vespa model <span class="req">*</span></label>
-              <input id="pf-vespa_model" placeholder="e.g. Primavera 150, PX 150, GTS 300" maxlength="80" required>
+              <label for="pf-beneficiary_name">Beneficiary full name <span class="req">*</span></label>
+              <input id="pf-beneficiary_name" maxlength="120" autocapitalize="characters" required>
+            </div>
+            <div class="form-row">
+              <div class="field">
+                <label for="pf-beneficiary_nric">Beneficiary NRIC number <span class="req">*</span></label>
+                <input id="pf-beneficiary_nric" maxlength="24" required>
+              </div>
+              <div class="field">
+                <label for="pf-beneficiary_relation">Relationship <span class="req">*</span></label>
+                <select id="pf-beneficiary_relation" required>
+                <option value="">Choose</option>
+                <option>Husband</option>
+                <option>Wife</option>
+                <option>Son</option>
+                <option>Daughter</option>
+                <option>Siblings</option>
+                <option>Parents</option>
+                <option value="__other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="field" id="pf-relation_other-wrap" hidden>
+              <label for="pf-relation_other">Relationship (other) <span class="req">*</span></label>
+              <input id="pf-relation_other" maxlength="40">
+            </div>
+          </fieldset>
+
+          <fieldset class="form-section">
+            <legend>Your Vespa</legend>
+            <div class="form-row">
+              <div class="field">
+                <label for="pf-vespa_model">Vespa model <span class="req">*</span></label>
+                <input id="pf-vespa_model" placeholder="e.g. PX200, Primavera 150" maxlength="80" required>
+              </div>
+              <div class="field">
+                <label for="pf-plate_no">Vespa registration number <span class="req">*</span></label>
+                <input id="pf-plate_no" placeholder="e.g. WXY 1234" maxlength="20" autocapitalize="characters" required>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="form-section">
+            <legend>Membership</legend>
+            <div class="form-row">
+              <div class="field">
+                <label for="pf-claimed_member_no">VCM membership no. (existing members)</label>
+                <input id="pf-claimed_member_no" maxlength="20" placeholder="e.g. VCM0442" autocapitalize="characters">
+                <span class="hint">Optional. For reference only: the AJK will check it against the club records.</span>
+              </div>
+              <div class="field">
+                <label for="pf-tshirt_size">T-shirt size <span class="req">*</span></label>
+                <select id="pf-tshirt_size" required>
+                <option value="">Choose</option>
+                <option value="Not needed">Renewal only (no T-shirt)</option>
+                <option>XS</option>
+                <option>S</option>
+                <option>M</option>
+                <option>L</option>
+                <option>XL</option>
+                <option>XXL</option>
+                <option>3XL</option>
+                <option>4XL</option>
+                <option>5XL</option>
+                </select>
+                <span class="hint">New members receive a club T-shirt.</span>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="field">
+                <label for="pf-oku">Orang Kurang Upaya (OKU), if any</label>
+                <input id="pf-oku" maxlength="120">
+              </div>
+              <div class="field">
+                <label for="pf-club_group">Local / personal Vespa club or group</label>
+                <input id="pf-club_group" maxlength="120">
+              </div>
             </div>
             <div class="field">
-              <label for="pf-plate_no">Plate number</label>
-              <input id="pf-plate_no" placeholder="e.g. WXY 1234" maxlength="20" autocapitalize="characters">
-              <span class="hint">Optional</span>
+              <label for="pf-remark">Remark</label>
+              <textarea id="pf-remark" rows="2" maxlength="500"></textarea>
             </div>
-          </div>
-          <p class="muted" style="margin:0;font-size:.85rem">Your details are used only for Vespa Club Malaysia membership. Only you and the AJK can see them.</p>
+          </fieldset>
+
+          <label class="check">
+            <input type="checkbox" id="pf-declaration">
+            <span>I acknowledge and verify that all information provided is accurate and intended for use by Vespa Club Malaysia for the purpose of membership registration. <span class="req">*</span></span>
+          </label>
+          <p class="muted" style="margin:0;font-size:.85rem">Your details are used only for Vespa Club Malaysia membership and registration with the Registrar of Societies (ROS). Only you and the AJK can see them.</p>
           <div id="profile-msg" class="notice" hidden aria-live="polite"></div>
           <div class="form-actions">
             <button class="btn" type="submit">Save profile</button>
@@ -262,8 +380,8 @@
   </div>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
-<script src="../assets/js/supabase-config.js?v=9"></script>
-<script src="../assets/js/main.js?v=9"></script>
-<script src="../assets/js/portal.js?v=9"></script>
+<script src="../assets/js/supabase-config.js?v=10"></script>
+<script src="../assets/js/main.js?v=10"></script>
+<script src="../assets/js/portal.js?v=10"></script>
 </body>
 </html>

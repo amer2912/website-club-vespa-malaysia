@@ -76,7 +76,18 @@ Ulang langkah yang sama untuk fail ketiga, [`supabase/migrations/003_new_member_
 
 Portal memaparkan **kedua-dua** pilihan, tetapi hanya pilihan yang layak boleh ditekan. Jenis yuran ditentukan oleh pangkalan data, jadi ahli tidak boleh memilih sendiri atau menukar dirinya kepada "ahli lama".
 
-Jalankan fail mengikut susunan `001`, `002`, kemudian `003`. Semuanya selamat untuk dijalankan semula, dan nombor ahli tidak akan berundur.
+### 2d. Profil penuh (maklumat sama seperti Google Form lama)
+Ulang langkah yang sama untuk fail keempat, [`supabase/migrations/004_full_profile.sql`](../supabase/migrations/004_full_profile.sql). Fail ini menambah medan profil berikut:
+- warganegara, NRIC atau pasport, jantina, umur, alamat;
+- penerima (beneficiary): nama, NRIC dan hubungan;
+- nombor pendaftaran Vespa (wajib), saiz baju, OKU, kelab tempatan, catatan;
+- **akuan (declaration)**, yang wajib ditanda.
+
+Medan **"VCM membership no."** yang diisi oleh ahli hanyalah **rujukan**. Ia tidak menukar nombor ahli sebenar dan tidak mempengaruhi yuran. AJK boleh melihatnya di panel admin (*claims VCM0123*) untuk disemak dengan master list. Selepas itu, AJK menetapkan nombor sebenar melalui **Edit**.
+
+Selepas fail ini dijalankan, **semua ahli (termasuk AJK) akan diminta melengkapkan profil semula** pada log masuk seterusnya.
+
+Jalankan fail mengikut susunan `001`, `002`, `003`, kemudian `004`. Semuanya selamat untuk dijalankan semula, dan nombor ahli tidak akan berundur.
 
 ## Langkah 3: Tetapan log masuk emel
 

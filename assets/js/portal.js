@@ -162,10 +162,35 @@
   $("#change-email").addEventListener("click", () => { note($("#code-msg"), ""); showLogin(); $("#login-email").focus(); });
 
   /* ---------------- profile ---------------- */
-  const PROFILE_FIELDS = ["full_name", "phone", "state", "vespa_model", "plate_no"];
+  // Text inputs and selects saved as-is (trimmed). Nationality and relationship
+  // have an "Other" choice with a free-text box; the declaration is a checkbox.
+  const PROFILE_FIELDS = ["full_name", "nric", "gender", "age", "phone", "address", "state",
+    "beneficiary_name", "beneficiary_nric", "vespa_model", "plate_no",
+    "claimed_member_no", "tshirt_size", "oku", "club_group", "remark"];
+  const REQUIRED = {
+    full_name: "full name", nric: "NRIC / passport number", gender: "gender", age: "age",
+    phone: "mobile number", address: "address", state: "state",
+    beneficiary_name: "beneficiary name", beneficiary_nric: "beneficiary NRIC",
+    vespa_model: "Vespa model", plate_no: "Vespa registration number", tshirt_size: "T-shirt size",
+  };
+  const RELATIONS = ["Husband", "Wife", "Son", "Daughter", "Siblings", "Parents"];
+
+  const toggleOther = (sel, wrap) => { $(wrap).hidden = $(sel).value !== "__other"; };
+  $("#pf-nationality").addEventListener("change", () => toggleOther("#pf-nationality", "#pf-nationality_other-wrap"));
+  $("#pf-beneficiary_relation").addEventListener("change", () => toggleOther("#pf-beneficiary_relation", "#pf-relation_other-wrap"));
 
   function openProfile(required) {
-    PROFILE_FIELDS.forEach((f) => { $(`#pf-${f}`).value = member[f] ?? ""; $(`#pf-${f}`).removeAttribute("aria-invalid"); });
+    PROFILE_FIELDS.forEach((f) => { const el = $(`#pf-${f}`); el.value = member[f] ?? ""; el.removeAttribute("aria-invalid"); });
+    const nat = member.nationality || "";
+    $("#pf-nationality").value = !nat ? "" : nat === "Malaysia" ? "Malaysia" : "__other";
+    $("#pf-nationality_other").value = nat && nat !== "Malaysia" ? nat : "";
+    const rel = member.beneficiary_relation || "";
+    $("#pf-beneficiary_relation").value = !rel ? "" : RELATIONS.includes(rel) ? rel : "__other";
+    $("#pf-relation_other").value = rel && !RELATIONS.includes(rel) ? rel : "";
+    toggleOther("#pf-nationality", "#pf-nationality_other-wrap");
+    toggleOther("#pf-beneficiary_relation", "#pf-relation_other-wrap");
+    $("#pf-declaration").checked = !!member.declaration_accepted_at;
+    $("#pf-declaration").closest(".check").removeAttribute("aria-invalid");
     $("#pf-email").textContent = member.email;
     $("#profile-required").hidden = !required;
     $("#profile-cancel").hidden = required;
@@ -173,31 +198,72 @@
     show("profile");
   }
 
-  function validateProfile(values) {
+  function collectProfile() {
+    const v = Object.fromEntries(PROFILE_FIELDS.map((f) => [f, $(`#pf-${f}`).value.trim()]));
+    const natSel = $("#pf-nationality").value;
+    v.nationality = natSel === "__other" ? $("#pf-nationality_other").value.trim() : natSel;
+    const relSel = $("#pf-beneficiary_relation").value;
+    v.beneficiary_relation = relSel === "__other" ? $("#pf-relation_other").value.trim() : relSel;
+    return v;
+  }
+
+  function validateProfile(v) {
     const problems = [];
-    const mark = (f, bad) => $(`#pf-${f}`).setAttribute("aria-invalid", bad ? "true" : "false");
-    const nameBad = values.full_name.length < 3; mark("full_name", nameBad); if (nameBad) problems.push("full name");
-    const phoneBad = !/^\+?[0-9][0-9 -]{7,18}$/.test(values.phone); mark("phone", phoneBad); if (phoneBad) problems.push("phone number (e.g. 012-345 6789)");
-    const stateBad = !values.state; mark("state", stateBad); if (stateBad) problems.push("state");
-    const modelBad = !values.vespa_model; mark("vespa_model", modelBad); if (modelBad) problems.push("Vespa model");
-    return problems;
+    const mark = (id, bad) => $(id).setAttribute("aria-invalid", bad ? "true" : "false");
+    for (const [f, label] of Object.entries(REQUIRED)) {
+      const bad = !v[f]; mark(`#pf-${f}`, bad); if (bad) problems.push(label);
+    }
+    const natBad = !v.nationality;
+    mark($("#pf-nationality").value === "__other" ? "#pf-nationality_other" : "#pf-nationality", natBad);
+    if (natBad) problems.push("nationality");
+    const relBad = !v.beneficiary_relation;
+    mark($("#pf-beneficiary_relation").value === "__other" ? "#pf-relation_other" : "#pf-beneficiary_relation", relBad);
+    if (relBad) problems.push("relationship");
+    if (v.full_name && v.full_name.length < 3) { mark("#pf-full_name", true); problems.push("full name"); }
+    if (v.phone && !/^\+?[0-9][0-9 -]{7,18}$/.test(v.phone)) { mark("#pf-phone", true); problems.push("mobile number (e.g. 012-345 6789)"); }
+    const idOk = (x) => /^[A-Za-z0-9]{5,20}$/.test(x.replace(/[\s-]/g, ""));
+    if (v.nric && !idOk(v.nric)) { mark("#pf-nric", true); problems.push("NRIC / passport number (letters and numbers only)"); }
+    if (v.beneficiary_nric && !idOk(v.beneficiary_nric)) { mark("#pf-beneficiary_nric", true); problems.push("beneficiary NRIC (letters and numbers only)"); }
+    const age = Number(v.age);
+    if (v.age && !(Number.isInteger(age) && age >= 5 && age <= 120)) { mark("#pf-age", true); problems.push("age"); }
+    if (v.claimed_member_no && !/^[A-Za-z0-9-]{1,20}$/.test(v.claimed_member_no.replace(/\s/g, ""))) { mark("#pf-claimed_member_no", true); problems.push("VCM membership no. (letters, numbers and - only)"); }
+    const declared = $("#pf-declaration").checked;
+    $("#pf-declaration").closest(".check").setAttribute("aria-invalid", declared ? "false" : "true");
+    if (!declared) problems.push("declaration (tick the box)");
+    return [...new Set(problems)];
   }
 
   $("#profile-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const msg = $("#profile-msg");
-    const values = Object.fromEntries(PROFILE_FIELDS.map((f) => [f, $(`#pf-${f}`).value.trim()]));
-    const problems = validateProfile(values);
-    if (problems.length) { note(msg, `Please check your ${problems.join(", ")}.`, "error"); return; }
+    const v = collectProfile();
+    const problems = validateProfile(v);
+    if (problems.length) {
+      note(msg, `Please check: ${problems.join(", ")}.`, "error");
+      $("#profile-form [aria-invalid='true']")?.scrollIntoView({ block: "center", behavior: "smooth" });
+      return;
+    }
+    const values = {
+      ...Object.fromEntries(Object.entries(v).map(([k, val]) => [k, val === "" ? null : val])),
+      age: Number(v.age),
+      declaration_accepted_at: member.declaration_accepted_at || new Date().toISOString(),
+    };
     const btn = e.submitter || $("#profile-form button[type=submit]");
     busy(btn, true, "Saving…");
     const { data, error } = await sb.from("members").update(values).eq("id", member.id).select().single();
     busy(btn, false);
     if (error) {
-      note(msg, /phone/i.test(error.message) ? "Please enter a valid phone number." : `Could not save your profile: ${error.message}`, "error");
+      const m = error.message;
+      const friendly = /phone/i.test(m) ? "Please enter a valid mobile number."
+        : /nric/i.test(m) ? "Please check the NRIC numbers (letters and numbers only)."
+        : /age/i.test(m) ? "Please enter a valid age."
+        : /claimed_member_no/i.test(m) ? "Please check the VCM membership number."
+        : `Could not save your profile: ${m}`;
+      note(msg, friendly, "error");
       return;
     }
     member = data;
+    if (!member.profile_completed_at) { note(msg, "Some required details are still missing.", "error"); return; }
     await openDashboard("Profile saved.");
   });
   $("#profile-cancel").addEventListener("click", () => openDashboard());
@@ -231,9 +297,14 @@
     $("#card-status").textContent = st.label;
     $("#dash-greeting").textContent = `Hi, ${(member.full_name || "").split(" ")[0] || "member"}`;
 
+    const masked = (x) => (x ? `${"•".repeat(Math.max(0, x.length - 4))}${x.slice(-4)}` : "—");
     $("#profile-summary").innerHTML = [
-      ["Email", member.email], ["Phone", member.phone], ["State", member.state],
-      ["Vespa", member.vespa_model], ["Plate no.", member.plate_no || "—"], ["Member since", fmtDate(member.joined_on)],
+      ["Email", member.email], ["Mobile", member.phone], ["NRIC", masked(member.nric)],
+      ["State", member.state], ["Vespa", `${member.vespa_model || "—"} · ${member.plate_no || "—"}`],
+      ["Beneficiary", member.beneficiary_name ? `${member.beneficiary_name} (${member.beneficiary_relation || "—"})` : "—"],
+      ["T-shirt", member.tshirt_size === "Not needed" ? "Not needed" : member.tshirt_size || "—"],
+      ...(member.claimed_member_no && member.claimed_member_no !== member.member_no ? [["Old VCM no.", `${member.claimed_member_no} (being checked by AJK)`]] : []),
+      ["Member since", fmtDate(member.joined_on)],
     ].map(([k, v]) => `<li><span>${esc(k)}</span><strong>${esc(v)}</strong></li>`).join("");
 
     const flashEl = $("#dash-msg");
