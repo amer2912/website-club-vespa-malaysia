@@ -195,6 +195,7 @@
     ended.forEach((y, i) => add(`lapsed-${y}`,
       i === 0 && y === Y - 1 ? `Belum renew ${Y} (terakhir bayar ${y})` : `Terakhir bayar ${y}`,
       (p) => endYear(p) === y, "renew"));
+    add("all", "Semua ahli", () => true, null);
     add("prereg", "Belum log masuk portal (didaftarkan oleh AJK)", (p) => !p.account, "login");
     add("incomplete", `Ahli aktif ${Y}, profil belum lengkap`, (p) => p.account && paidFor(p, Y) && !p.profile_completed_at, "profile");
     add("nopaid", "Ada akaun tetapi belum pernah bayar", (p) => p.account && !p.expires_on, "pay");
@@ -222,32 +223,49 @@
     return d.length >= 10 && d.length <= 15 ? d : "";
   }
 
+  // Typing "518", "vcm518" or "VCM-0518" all find member VCM-0518.
+  const noDigits = (v) => { const m = String(v || "").match(/^\s*(?:vcm)?[\s-]*0*(\d{1,5})\s*$/i); return m ? m[1] : null; };
+  function matches(p, q) {
+    const n = noDigits(q);
+    // Up to 4 digits, or starting with "vcm": a member number, matched exactly.
+    if (n && (/^\s*vcm/i.test(q) || n.length <= 4)) return noDigits(p.member_no) === n;
+    return [p.member_no, p.full_name, p.phone, p.email].some((v) => String(v || "").toLowerCase().includes(q));
+  }
+  // A search looks through every member, whichever list is chosen.
   function currentRows() {
-    const list = LISTS[$("#follow-filter").value];
-    if (!list) return [];
     const q = $("#follow-search").value.trim().toLowerCase();
-    return people.filter(list.test).filter((p) => !q || [p.member_no, p.full_name, p.phone, p.email]
-      .some((v) => String(v || "").toLowerCase().includes(q)))
+    const list = LISTS[$("#follow-filter").value];
+    const pool = q ? people : list ? people.filter(list.test) : [];
+    return pool.filter((p) => !q || matches(p, q))
       .sort((a, b) => String(a.member_no || "~").localeCompare(String(b.member_no || "~")));
+  }
+  function messageKind(p) {
+    if (endYear(p) && endYear(p) < Y) return "renew";
+    if (!p.account) return "login";
+    if (!p.expires_on) return "pay";
+    if (!p.profile_completed_at) return "profile";
+    return null;
   }
 
   function renderFollow() {
     const list = LISTS[$("#follow-filter").value];
+    const searching = !!$("#follow-search").value.trim();
     const rows = currentRows();
     $("#follow-rows").innerHTML = rows.map((p) => {
       const wa = waNumber(p.phone);
-      const link = wa && list?.msg ? `<a class="btn btn--line btn--small" target="_blank" rel="noopener"
-          href="https://wa.me/${wa}?text=${encodeURIComponent(message(list.msg, p))}">WhatsApp</a>` : "";
+      const kind = searching ? messageKind(p) : list?.msg;
+      const link = wa && kind ? `<a class="btn btn--line btn--small" target="_blank" rel="noopener"
+          href="https://wa.me/${wa}?text=${encodeURIComponent(message(kind, p))}">WhatsApp</a>` : "";
       return `<tr>
         <td class="num">${esc(p.member_no || "—")}</td>
         <td><strong>${esc(p.full_name || "(tiada nama)")}</strong><div class="muted" style="font-size:.8rem">${esc(p.email || "")}</div></td>
         <td>${esc(p.phone || "—")}</td>
-        <td class="num">${esc(fmtDate(p.expires_on))}</td>
+        <td class="num">${esc(fmtDate(p.expires_on))}${p.expires_on ? `<div class="muted" style="font-size:.78rem">${paidFor(p, Y) ? "Aktif" : "Sudah tamat"}</div>` : ""}</td>
         <td>${p.account ? '<span class="pill pill--active">Ada akaun</span>' : '<span class="pill pill--new">Belum log masuk</span>'}</td>
         <td>${link}</td>
       </tr>`;
     }).join("") || `<tr><td colspan="6" class="muted">Tiada nama dalam senarai ini.</td></tr>`;
-    $("#follow-count").textContent = `${num(rows.length)} orang`;
+    $("#follow-count").textContent = searching ? `${num(rows.length)} dijumpai (carian dalam semua ahli)` : `${num(rows.length)} orang`;
   }
   $("#follow-filter").addEventListener("change", renderFollow);
   $("#follow-search").addEventListener("input", renderFollow);
