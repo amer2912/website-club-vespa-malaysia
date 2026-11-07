@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/style.css?v=12">
+<link rel="stylesheet" href="../assets/css/style.css?v=13">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -136,7 +136,7 @@
         <p id="edit-email" class="muted"></p>
         <form id="edit-form" class="form" novalidate>
           <div class="form-row">
-            <div class="field"><label for="ed-member_no">Member no.</label><input id="ed-member_no" maxlength="20" placeholder="e.g. VCM0012" autocapitalize="characters"></div>
+            <div class="field"><label for="ed-member_no">Member no.</label><input id="ed-member_no" maxlength="20" placeholder="e.g. VCM-0012" autocapitalize="characters"></div>
             <div class="field"><label for="ed-expires_on">Valid until</label><input id="ed-expires_on" type="date"><span class="hint">Clear it to mark as not paid.</span></div>
           </div>
           <div class="field"><label for="ed-full_name">Full name</label><input id="ed-full_name" maxlength="120"></div>
@@ -185,7 +185,7 @@
         <form id="pre-form" class="form" novalidate>
           <div class="field"><label for="pre-email">Email <span class="req">*</span></label><input id="pre-email" type="email" inputmode="email" required><span class="hint">Must be the email they will use to log in.</span></div>
           <div class="form-row">
-            <div class="field"><label for="pre-member_no">Member no.</label><input id="pre-member_no" maxlength="20" placeholder="e.g. VCM0012" autocapitalize="characters"></div>
+            <div class="field"><label for="pre-member_no">Member no.</label><input id="pre-member_no" maxlength="20" placeholder="e.g. VCM-0012" autocapitalize="characters"></div>
             <div class="field"><label for="pre-expires_on">Valid until</label><input id="pre-expires_on" type="date"><span class="hint">e.g. 31 Dec 2026 if paid for 2026</span></div>
           </div>
           <div class="field"><label for="pre-full_name">Full name</label><input id="pre-full_name" maxlength="120"></div>
@@ -242,8 +242,8 @@
   </div>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
-<script src="../assets/js/supabase-config.js?v=12"></script>
-<script src="../assets/js/main.js?v=12"></script>
-<script src="../assets/js/admin.js?v=12"></script>
+<script src="../assets/js/supabase-config.js?v=13"></script>
+<script src="../assets/js/main.js?v=13"></script>
+<script src="../assets/js/admin.js?v=13"></script>
 </body>
 </html>

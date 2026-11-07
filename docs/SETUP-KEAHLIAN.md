@@ -39,7 +39,7 @@ vespaclubmalaysia.com/ahli/   (GitHub Pages: halaman log masuk, profil, kad, ren
 - Keahlian ikut **tahun kalendar** (1 Januari hingga 31 Disember, waktu Malaysia).
 - **Ahli baharu RM130, renew RM60.** Boleh ditukar pada Langkah 10.
 - Ahli yang masih aktif boleh bayar untuk tahun depan mulai **1 November**.
-- Nombor ahli baharu diberi secara automatik selepas bayaran pertama, bermula dari **VCM5020**.
+- Nombor ahli baharu diberi secara automatik selepas bayaran pertama, bermula dari **VCM-0519** (selepas nombor terakhir dalam master list, VCM-0518).
 
 ---
 
@@ -72,7 +72,7 @@ Ulang langkah yang sama untuk fail kedua, [`supabase/migrations/002_admin_edit.s
 Ulang langkah yang sama untuk fail ketiga, [`supabase/migrations/003_new_member_fee.sql`](../supabase/migrations/003_new_member_fee.sql). Fail ini menetapkan:
 - **Ahli baharu: RM130.** Untuk orang yang tiada nombor ahli dan belum pernah bayar.
 - **Renew: RM60.** Untuk ahli yang ada nombor ahli atau pernah bayar.
-- **Nombor ahli automatik bermula dari VCM5020.**
+- Nombor ahli automatik diteruskan selepas nombor terakhir dalam master list (fail `005` menetapkan VCM-0519).
 
 Portal memaparkan **kedua-dua** pilihan, tetapi hanya pilihan yang layak boleh ditekan. Jenis yuran ditentukan oleh pangkalan data, jadi ahli tidak boleh memilih sendiri atau menukar dirinya kepada "ahli lama".
 
@@ -87,7 +87,13 @@ Medan **"VCM membership no."** yang diisi oleh ahli hanyalah **rujukan**. Ia tid
 
 Selepas fail ini dijalankan, **semua ahli (termasuk AJK) akan diminta melengkapkan profil semula** pada log masuk seterusnya.
 
-Jalankan fail mengikut susunan `001`, `002`, `003`, kemudian `004`. Semuanya selamat untuk dijalankan semula, dan nombor ahli tidak akan berundur.
+### 2e. Format nombor ahli dan import penuh
+Ulang langkah yang sama untuk fail kelima, [`supabase/migrations/005_import_and_numbering.sql`](../supabase/migrations/005_import_and_numbering.sql). Fail ini:
+- menyeragamkan nombor ahli kepada format master list, iaitu **`VCM-0442`**. Nombor yang ditaip sebagai `VCM0442` atau `vcm 442` akan disimpan sebagai `VCM-0442`;
+- meneruskan nombor automatik selepas **VCM-0518**, jadi ahli baharu seterusnya mendapat **VCM-0519**;
+- membolehkan senarai import (`member_import`) membawa **profil penuh** dan **bayaran yang sudah dibuat** (contohnya melalui Google Form). Ahli yang diimport akan nampak profil lengkap, kad aktif dan sejarah bayaran pada log masuk pertama.
+
+Jalankan fail mengikut susunan `001` hingga `005`. Semuanya selamat untuk dijalankan semula, dan nombor ahli tidak akan berundur.
 
 ## Langkah 3: Tetapan log masuk emel
 
@@ -163,7 +169,7 @@ ali@gmail.com,VCM0012,Ali Bin Abu,0123456789,2026-12-31,2019-08-02
    - `expires_on`: `2026-12-31` untuk ahli yang aktif bagi 2026. Biarkan kosong untuk ahli yang belum bayar.
    - Tarikh mesti dalam format `YYYY-MM-DD`.
 2. Di Supabase, buka **Table Editor → member_import → Insert → Import data from CSV**.
-3. Fail `003` sudah menetapkan nombor ahli baharu bermula dari **VCM5020**. Sistem juga melangkau nombor yang sudah diambil secara automatik.
+3. Fail `005` menetapkan nombor ahli baharu bermula dari **VCM-0519**. Sistem juga melangkau nombor yang sudah diambil secara automatik.
 
 ## Panel AJK: kemas kini ahli secara manual
 

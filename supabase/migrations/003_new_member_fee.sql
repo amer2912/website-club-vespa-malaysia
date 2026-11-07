@@ -6,7 +6,7 @@
 --   * New member (never had a member number or a paid year): RM130
 --   * Renewal (has a member number or has paid before):      RM60
 --   The database decides which one applies. Members cannot choose.
---   * Automatic member numbers continue from VCM5020.
+--   * Automatic member numbers continue after VCM-0518 (see 005).
 -- =====================================================================
 
 -- ---------------------------------------------------------------------
@@ -32,10 +32,11 @@ alter table public.payments
   check (kind in ('new', 'renewal'));
 
 -- ---------------------------------------------------------------------
--- 3. Member numbers continue from VCM5020 (never moves backwards)
+-- 3. Member numbers continue after the master list's highest number,
+--    VCM-0518 (005 sets the exact value; this never moves it backwards)
 -- ---------------------------------------------------------------------
 select setval('public.member_no_seq',
-              greatest(5019, (select last_value from public.member_no_seq)),
+              greatest(518, (select last_value from public.member_no_seq)),
               true);
 
 -- ---------------------------------------------------------------------

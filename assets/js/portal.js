@@ -19,6 +19,9 @@
     el.hidden = !text;
   };
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  // "VCM0442", "vcm-442" and "VCM-0442" are the same member number
+  const sameNo = (a, b) => String(a || "").toUpperCase().replace(/[^A-Z0-9]/g, "").replace(/^VCM0*/, "VCM")
+    === String(b || "").toUpperCase().replace(/[^A-Z0-9]/g, "").replace(/^VCM0*/, "VCM");
   const rm = (cents) => `RM${(cents / 100).toFixed(2)}`;
   const todayMYT = () => new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kuala_Lumpur" });
   const fmtDate = (d) => {
@@ -303,7 +306,7 @@
       ["State", member.state], ["Vespa", `${member.vespa_model || "—"} · ${member.plate_no || "—"}`],
       ["Beneficiary", member.beneficiary_name ? `${member.beneficiary_name} (${member.beneficiary_relation || "—"})` : "—"],
       ["T-shirt", member.tshirt_size === "Not needed" ? "Not needed" : member.tshirt_size || "—"],
-      ...(member.claimed_member_no && member.claimed_member_no !== member.member_no ? [["Old VCM no.", `${member.claimed_member_no} (being checked by AJK)`]] : []),
+      ...(member.claimed_member_no && !sameNo(member.claimed_member_no, member.member_no) ? [["Old VCM no.", `${member.claimed_member_no} (being checked by AJK)`]] : []),
       ["Member since", fmtDate(member.joined_on)],
     ].map(([k, v]) => `<li><span>${esc(k)}</span><strong>${esc(v)}</strong></li>`).join("");
 

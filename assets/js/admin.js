@@ -17,6 +17,9 @@
     return date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kuala_Lumpur" });
   };
   const statusOf = (m) => (!m.expires_on ? "new" : m.expires_on >= todayMYT() ? "active" : "expired");
+  // "VCM0442", "vcm-442" and "VCM-0442" are the same member number
+  const sameNo = (a, b) => String(a || "").toUpperCase().replace(/[^A-Z0-9]/g, "").replace(/^VCM0*/, "VCM")
+    === String(b || "").toUpperCase().replace(/[^A-Z0-9]/g, "").replace(/^VCM0*/, "VCM");
   const LABEL = { active: "Active", expired: "Expired", new: "Never paid" };
   const METHOD = { fpx: "FPX", cash: "Cash", transfer: "Transfer", legacy: "Old Google Form" };
   const orNull = (v) => { const t = String(v ?? "").trim(); return t === "" ? null : t; };
@@ -95,7 +98,7 @@
     $("#adm-rows").innerHTML = rows.map((m) => {
       const st = statusOf(m);
       return `<tr>
-        <td class="num">${esc(m.member_no || "—")}${m.claimed_member_no && m.claimed_member_no !== m.member_no
+        <td class="num">${esc(m.member_no || "—")}${m.claimed_member_no && !sameNo(m.claimed_member_no, m.member_no)
           ? `<div class="claimed" title="Number typed by the member, for checking">claims ${esc(m.claimed_member_no)}</div>` : ""}</td>
         <td><strong>${esc(m.full_name || "(no name yet)")}</strong>${m.profile_completed_at ? "" : '<div class="muted" style="font-size:.8rem">Profile incomplete</div>'}</td>
         <td><div>${esc(m.email)}</div><div class="muted">${esc(m.phone || "")}</div></td>
