@@ -33,6 +33,7 @@
 
   let members = [];
   let imports = [];
+  let fees = { new_member_fee_cents: 13000, fee_cents: 6000 };
   let current = null;
   let editing = null;
 
@@ -42,6 +43,8 @@
     const { data: isAdmin } = await sb.rpc("is_admin");
     if (isAdmin !== true) { deny("Admins only", "Your account does not have AJK admin access. Ask the club secretary to add your email to the admins list."); return; }
     view("adm-main");
+    const { data: feeRow } = await sb.from("settings").select("*").maybeSingle();
+    if (feeRow?.fee_cents) fees = { ...fees, ...feeRow };
     await Promise.all([loadMembers(), loadPayments()]);
     await loadImports();
   }
@@ -56,11 +59,11 @@
 
   async function loadPayments() {
     const { data } = await sb.from("payments")
-      .select("coverage_year, amount_cents, method, status, paid_at, recorded_by, members(full_name, member_no)")
+      .select("*, members(full_name, member_no)")
       .eq("status", "paid").order("paid_at", { ascending: false }).limit(20);
     $("#adm-payments").innerHTML = (data || []).length
       ? data.map((p) => `<li><div><strong>${esc(p.members?.full_name || "—")}</strong> <span class="muted">${esc(p.members?.member_no || "")}</span>
-          <div class="muted">${esc(fmtDate(p.paid_at))} · ${METHOD[p.method] || esc(p.method)} · ${p.coverage_year}${p.recorded_by ? ` · by ${esc(p.recorded_by)}` : ""}</div></div>
+          <div class="muted">${esc(fmtDate(p.paid_at))} · ${METHOD[p.method] || esc(p.method)}${p.kind === "new" ? " · New member" : ""} · ${p.coverage_year}${p.recorded_by ? ` · by ${esc(p.recorded_by)}` : ""}</div></div>
           <strong>${p.amount_cents ? rm(p.amount_cents) : "—"}</strong></li>`).join("")
       : `<li class="muted">No payments yet.</li>`;
   }
@@ -141,7 +144,8 @@
     const nextYear = current.expires_on && Number(current.expires_on.slice(0, 4)) >= yearMYT() ? Number(current.expires_on.slice(0, 4)) + 1 : yearMYT();
     $("#pay-member").textContent = `${current.full_name || current.email} (${current.member_no || "new"})`;
     $("#pay-year").value = nextYear;
-    $("#pay-amount").value = "50.00";
+    const isNew = !current.member_no && !current.expires_on;
+    $("#pay-amount").value = ((isNew ? fees.new_member_fee_cents : fees.fee_cents) / 100).toFixed(2);
     $("#pay-method").value = "cash";
     $("#pay-note").value = "";
     note($("#pay-msg"), "");

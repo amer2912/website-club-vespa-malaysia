@@ -35,11 +35,11 @@ vespaclubmalaysia.com/ahli/   (GitHub Pages: halaman log masuk, profil, kad, ren
 | `assets/js/supabase-config.js` | Alamat projek Supabase (diisi pada Langkah 4) |
 | `ahli/index.html`, `ahli/admin.html` | Portal ahli dan panel AJK |
 
-**Peraturan keahlian (lalai):**
+**Peraturan keahlian:**
 - Keahlian ikut **tahun kalendar** (1 Januari hingga 31 Disember, waktu Malaysia).
-- Yuran **RM50**. Boleh ditukar pada Langkah 10.
+- **Ahli baharu RM130, renew RM60.** Boleh ditukar pada Langkah 10.
 - Ahli yang masih aktif boleh bayar untuk tahun depan mulai **1 November**.
-- Nombor ahli baharu (contoh `VCM0061`) diberi secara automatik selepas bayaran pertama.
+- Nombor ahli baharu diberi secara automatik selepas bayaran pertama, bermula dari **VCM5020**.
 
 ---
 
@@ -68,7 +68,15 @@ Ulang langkah yang sama untuk fail kedua, [`supabase/migrations/002_admin_edit.s
 - kaedah bayaran **Old Google Form**, untuk ahli yang sudah bayar melalui borang lama;
 - senarai **Pre-registered**, untuk menambah ahli yang belum pernah log masuk.
 
-Jalankan fail `001` dahulu, kemudian `002`. Kedua-duanya selamat untuk dijalankan semula.
+### 2c. Yuran ahli baharu dan renew
+Ulang langkah yang sama untuk fail ketiga, [`supabase/migrations/003_new_member_fee.sql`](../supabase/migrations/003_new_member_fee.sql). Fail ini menetapkan:
+- **Ahli baharu: RM130.** Untuk orang yang tiada nombor ahli dan belum pernah bayar.
+- **Renew: RM60.** Untuk ahli yang ada nombor ahli atau pernah bayar.
+- **Nombor ahli automatik bermula dari VCM5020.**
+
+Portal memaparkan **kedua-dua** pilihan, tetapi hanya pilihan yang layak boleh ditekan. Jenis yuran ditentukan oleh pangkalan data, jadi ahli tidak boleh memilih sendiri atau menukar dirinya kepada "ahli lama".
+
+Jalankan fail mengikut susunan `001`, `002`, kemudian `003`. Semuanya selamat untuk dijalankan semula, dan nombor ahli tidak akan berundur.
 
 ## Langkah 3: Tetapan log masuk emel
 
@@ -144,11 +152,7 @@ ali@gmail.com,VCM0012,Ali Bin Abu,0123456789,2026-12-31,2019-08-02
    - `expires_on`: `2026-12-31` untuk ahli yang aktif bagi 2026. Biarkan kosong untuk ahli yang belum bayar.
    - Tarikh mesti dalam format `YYYY-MM-DD`.
 2. Di Supabase, buka **Table Editor → member_import → Insert → Import data from CSV**.
-3. Supaya nombor ahli baharu bermula selepas nombor terakhir, jalankan arahan ini di SQL Editor (tukar `120` kepada nombor terbesar yang sudah digunakan):
-```sql
-select setval('public.member_no_seq', 120);
-```
-Kalau terlupa langkah ini pun, sistem akan langkau nombor yang sudah diambil secara automatik.
+3. Fail `003` sudah menetapkan nombor ahli baharu bermula dari **VCM5020**. Sistem juga melangkau nombor yang sudah diambil secara automatik.
 
 ## Panel AJK: kemas kini ahli secara manual
 
@@ -218,7 +222,8 @@ Kalau ada masalah, buka **Edge Functions → (nama fungsi) → Logs** untuk meli
 1. Daftar akaun ToyyibPay **sebenar** atas nama kelab, cipta Category, dan ambil Secret Key yang baharu.
 2. Kemas kini secrets: `TOYYIBPAY_BASE_URL` = `https://toyyibpay.com`, beserta `TOYYIBPAY_SECRET_KEY` dan `TOYYIBPAY_CATEGORY_CODE` yang baharu.
 3. Untuk tukar **yuran** atau **bulan renew dibuka**, buka **Table Editor → settings**:
-   - `fee_cents`: dalam sen. `5000` = RM50.00, `3000` = RM30.00.
+   - `new_member_fee_cents`: yuran ahli baharu, dalam sen. `13000` = RM130.00.
+   - `fee_cents`: yuran renew, dalam sen. `6000` = RM60.00.
    - `renewal_opens_month`: `11` = November.
 4. Umumkan portal kepada ahli. 🎉
 

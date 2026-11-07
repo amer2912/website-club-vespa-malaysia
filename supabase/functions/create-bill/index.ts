@@ -102,8 +102,11 @@ Deno.serve(async (req) => {
   const form = new URLSearchParams({
     userSecretKey: TP_SECRET,
     categoryCode: TP_CATEGORY,
-    billName: `VCM Membership ${payment.coverage_year}`, // ToyyibPay: max 30 characters
-    billDescription: `Yuran keahlian Vespa Club Malaysia ${payment.coverage_year}`, // max 100 characters
+    // ToyyibPay: billName max 30 characters, billDescription max 100
+    billName: payment.kind === "new" ? `VCM New Membership ${payment.coverage_year}` : `VCM Renewal ${payment.coverage_year}`,
+    billDescription: payment.kind === "new"
+      ? `Yuran ahli baharu Vespa Club Malaysia ${payment.coverage_year}`
+      : `Yuran pembaharuan keahlian Vespa Club Malaysia ${payment.coverage_year}`,
     billPriceSetting: "1", // fixed amount
     billPayorInfo: "1", // payer details required
     billAmount: String(payment.amount_cents), // in sen

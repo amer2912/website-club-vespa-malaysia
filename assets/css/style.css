@@ -498,3 +498,16 @@ h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.05; margin: 0;
 dialog.modal { border: 0; padding: 0; width: min(520px, calc(100vw - 32px)); border-radius: 16px; box-shadow: 0 30px 80px -20px rgba(0,0,0,.4); }
 dialog.modal::backdrop { background: rgba(17,18,20,.5); }
 dialog.modal .panel { border: 0; }
+
+/* Fee options (new membership / renewal) */
+.fee-options { display: grid; gap: 12px; margin-top: 8px; }
+.fee-option { border: 2px solid var(--mint); border-radius: 14px; padding: 18px; display: grid; gap: 10px; background: #fff; }
+.fee-option__head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.fee-option__head strong { font-family: var(--font-display); font-size: 1.05rem; }
+.fee-option__price { font-family: var(--font-display); font-weight: 800; font-size: 1.6rem; font-variant-numeric: tabular-nums; line-height: 1; }
+.fee-option__note { margin: 0; font-size: .88rem; color: var(--ink-2); }
+.fee-option .btn { justify-self: start; }
+.fee-option.is-off { border: 1px dashed #cfd2d6; background: var(--paper-2); }
+.fee-option.is-off .fee-option__head strong, .fee-option.is-off .fee-option__price { color: var(--muted); }
+.fee-option.is-off .fee-option__note::before { content: "Not for you · "; font-weight: 600; }
+.fee-option.is-off .btn, .fee-option .btn[disabled] { background: #dfe2e6; border-color: #dfe2e6; color: #7a8089; opacity: 1; }

@@ -247,32 +247,54 @@
 
   async function loadQuote() {
     const box = $("#renew-box");
-    const btn = $("#renew-btn");
     const { data, error } = await sb.rpc("renewal_quote");
     const q = Array.isArray(data) ? data[0] : data;
-    if (error || !q) { $("#renew-text").textContent = "Renewal information is not available right now."; btn.hidden = true; return; }
-    $("#renew-price").textContent = q.amount_cents ? rm(q.amount_cents) : "";
+    const opts = {
+      new: { box: $("#opt-new"), btn: $("#pay-new"), note: $("#note-new"), price: $("#price-new") },
+      renewal: { box: $("#opt-renewal"), btn: $("#pay-renewal"), note: $("#note-renewal"), price: $("#price-renewal") },
+    };
+    if (error || !q) {
+      $("#renew-text").textContent = "Membership fees are not available right now. Please try again later.";
+      Object.values(opts).forEach((o) => { o.btn.disabled = true; });
+      box.hidden = false;
+      return;
+    }
+    opts.new.price.textContent = q.new_fee_cents ? rm(q.new_fee_cents) : "";
+    opts.renewal.price.textContent = q.renewal_fee_cents ? rm(q.renewal_fee_cents) : "";
+
+    // The database decides which fee applies; the other option is shown but cannot be used.
+    const mine = q.kind === "new" ? "new" : "renewal";
+    const other = mine === "new" ? "renewal" : "new";
+    opts.new.note.textContent = mine === "new"
+      ? "For first-time members. Your member number is given after payment."
+      : `For first-time members only. You are already a member${member.member_no ? ` (${member.member_no})` : ""}.`;
+    opts.renewal.note.textContent = mine === "renewal"
+      ? "For existing Vespa Club Malaysia members."
+      : "For existing members with a VCM member number only.";
+    opts[other].box.classList.add("is-off");
+    opts[other].btn.disabled = true;
+    opts[mine].box.classList.remove("is-off");
+
     if (q.allowed) {
-      $("#renew-title").textContent = statusOf(member).key === "active" ? `Renew for ${q.coverage_year}` : `Membership ${q.coverage_year}`;
+      $("#renew-title").textContent = mine === "new" ? `Join for ${q.coverage_year}` : `Renew for ${q.coverage_year}`;
       $("#renew-text").textContent = `Valid until 31 December ${q.coverage_year}. Pay securely with FPX online banking.`;
-      btn.hidden = false;
-      btn.dataset.year = q.coverage_year;
+      opts[mine].btn.disabled = false;
     } else {
-      $("#renew-title").textContent = "Membership renewal";
-      $("#renew-text").textContent = q.reason || "Renewal is not open right now.";
-      btn.hidden = true;
+      $("#renew-title").textContent = "Membership";
+      $("#renew-text").textContent = q.reason || "Payment is not open right now.";
+      opts[mine].btn.disabled = true;
     }
     box.hidden = false;
   }
 
   async function loadPayments() {
     const { data } = await sb.from("payments")
-      .select("coverage_year, amount_cents, method, status, paid_at, created_at")
+      .select("*")
       .order("created_at", { ascending: false }).limit(12);
     const rows = (data || []).filter((p) => p.status === "paid");
     const list = $("#history");
     list.innerHTML = rows.length
-      ? rows.map((p) => `<li><div><strong>Membership ${p.coverage_year}</strong><div class="muted">${esc(fmtDate(p.paid_at || p.created_at))} · ${({ fpx: "FPX", cash: "Cash", transfer: "Bank transfer", legacy: "Google Form" })[p.method] || p.method}</div></div><strong>${p.amount_cents ? rm(p.amount_cents) : "Paid"}</strong></li>`).join("")
+      ? rows.map((p) => `<li><div><strong>Membership ${p.coverage_year}</strong><div class="muted">${esc(fmtDate(p.paid_at || p.created_at))} · ${({ fpx: "FPX", cash: "Cash", transfer: "Bank transfer", legacy: "Google Form" })[p.method] || p.method}${p.kind === "new" ? " · New member" : ""}</div></div><strong>${p.amount_cents ? rm(p.amount_cents) : "Paid"}</strong></li>`).join("")
       : `<li class="muted">No payments yet.</li>`;
   }
 
@@ -281,11 +303,13 @@
     $("#admin-link").hidden = data !== true;
   }
 
-  $("#renew-btn").addEventListener("click", async (e) => {
+  async function startPayment(e) {
     const btn = e.currentTarget;
+    if (btn.disabled) return;
     const msg = $("#renew-msg");
     busy(btn, true, "Opening FPX…");
     note(msg, "");
+    // The amount is decided by the server, never by this button.
     const { data, error } = await sb.functions.invoke("create-bill", { body: {} });
     if (error || !data?.url) {
       let text = "Could not start the payment. Please try again.";
@@ -295,7 +319,9 @@
       return;
     }
     location.href = data.url;
-  });
+  }
+  $("#pay-new").addEventListener("click", startPayment);
+  $("#pay-renewal").addEventListener("click", startPayment);
 
   $("#edit-profile").addEventListener("click", () => openProfile(false));
   $("#logout").addEventListener("click", async () => { await sb.auth.signOut(); member = null; showLogin(); });
