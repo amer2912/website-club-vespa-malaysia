@@ -195,6 +195,19 @@ Ringkasan keahlian yang dikira terus daripada pangkalan data setiap kali halaman
 | Ahli aktif ikut negeri | Diambil daripada profil ahli. |
 | Senarai untuk dihubungi | Pilih senarai (belum renew, belum log masuk, profil belum lengkap, belum pernah bayar). Butang **WhatsApp** membuka mesej yang sudah siap ditulis. Senarai boleh dimuat turun sebagai CSV, atau nombor telefon boleh disalin sekali gus. |
 
+
+### Rekod lama dan status ikut perlembagaan (fail 006)
+
+Jalankan `supabase/migrations/006_archive_and_followup.sql` dalam SQL Editor, kemudian fail data rekod lama (`5-rekod-lama.sql`, tidak disimpan dalam repository kerana mengandungi data peribadi). Kedua-duanya selamat dijalankan semula.
+
+| Bahagian | Maksud |
+|---|---|
+| Rekod lama | Ahli lama yang belum boleh log masuk (tiada emel, "Left Group", atau rekod perlu disemak). Hanya AJK boleh lihat. Tekan **Kemaskini** untuk betulkan nama, telefon, emel, tahun terakhir bayar dan catatan. **Tambah rekod lama** untuk ahli yang dijumpai kemudian. |
+| Pindah ke pra-daftar | Bila AJK dapat emel ahli lama, isi emel dan tekan **Pindah ke pra-daftar**. Bila ahli itu log masuk, dia terus dapat nombor lamanya dan dikenakan yuran pembaharuan. |
+| Status ikut perlembagaan | Aktif; tertunggak 1, 2 atau 3 tahun; terhenti (tunggakan lebih 3 tahun); tiada rekod bayaran. Dikira daripada tahun terakhir bayar. |
+| Notis hutang | Tarikh notis dihantar dan catatan AJK, untuk setiap nombor ahli. Selepas menekan **WhatsApp** pada senarai tertunggak, dashboard menawarkan untuk merekod tarikh notis hari ini. |
+| Akaun yang menuntut nombor lama | Ahli lama yang daftar sendiri dan menaip nombor lama mereka. Sahkan di **Senarai ahli & bayaran** → **Edit** → isi **Member no.** sebelum mereka bayar, supaya yuran pembaharuan dikenakan. |
+
 ## Langkah 7: Akaun ToyyibPay (mula dengan sandbox)
 
 1. Daftar akaun **sandbox** di https://dev.toyyibpay.com.

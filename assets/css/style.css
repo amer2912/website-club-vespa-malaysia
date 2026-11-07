@@ -567,3 +567,7 @@ button.col { cursor: pointer; }
 .dash-tip { position: fixed; z-index: 60; pointer-events: none; background: var(--ink); color: #fff; font-size: .8rem; line-height: 1.4;
   padding: 8px 10px; border-radius: 8px; max-width: 240px; box-shadow: 0 8px 24px -8px rgba(0, 0, 0, .35); }
 .table--compact { min-width: 720px; }
+button.hbar { width: 100%; background: none; border: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.field textarea { min-height: 0; resize: vertical; }
+#rec-dialog .field { align-content: start; }
+#rec-today { white-space: nowrap; flex: none; }
