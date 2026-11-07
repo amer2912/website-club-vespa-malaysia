@@ -155,7 +155,18 @@ insert into public.admins (email) values
   ('setiausaha@example.com'),
   ('bendahari@example.com');
 ```
-AJK tersebut kemudian log masuk di `/ahli/` dengan emel yang sama. Butang **AJK admin** akan muncul di papan pemuka mereka. Hadkan akses admin kepada 2 hingga 3 orang sahaja.
+AJK tersebut kemudian log masuk di `/ahli/` dengan emel yang sama. Butang **AJK dashboard** akan muncul di papan pemuka mereka. Hadkan akses admin kepada 2 hingga 3 orang sahaja.
+
+**Peranan (selepas fail 007):** setiap admin ialah `editor` (boleh lihat dan ubah) atau `viewer` (lihat dan muat turun senarai sahaja; setiap perubahan ditolak oleh pangkalan data). Admin sedia ada menjadi editor.
+```sql
+-- tambah viewer, atau tukar peranan admin sedia ada
+insert into public.admins (email, role) values ('nama@example.com', 'viewer')
+on conflict (email) do update set role = excluded.role;
+
+-- semak senarai admin
+select email, role from public.admins order by role, email;
+```
+Jika fail 001 hingga 005 dijalankan semula pada masa hadapan, jalankan 007 semula selepasnya supaya akses viewer kekal.
 
 ## Langkah 6: Import ahli sedia ada (pilihan)
 

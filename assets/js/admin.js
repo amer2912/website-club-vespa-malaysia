@@ -40,12 +40,24 @@
   let current = null;
   let editing = null;
 
+  // 'editor', 'viewer' or null. Falls back to is_admin() until 007 is run.
+  async function adminRole() {
+    const r = await sb.rpc("my_admin_role");
+    if (!r.error) return r.data || null;
+    const a = await sb.rpc("is_admin");
+    return a.data === true ? "editor" : null;
+  }
+
   async function init() {
     const { data } = await sb.auth.getSession();
     if (!data.session) { deny("Please log in", "Log in on the member portal with your AJK email first."); return; }
-    const { data: isAdmin } = await sb.rpc("is_admin");
-    if (isAdmin !== true) { deny("Admins only", "Your account does not have AJK admin access. Ask the club secretary to add your email to the admins list."); return; }
+    const role = await adminRole();
+    if (!role) { deny("Admins only", "Your account does not have AJK admin access. Ask the club secretary to add your email to the admins list."); return; }
     view("adm-main");
+    if (role === "viewer") {
+      document.body.classList.add("is-viewer");
+      note($("#adm-msg"), "View-only access: you can see and export the list, but changes are made by AJK editors.", "info");
+    }
     const { data: feeRow } = await sb.from("settings").select("*").maybeSingle();
     if (feeRow?.fee_cents) fees = { ...fees, ...feeRow };
     await Promise.all([loadMembers(), loadPayments()]);

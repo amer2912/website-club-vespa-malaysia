@@ -37,12 +37,18 @@ alter table public.member_followup enable row level security;
 revoke all on public.member_archive, public.member_followup from anon, authenticated;
 grant select on public.member_archive, public.member_followup to authenticated;
 
-drop policy if exists member_archive_admin_select on public.member_archive;
-create policy member_archive_admin_select on public.member_archive
-  for select to authenticated using (public.is_admin());
-drop policy if exists member_followup_admin_select on public.member_followup;
-create policy member_followup_admin_select on public.member_followup
-  for select to authenticated using (public.is_admin());
+-- Created once only, so running this file again after 007 keeps 007's viewer access.
+do $$
+begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and policyname = 'member_archive_admin_select') then
+    create policy member_archive_admin_select on public.member_archive
+      for select to authenticated using (public.is_admin());
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'public' and policyname = 'member_followup_admin_select') then
+    create policy member_followup_admin_select on public.member_followup
+      for select to authenticated using (public.is_admin());
+  end if;
+end $$;
 
 -- ---------------------------------------------------------------------
 -- AJK: add or edit an old record

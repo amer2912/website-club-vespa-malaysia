@@ -571,3 +571,6 @@ button.hbar { width: 100%; background: none; border: 0; font: inherit; color: in
 .field textarea { min-height: 0; resize: vertical; }
 #rec-dialog .field { align-content: start; }
 #rec-today { white-space: nowrap; flex: none; }
+/* View-only AJK: hide change buttons (the database refuses changes anyway) */
+.is-viewer [data-edit], .is-viewer [data-pay], .is-viewer #pre-add, .is-viewer [data-pre-edit],
+.is-viewer [data-pre-del], .is-viewer [data-rec], .is-viewer #arch-add { display: none !important; }

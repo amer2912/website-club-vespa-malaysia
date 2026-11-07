@@ -372,9 +372,16 @@
       : `<li class="muted">No payments yet.</li>`;
   }
 
+  // 'editor', 'viewer' or null. Falls back to is_admin() until 007 is run.
+  async function adminRole() {
+    const r = await sb.rpc("my_admin_role");
+    if (!r.error) return r.data || null;
+    const a = await sb.rpc("is_admin");
+    return a.data === true ? "editor" : null;
+  }
+
   async function loadAdminLink() {
-    const { data } = await sb.rpc("is_admin");
-    $("#admin-link").hidden = data !== true;
+    $("#admin-link").hidden = !(await adminRole());
   }
 
   async function startPayment(e) {

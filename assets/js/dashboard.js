@@ -73,13 +73,25 @@
     }
   }
 
+  // 'editor', 'viewer' or null. Falls back to is_admin() until 007 is run.
+  async function adminRole() {
+    const r = await sb.rpc("my_admin_role");
+    if (!r.error) return r.data || null;
+    const a = await sb.rpc("is_admin");
+    return a.data === true ? "editor" : null;
+  }
+  let viewer = false;
+
   async function init() {
     const { data } = await sb.auth.getSession();
     if (!data.session) { deny("Sila log masuk", "Log masuk di portal ahli dengan emel AJK anda dahulu."); return; }
-    const { data: isAdmin } = await sb.rpc("is_admin");
-    if (isAdmin !== true) { deny("AJK sahaja", "Akaun anda tiada akses admin AJK. Minta setiausaha kelab tambah emel anda dalam senarai admin."); return; }
+    const role = await adminRole();
+    if (!role) { deny("AJK sahaja", "Akaun anda tiada akses admin AJK. Minta setiausaha kelab tambah emel anda dalam senarai admin."); return; }
     view("adm-main");
+    viewer = role === "viewer";
+    document.body.classList.toggle("is-viewer", viewer);
     if (await loadData()) renderAll();
+    if (viewer) note($("#adm-msg"), "Akses lihat sahaja: anda boleh lihat dan muat turun senarai, tetapi perubahan dibuat oleh AJK editor.", "info");
   }
 
   // Tables added by 006; until it is run the dashboard works without old records.
@@ -491,7 +503,7 @@
   // After a notice goes out on WhatsApp, offer to record the date as proof of notice.
   $("#follow-rows").addEventListener("click", (e) => {
     const a = e.target.closest("a[data-wa='notice']");
-    if (!a || !a.dataset.no) return;
+    if (!a || !a.dataset.no || viewer) return;
     setTimeout(async () => {
       if (!window.confirm(`Rekodkan notis hutang untuk ${a.dataset.no} sebagai dihantar hari ini (${fmtDate(todayMYT())})?`)) return;
       const prev = follow.get(a.dataset.no);
