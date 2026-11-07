@@ -10,7 +10,7 @@
    ========================================================= */
 
 const VCM = {
-  membershipForm: "https://forms.gle/Zg8sRTTM9LAaRp6EA",
+  membershipForm: "/ahli/", // member portal: join or renew online
   email: "vespaclubmalaysia1946@gmail.com",
   facebook: "https://www.facebook.com/vespaclubmalaysia/",
   instagram: "https://www.instagram.com/vespaclubmalaysia/",
@@ -227,7 +227,7 @@ function initReveal() {
 
 /* ---------- shared links ---------- */
 function fillLinks() {
-  $$("[data-join]").forEach((a) => { a.href = VCM.membershipForm; a.target = "_blank"; a.rel = "noopener"; });
+  $$("[data-join]").forEach((a) => { a.href = VCM.membershipForm; });
   $$("[data-year]").forEach((el) => (el.textContent = new Date().getFullYear()));
 }
 
