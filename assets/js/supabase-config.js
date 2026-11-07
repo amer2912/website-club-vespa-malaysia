@@ -11,6 +11,6 @@
    "coming soon" message instead of the login form.
    ========================================================= */
 window.VCM_SUPABASE = {
-  url: "https://klqlpnoghudrdtvnseag.supabase.co",
-  anonKey: "sb_publishable_YovHOrqevxs6bx0DV38wvw_oMG2_q50", // publishable key (safe to be public)
+  url: "https://iyjlrjrqnmkgfcadwydg.supabase.co",
+  anonKey: "sb_publishable_qxkuJfHMD9DHBVG1QwYLqw_p7YoO4dV", // publishable key (safe to be public)
 };
