@@ -33,7 +33,7 @@ vespaclubmalaysia.com/ahli/   (GitHub Pages: halaman log masuk, profil, kad, ren
 | `supabase/functions/create-bill/index.ts` | Fungsi cipta bil FPX |
 | `supabase/functions/toyyibpay-callback/index.ts` | Fungsi pengesahan bayaran |
 | `assets/js/supabase-config.js` | Alamat projek Supabase (diisi pada Langkah 4) |
-| `ahli/index.html`, `ahli/admin.html` | Portal ahli dan panel AJK |
+| `ahli/index.html`, `ahli/admin.html`, `ahli/dashboard.html` | Portal ahli, panel AJK dan dashboard AJK |
 
 **Peraturan keahlian:**
 - Keahlian ikut **tahun kalendar** (1 Januari hingga 31 Disember, waktu Malaysia).
@@ -173,7 +173,7 @@ ali@gmail.com,VCM0012,Ali Bin Abu,0123456789,2026-12-31,2019-08-02
 
 ## Panel AJK: kemas kini ahli secara manual
 
-Buka portal, tekan **AJK admin**, dan anda boleh buat perkara berikut.
+Buka portal dan tekan **AJK dashboard**. Dari situ, tekan **Senarai ahli & bayaran** untuk ke panel admin. Di panel admin anda boleh buat perkara berikut.
 
 | Mahu buat | Cara |
 |---|---|
@@ -182,6 +182,18 @@ Buka portal, tekan **AJK admin**, dan anda boleh buat perkara berikut.
 | Tanda ahli **belum bayar** (betulkan kesilapan) | Tekan **Edit**, **kosongkan** tarikh **Valid until**, kemudian **Save changes**. |
 | Tambah ahli yang **belum log masuk** | Di bahagian **Pre-registered**, tekan **Add member** dan isi emel, nombor ahli serta tarikh sah. Bila ahli itu log masuk kali pertama dengan emel tersebut, semua maklumat ini terus dipindahkan ke akaunnya. |
 | Rekod bayaran tunai atau pindahan bank | Tekan **Payment** dan pilih **Cash** atau **Bank transfer**. |
+
+### Dashboard AJK (`/ahli/dashboard`)
+
+Ringkasan keahlian yang dikira terus daripada pangkalan data setiap kali halaman dibuka. Ahli yang didaftarkan oleh AJK tetapi belum log masuk portal turut dikira.
+
+| Bahagian | Maksud |
+|---|---|
+| Nombor di atas | Ahli aktif tahun ini, ahli yang belum renew (bayar tahun lepas tetapi belum tahun ini), ahli baharu, jumlah yuran untuk tahun ini, dan ahli yang sudah renew awal untuk tahun depan. Tekan **Belum renew** untuk terus ke senarai nama. |
+| Keahlian tamat pada tahun | Setiap ahli dikira sekali, ikut tahun keahlian mereka tamat. Kelabu bermaksud sudah tamat, biru bermaksud masih aktif. Tekan satu tahun untuk lihat nama. |
+| Bayaran ikut bulan | Bilangan bayaran pembaharuan dan ahli baharu bagi setiap bulan tahun ini. |
+| Ahli aktif ikut negeri | Diambil daripada profil ahli. |
+| Senarai untuk dihubungi | Pilih senarai (belum renew, belum log masuk, profil belum lengkap, belum pernah bayar). Butang **WhatsApp** membuka mesej yang sudah siap ditulis. Senarai boleh dimuat turun sebagai CSV, atau nombor telefon boleh disalin sekali gus. |
 
 ## Langkah 7: Akaun ToyyibPay (mula dengan sandbox)
 

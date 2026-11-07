@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AJK Dashboard | Vespa Club Malaysia</title>
+<meta name="description" content="Vespa Club Malaysia AJK membership dashboard.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#111214">
+<link rel="icon" type="image/png" href="../assets/img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css?v=14">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../index.html" aria-label="Vespa Club Malaysia home">
+      <img src="../assets/img/logo.png" alt="" width="46" height="46">
+      <span class="brand-text">Vespa Club Malaysia<small>Kelab Vespa Malaysia</small></span>
+    </a>
+    <button class="menu-toggle" aria-label="Menu" aria-expanded="false" aria-controls="site-nav"><span></span></button>
+    <nav class="nav" id="site-nav" aria-label="Main">
+      <a href="../index.html">Home</a>
+      <a href="../about.html">About</a>
+      <a href="../team.html">Team</a>
+      <a href="../events.html">Events</a>
+      <a href="../shop.html">Shop</a>
+      <a href="../contact.html">Contact</a>
+      <a href="./" aria-current="page">Members</a>
+      <a class="btn" data-join href="./">Join the club</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="portal">
+  <div class="wrap">
+<noscript><div class="notice notice--warn">Please turn on JavaScript.</div></noscript>
+    <section id="adm-loading" class="center" style="padding:80px 0"><div class="spinner" aria-hidden="true"></div><p class="muted">Memuatkan…</p></section>
+
+    <section id="adm-denied" hidden>
+      <div class="portal-head"><span class="eyebrow">AJK</span><h1>Dashboard</h1></div>
+      <div class="panel panel--narrow">
+        <h2 id="adm-denied-title">AJK sahaja</h2>
+        <p id="adm-denied-text">Halaman ini untuk AJK yang ada akses admin.</p>
+        <a class="btn" href="./">Ke portal ahli <svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M0 6h16M11 1l5 5-5 5"/></svg></a>
+      </div>
+    </section>
+
+    <section id="adm-main" hidden>
+      <div class="portal-head" style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px">
+        <div><span class="eyebrow">AJK</span><h1>Dashboard</h1><p class="muted" id="dash-asof"></p></div>
+        <div class="form-actions">
+          <a class="btn btn--small" href="admin.html">Senarai ahli &amp; bayaran</a>
+          <a class="btn btn--line btn--small" href="./">Portal ahli</a>
+        </div>
+      </div>
+      <div id="adm-msg" class="notice" hidden aria-live="polite" style="margin-bottom:16px"></div>
+
+      <div class="dash-kpis" id="dash-kpis"></div>
+
+      <div class="dash-grid">
+        <div class="panel">
+          <h2>Keahlian tamat pada tahun</h2>
+          <p>Setiap ahli dikira sekali, ikut tahun keahlian mereka tamat. Tekan satu tahun untuk lihat senarai nama.</p>
+          <div class="dash-legend"><span><i style="background:var(--c-past)"></i>Sudah tamat</span><span><i style="background:var(--c-renew)"></i>Masih aktif</span></div>
+          <div id="chart-years"></div>
+          <p class="muted dash-note" id="years-note"></p>
+        </div>
+        <div class="panel">
+          <h2 id="months-title">Bayaran ikut bulan</h2>
+          <p>Bilangan bayaran yang diterima setiap bulan.</p>
+          <div class="dash-legend"><span><i style="background:var(--c-renew)"></i>Pembaharuan</span><span><i style="background:var(--c-new)"></i>Ahli baharu</span></div>
+          <div id="chart-months"></div>
+          <p class="muted dash-note">Bayaran melalui Google Form lama dikira ikut tarikh borang dihantar.</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2 id="states-title">Ahli aktif ikut negeri</h2>
+        <p>Diambil daripada profil ahli. Ahli yang belum log masuk portal belum ada maklumat negeri.</p>
+        <div id="chart-states"></div>
+      </div>
+
+      <div class="panel" id="follow">
+        <h2>Senarai untuk dihubungi</h2>
+        <p>Pilih senarai, kemudian tekan WhatsApp untuk hantar mesej yang sudah siap ditulis.</p>
+        <div class="toolbar">
+          <div class="field" style="flex:2 1 320px">
+            <label for="follow-filter">Senarai</label>
+            <select id="follow-filter"></select>
+          </div>
+          <div class="field">
+            <label for="follow-search">Cari</label>
+            <input id="follow-search" type="search" placeholder="Nama, no. ahli atau telefon">
+          </div>
+        </div>
+        <div class="form-actions" style="margin-bottom:14px">
+          <button class="btn btn--small" type="button" id="follow-csv">Muat turun senarai (CSV)</button>
+          <button class="btn btn--line btn--small" type="button" id="follow-copy">Salin semua nombor telefon</button>
+          <span class="muted" id="follow-count" style="font-size:.85rem"></span>
+        </div>
+        <div class="table-scroll">
+          <table class="table table--compact">
+            <thead><tr><th>No. ahli</th><th>Nama</th><th>Telefon</th><th>Tamat</th><th>Portal</th><th></th></tr></thead>
+            <tbody id="follow-rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div class="dash-tip" id="dash-tip" role="status" hidden></div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <img src="../assets/img/logo.png" alt="Vespa Club Malaysia badge" width="72" height="72" loading="lazy">
+        <strong>Kelab Vespa Malaysia</strong>
+        <p>Vespa Club Malaysia. Registered with the Registrar of Societies Malaysia (ROS), PPM-010-14-02082019.</p>
+      </div>
+      <div>
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="../about.html">About us</a></li>
+          <li><a href="../team.html">Team</a></li>
+          <li><a href="../events.html">Events &amp; news</a></li>
+          <li><a href="../shop.html">Shop</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="mailto:vespaclubmalaysia1946@gmail.com">vespaclubmalaysia1946@gmail.com</a></li>
+          <li>40, Jalan 8/23E, Taman Danau Kota, 53300 Kuala Lumpur</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Follow us</h4>
+        <div class="socials">
+          <a href="https://www.facebook.com/vespaclubmalaysia/" target="_blank" rel="noopener" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 22v-8h2.7l.4-3.1h-3.1V8.9c0-.9.3-1.5 1.6-1.5h1.7V4.6c-.3 0-1.3-.1-2.5-.1-2.4 0-4.1 1.5-4.1 4.2v2.3H7.5V14h2.7v8h3.3z"/></svg></a>
+          <a href="https://www.instagram.com/vespaclubmalaysia/" target="_blank" rel="noopener" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg></a>
+          <a href="mailto:vespaclubmalaysia1946@gmail.com" aria-label="Email"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="m3 7 9 6 9-6"/></svg></a>
+        </div>
+        <p style="margin-top:22px"><a class="link-arrow" data-join href="./" style="color:#fff">Join membership <svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M0 6h16M11 1l5 5-5 5"/></svg></a></p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; <span data-year>2026</span> Kelab Vespa Malaysia (Vespa Club Malaysia). All rights reserved.</span>
+      <span>More than just a ride.</span>
+    </div>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
+<script src="../assets/js/supabase-config.js?v=14"></script>
+<script src="../assets/js/main.js?v=14"></script>
+<script src="../assets/js/dashboard.js?v=14"></script>
+</body>
+</html>
