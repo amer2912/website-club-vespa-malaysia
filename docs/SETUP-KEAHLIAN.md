@@ -33,13 +33,13 @@ vespaclubmalaysia.com/ahli/   (GitHub Pages: halaman log masuk, profil, kad, ren
 | `supabase/functions/create-bill/index.ts` | Fungsi cipta bil FPX |
 | `supabase/functions/toyyibpay-callback/index.ts` | Fungsi pengesahan bayaran |
 | `assets/js/supabase-config.js` | Alamat projek Supabase (diisi pada Langkah 4) |
-| `ahli/index.html`, `ahli/admin.html` | Portal ahli dan panel AJK |
+| `ahli/index.html`, `ahli/admin.html`, `ahli/dashboard.html` | Portal ahli, panel AJK dan dashboard AJK |
 
-**Peraturan keahlian (lalai):**
+**Peraturan keahlian:**
 - Keahlian ikut **tahun kalendar** (1 Januari hingga 31 Disember, waktu Malaysia).
-- Yuran **RM50**. Boleh ditukar pada Langkah 10.
+- **Ahli baharu RM130, renew RM60.** Boleh ditukar pada Langkah 10.
 - Ahli yang masih aktif boleh bayar untuk tahun depan mulai **1 November**.
-- Nombor ahli baharu (contoh `VCM0061`) diberi secara automatik selepas bayaran pertama.
+- Nombor ahli baharu diberi secara automatik selepas bayaran pertama, bermula dari **VCM-0519** (selepas nombor terakhir dalam master list, VCM-0518).
 
 ---
 
@@ -68,7 +68,32 @@ Ulang langkah yang sama untuk fail kedua, [`supabase/migrations/002_admin_edit.s
 - kaedah bayaran **Old Google Form**, untuk ahli yang sudah bayar melalui borang lama;
 - senarai **Pre-registered**, untuk menambah ahli yang belum pernah log masuk.
 
-Jalankan fail `001` dahulu, kemudian `002`. Kedua-duanya selamat untuk dijalankan semula.
+### 2c. Yuran ahli baharu dan renew
+Ulang langkah yang sama untuk fail ketiga, [`supabase/migrations/003_new_member_fee.sql`](../supabase/migrations/003_new_member_fee.sql). Fail ini menetapkan:
+- **Ahli baharu: RM130.** Untuk orang yang tiada nombor ahli dan belum pernah bayar.
+- **Renew: RM60.** Untuk ahli yang ada nombor ahli atau pernah bayar.
+- Nombor ahli automatik diteruskan selepas nombor terakhir dalam master list (fail `005` menetapkan VCM-0519).
+
+Portal memaparkan **kedua-dua** pilihan, tetapi hanya pilihan yang layak boleh ditekan. Jenis yuran ditentukan oleh pangkalan data, jadi ahli tidak boleh memilih sendiri atau menukar dirinya kepada "ahli lama".
+
+### 2d. Profil penuh (maklumat sama seperti Google Form lama)
+Ulang langkah yang sama untuk fail keempat, [`supabase/migrations/004_full_profile.sql`](../supabase/migrations/004_full_profile.sql). Fail ini menambah medan profil berikut:
+- warganegara, NRIC atau pasport, jantina, umur, alamat;
+- penerima (beneficiary): nama, NRIC dan hubungan;
+- nombor pendaftaran Vespa (wajib), saiz baju, OKU, kelab tempatan, catatan;
+- **akuan (declaration)**, yang wajib ditanda.
+
+Medan **"VCM membership no."** yang diisi oleh ahli hanyalah **rujukan**. Ia tidak menukar nombor ahli sebenar dan tidak mempengaruhi yuran. AJK boleh melihatnya di panel admin (*claims VCM0123*) untuk disemak dengan master list. Selepas itu, AJK menetapkan nombor sebenar melalui **Edit**.
+
+Selepas fail ini dijalankan, **semua ahli (termasuk AJK) akan diminta melengkapkan profil semula** pada log masuk seterusnya.
+
+### 2e. Format nombor ahli dan import penuh
+Ulang langkah yang sama untuk fail kelima, [`supabase/migrations/005_import_and_numbering.sql`](../supabase/migrations/005_import_and_numbering.sql). Fail ini:
+- menyeragamkan nombor ahli kepada format master list, iaitu **`VCM-0442`**. Nombor yang ditaip sebagai `VCM0442` atau `vcm 442` akan disimpan sebagai `VCM-0442`;
+- meneruskan nombor automatik selepas **VCM-0518**, jadi ahli baharu seterusnya mendapat **VCM-0519**;
+- membolehkan senarai import (`member_import`) membawa **profil penuh** dan **bayaran yang sudah dibuat** (contohnya melalui Google Form). Ahli yang diimport akan nampak profil lengkap, kad aktif dan sejarah bayaran pada log masuk pertama.
+
+Jalankan fail mengikut susunan `001` hingga `005`. Semuanya selamat untuk dijalankan semula, dan nombor ahli tidak akan berundur.
 
 ## Langkah 3: Tetapan log masuk emel
 
@@ -130,7 +155,18 @@ insert into public.admins (email) values
   ('setiausaha@example.com'),
   ('bendahari@example.com');
 ```
-AJK tersebut kemudian log masuk di `/ahli/` dengan emel yang sama. Butang **AJK admin** akan muncul di papan pemuka mereka. Hadkan akses admin kepada 2 hingga 3 orang sahaja.
+AJK tersebut kemudian log masuk di `/ahli/` dengan emel yang sama. Butang **AJK dashboard** akan muncul di papan pemuka mereka. Hadkan akses admin kepada 2 hingga 3 orang sahaja.
+
+**Peranan (selepas fail 007):** setiap admin ialah `editor` (boleh lihat dan ubah) atau `viewer` (lihat dan muat turun senarai sahaja; setiap perubahan ditolak oleh pangkalan data). Admin sedia ada menjadi editor.
+```sql
+-- tambah viewer, atau tukar peranan admin sedia ada
+insert into public.admins (email, role) values ('nama@example.com', 'viewer')
+on conflict (email) do update set role = excluded.role;
+
+-- semak senarai admin
+select email, role from public.admins order by role, email;
+```
+Jika fail 001 hingga 005 dijalankan semula pada masa hadapan, jalankan 007 semula selepasnya supaya akses viewer kekal.
 
 ## Langkah 6: Import ahli sedia ada (pilihan)
 
@@ -144,15 +180,11 @@ ali@gmail.com,VCM0012,Ali Bin Abu,0123456789,2026-12-31,2019-08-02
    - `expires_on`: `2026-12-31` untuk ahli yang aktif bagi 2026. Biarkan kosong untuk ahli yang belum bayar.
    - Tarikh mesti dalam format `YYYY-MM-DD`.
 2. Di Supabase, buka **Table Editor → member_import → Insert → Import data from CSV**.
-3. Supaya nombor ahli baharu bermula selepas nombor terakhir, jalankan arahan ini di SQL Editor (tukar `120` kepada nombor terbesar yang sudah digunakan):
-```sql
-select setval('public.member_no_seq', 120);
-```
-Kalau terlupa langkah ini pun, sistem akan langkau nombor yang sudah diambil secara automatik.
+3. Fail `005` menetapkan nombor ahli baharu bermula dari **VCM-0519**. Sistem juga melangkau nombor yang sudah diambil secara automatik.
 
 ## Panel AJK: kemas kini ahli secara manual
 
-Buka portal, tekan **AJK admin**, dan anda boleh buat perkara berikut.
+Buka portal dan tekan **AJK dashboard**. Dari situ, tekan **Senarai ahli & bayaran** untuk ke panel admin. Di panel admin anda boleh buat perkara berikut.
 
 | Mahu buat | Cara |
 |---|---|
@@ -161,6 +193,31 @@ Buka portal, tekan **AJK admin**, dan anda boleh buat perkara berikut.
 | Tanda ahli **belum bayar** (betulkan kesilapan) | Tekan **Edit**, **kosongkan** tarikh **Valid until**, kemudian **Save changes**. |
 | Tambah ahli yang **belum log masuk** | Di bahagian **Pre-registered**, tekan **Add member** dan isi emel, nombor ahli serta tarikh sah. Bila ahli itu log masuk kali pertama dengan emel tersebut, semua maklumat ini terus dipindahkan ke akaunnya. |
 | Rekod bayaran tunai atau pindahan bank | Tekan **Payment** dan pilih **Cash** atau **Bank transfer**. |
+
+### Dashboard AJK (`/ahli/dashboard`)
+
+Ringkasan keahlian yang dikira terus daripada pangkalan data setiap kali halaman dibuka. Ahli yang didaftarkan oleh AJK tetapi belum log masuk portal turut dikira.
+
+| Bahagian | Maksud |
+|---|---|
+| Nombor di atas | Ahli aktif tahun ini, ahli yang belum renew (bayar tahun lepas tetapi belum tahun ini), ahli baharu, jumlah yuran untuk tahun ini, dan ahli yang sudah renew awal untuk tahun depan. Tekan **Belum renew** untuk terus ke senarai nama. |
+| Keahlian tamat pada tahun | Setiap ahli dikira sekali, ikut tahun keahlian mereka tamat. Kelabu bermaksud sudah tamat, biru bermaksud masih aktif. Tekan satu tahun untuk lihat nama. |
+| Bayaran ikut bulan | Bilangan bayaran pembaharuan dan ahli baharu bagi setiap bulan tahun ini. |
+| Ahli aktif ikut negeri | Diambil daripada profil ahli. |
+| Senarai untuk dihubungi | Pilih senarai (belum renew, belum log masuk, profil belum lengkap, belum pernah bayar). Butang **WhatsApp** membuka mesej yang sudah siap ditulis. Senarai boleh dimuat turun sebagai CSV, atau nombor telefon boleh disalin sekali gus. |
+
+
+### Rekod lama dan status ikut perlembagaan (fail 006)
+
+Jalankan `supabase/migrations/006_archive_and_followup.sql` dalam SQL Editor, kemudian fail data rekod lama (`5-rekod-lama.sql`, tidak disimpan dalam repository kerana mengandungi data peribadi). Kedua-duanya selamat dijalankan semula.
+
+| Bahagian | Maksud |
+|---|---|
+| Rekod lama | Ahli lama yang belum boleh log masuk (tiada emel, "Left Group", atau rekod perlu disemak). Hanya AJK boleh lihat. Tekan **Kemaskini** untuk betulkan nama, telefon, emel, tahun terakhir bayar dan catatan. **Tambah rekod lama** untuk ahli yang dijumpai kemudian. |
+| Pindah ke pra-daftar | Bila AJK dapat emel ahli lama, isi emel dan tekan **Pindah ke pra-daftar**. Bila ahli itu log masuk, dia terus dapat nombor lamanya dan dikenakan yuran pembaharuan. |
+| Status ikut perlembagaan | Aktif; tertunggak 1, 2 atau 3 tahun; terhenti (tunggakan lebih 3 tahun); tiada rekod bayaran. Dikira daripada tahun terakhir bayar. |
+| Notis hutang | Tarikh notis dihantar dan catatan AJK, untuk setiap nombor ahli. Selepas menekan **WhatsApp** pada senarai tertunggak, dashboard menawarkan untuk merekod tarikh notis hari ini. |
+| Akaun yang menuntut nombor lama | Ahli lama yang daftar sendiri dan menaip nombor lama mereka. Sahkan di **Senarai ahli & bayaran** → **Edit** → isi **Member no.** sebelum mereka bayar, supaya yuran pembaharuan dikenakan. |
 
 ## Langkah 7: Akaun ToyyibPay (mula dengan sandbox)
 
@@ -180,6 +237,7 @@ Di Supabase, buka **Edge Functions → Secrets** dan tambah:
 | `TOYYIBPAY_SECRET_KEY` | User Secret Key ToyyibPay |
 | `TOYYIBPAY_CATEGORY_CODE` | Category Code |
 | `TOYYIBPAY_BASE_URL` | `https://dev.toyyibpay.com` (sandbox). Tukar ke `https://toyyibpay.com` bila live. |
+| `TOYYIBPAY_PAYMENT_CHANNEL` | Pilihan. `0` = FPX sahaja (lalai), `2` = FPX dan kad kredit/debit, `1` = kad sahaja. Kad mesti diaktifkan dalam akaun ToyyibPay dahulu. Biarkan `TOYYIBPAY_CHARGE_TO_CUSTOMER` kosong (kelab tanggung caj) supaya jumlah bayaran sama dengan bil. |
 | `SITE_URL` | `https://vespaclubmalaysia.com` |
 
 ### 8b. Fungsi `create-bill`
@@ -218,7 +276,8 @@ Kalau ada masalah, buka **Edge Functions → (nama fungsi) → Logs** untuk meli
 1. Daftar akaun ToyyibPay **sebenar** atas nama kelab, cipta Category, dan ambil Secret Key yang baharu.
 2. Kemas kini secrets: `TOYYIBPAY_BASE_URL` = `https://toyyibpay.com`, beserta `TOYYIBPAY_SECRET_KEY` dan `TOYYIBPAY_CATEGORY_CODE` yang baharu.
 3. Untuk tukar **yuran** atau **bulan renew dibuka**, buka **Table Editor → settings**:
-   - `fee_cents`: dalam sen. `5000` = RM50.00, `3000` = RM30.00.
+   - `new_member_fee_cents`: yuran ahli baharu, dalam sen. `13000` = RM130.00.
+   - `fee_cents`: yuran renew, dalam sen. `6000` = RM60.00.
    - `renewal_opens_month`: `11` = November.
 4. Umumkan portal kepada ahli. 🎉
 
@@ -262,3 +321,30 @@ Jalankan arahan ini di SQL Editor:
 ```sql
 delete from public.admins where email = 'emel@example.com';
 ```
+
+## Jualan tiket acara (fail 008)
+
+Laman web boleh menjual **tiket + baju** untuk acara VCM atau acara rakan penganjur, contohnya ISD 2.0. Pembeli **tidak perlu log masuk**. Bayaran masuk **terus ke akaun ToyyibPay penganjur**.
+
+| Halaman | Kegunaan |
+|---|---|
+| `/acara/isd2026` | Halaman jualan: maklumat acara, borang (nama, telefon, emel, jenis motor, model, saiz baju) dan butang bayar |
+| `/acara/tiket?code=…` | Tiket pembeli dengan kod QR. Pautan ini dihantar dalam emel resit ToyyibPay. |
+| `/acara/kaunter` | Untuk penganjur dan AJK: imbas QR, tanda hadir, serah baju, cari pembeli, ringkasan ikut saiz, muat turun CSV |
+
+### Persediaan satu kali
+1. **SQL Editor:** jalankan `supabase/migrations/008_events.sql`.
+2. **Edge Functions:** cipta dua fungsi baharu, `event-checkout` dan `event-callback`, dengan kod dari `supabase/functions/`. **Matikan "Verify JWT"** untuk kedua-duanya.
+
+### Setiap acara
+1. Jalankan SQL acara: satu baris dalam `events` dan emel penganjur dalam `event_staff`. Contoh: fail `2-acara-isd2026.sql` yang diberi berasingan.
+2. Penganjur log masuk ke akaun **ToyyibPay mereka** dan cipta **Category**. Mereka perlukan **Category Code** dan **User Secret Key**.
+3. Masukkan **User Secret Key** penganjur di **Edge Functions → Secrets** dengan nama yang ditetapkan dalam SQL, contohnya `EVENT_TOYYIBPAY_ISD2026`. Jangan kongsi kunci ini dalam group chat. Sebaiknya penganjur sendiri yang menaipnya, atau hantar secara peribadi kepada seorang AJK sahaja. Selepas acara, penganjur boleh menukar kunci di ToyyibPay.
+4. Masukkan **Category Code** dengan SQL: `update public.events set toyyibpay_category_code = '…' where id = '…';`. Jualan hanya dibuka selepas kunci dan Category Code kedua-duanya ada.
+5. **Uji RM1** dahulu (arahan ada dalam fail SQL acara), kemudian pulangkan harga asal.
+
+### Keselamatan
+- Penganjur hanya nampak pembeli **acara mereka sendiri**. Mereka tak nampak data ahli VCM, dan akaun mereka tidak dikira sebagai ahli.
+- AJK editor boleh menjalankan kaunter untuk semua acara. AJK viewer hanya boleh melihat.
+- Setiap bayaran disahkan semula dengan ToyyibPay, dan jumlahnya mesti tepat, sebelum tiket diberi nombor (contohnya ISD-0001, yang juga nombor cabutan bertuah).
+- QR hanya mengandungi kod rawak. Setiap serahan baju direkodkan siapa dan bila, dan baju tak boleh dituntut dua kali.

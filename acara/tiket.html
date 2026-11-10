@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Ticket | Vespa Club Malaysia</title>
+<meta name="description" content="Your event ticket and QR code.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#111214">
+<link rel="icon" type="image/png" href="../assets/img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css?v=18">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../index.html" aria-label="Vespa Club Malaysia home">
+      <img src="../assets/img/logo.png" alt="" width="46" height="46">
+      <span class="brand-text">Vespa Club Malaysia<small>Kelab Vespa Malaysia</small></span>
+    </a>
+    <button class="menu-toggle" aria-label="Menu" aria-expanded="false" aria-controls="site-nav"><span></span></button>
+    <nav class="nav" id="site-nav" aria-label="Main">
+      <a href="../index.html">Home</a>
+      <a href="../about.html">About</a>
+      <a href="../team.html">Team</a>
+      <a href="../events.html">Events</a>
+      <a href="../shop.html">Shop</a>
+      <a href="../contact.html">Contact</a>
+      <a href="../ahli/">Members</a>
+      <a class="btn" data-join href="../ahli/">Join the club</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="portal">
+  <div class="wrap">
+    <section class="ticket-wrap">
+      <div id="tk-loading" class="center" style="padding:60px 0"><div class="spinner" aria-hidden="true"></div><p class="muted">Loading your ticket…</p></div>
+      <div id="tk-msg" class="notice" hidden aria-live="polite" style="margin-bottom:16px"></div>
+      <article class="ticket" id="tk" hidden>
+        <div class="ticket__head">
+          <span class="eyebrow" id="tk-status-label">Ticket</span>
+          <h1 id="tk-title"></h1>
+          <p id="tk-when"></p>
+        </div>
+        <div class="ticket__qr" id="tk-qr"></div>
+        <p class="ticket__hint" id="tk-hint">Show this QR code at the counter to collect your T-shirt. A screenshot works too.<br><span class="muted">Tunjukkan kod QR ini di kaunter untuk ambil baju. Screenshot pun boleh.</span></p>
+        <dl class="ticket__rows">
+          <div><dt>Order no. · Lucky draw no.</dt><dd id="tk-no"></dd></div>
+          <div><dt>Name · Nama</dt><dd id="tk-name"></dd></div>
+          <div><dt>T-shirt size · Saiz baju</dt><dd id="tk-size"></dd></div>
+          <div><dt>Scooter</dt><dd id="tk-moto"></dd></div>
+          <div><dt>Paid · Dibayar</dt><dd id="tk-paid"></dd></div>
+          <div><dt>T-shirt · Baju</dt><dd id="tk-collected"></dd></div>
+        </dl>
+        <p class="muted ticket__org" id="tk-org"></p>
+      </article>
+      <div class="form-actions" style="justify-content:center;margin-top:20px"><a class="btn btn--line btn--small" id="tk-back" href="isd2026.html">Event page</a></div>
+    </section>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <img src="../assets/img/logo.png" alt="Vespa Club Malaysia badge" width="72" height="72" loading="lazy">
+        <strong>Kelab Vespa Malaysia</strong>
+        <p>Vespa Club Malaysia. Registered with the Registrar of Societies Malaysia (ROS), PPM-010-14-02082019.</p>
+      </div>
+      <div>
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="../about.html">About us</a></li>
+          <li><a href="../team.html">Team</a></li>
+          <li><a href="../events.html">Events &amp; news</a></li>
+          <li><a href="../shop.html">Shop</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="mailto:vespaclubmalaysia1946@gmail.com">vespaclubmalaysia1946@gmail.com</a></li>
+          <li>40, Jalan 8/23E, Taman Danau Kota, 53300 Kuala Lumpur</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Follow us</h4>
+        <div class="socials">
+          <a href="https://www.facebook.com/vespaclubmalaysia/" target="_blank" rel="noopener" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 22v-8h2.7l.4-3.1h-3.1V8.9c0-.9.3-1.5 1.6-1.5h1.7V4.6c-.3 0-1.3-.1-2.5-.1-2.4 0-4.1 1.5-4.1 4.2v2.3H7.5V14h2.7v8h3.3z"/></svg></a>
+          <a href="https://www.instagram.com/vespaclubmalaysia/" target="_blank" rel="noopener" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg></a>
+          <a href="mailto:vespaclubmalaysia1946@gmail.com" aria-label="Email"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="m3 7 9 6 9-6"/></svg></a>
+        </div>
+        <p style="margin-top:22px"><a class="link-arrow" data-join href="../ahli/" style="color:#fff">Join membership <svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M0 6h16M11 1l5 5-5 5"/></svg></a></p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; <span data-year>2026</span> Kelab Vespa Malaysia (Vespa Club Malaysia). All rights reserved.</span>
+      <span>More than just a ride.</span>
+    </div>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
+<script src="../assets/js/supabase-config.js?v=18"></script>
+<script src="../assets/js/main.js?v=18"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script src="../assets/js/ticket.js?v=18"></script>
+</body>
+</html>

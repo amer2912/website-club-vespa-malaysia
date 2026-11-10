@@ -102,8 +102,11 @@ Deno.serve(async (req) => {
   const form = new URLSearchParams({
     userSecretKey: TP_SECRET,
     categoryCode: TP_CATEGORY,
-    billName: `VCM Membership ${payment.coverage_year}`, // ToyyibPay: max 30 characters
-    billDescription: `Yuran keahlian Vespa Club Malaysia ${payment.coverage_year}`, // max 100 characters
+    // ToyyibPay: billName max 30 characters, billDescription max 100
+    billName: payment.kind === "new" ? `VCM New Membership ${payment.coverage_year}` : `VCM Renewal ${payment.coverage_year}`,
+    billDescription: payment.kind === "new"
+      ? `Yuran ahli baharu Vespa Club Malaysia ${payment.coverage_year}`
+      : `Yuran pembaharuan keahlian Vespa Club Malaysia ${payment.coverage_year}`,
     billPriceSetting: "1", // fixed amount
     billPayorInfo: "1", // payer details required
     billAmount: String(payment.amount_cents), // in sen
@@ -115,7 +118,11 @@ Deno.serve(async (req) => {
     billPhone: (member.phone ?? "").replace(/\D/g, ""),
     billSplitPayment: "0",
     billSplitPaymentArgs: "",
-    billPaymentChannel: "0", // FPX only
+    // 0 = FPX only (default), 1 = card only, 2 = FPX and card. Card needs to be
+    // enabled on the ToyyibPay account first.
+    billPaymentChannel: ["0", "1", "2"].includes(Deno.env.get("TOYYIBPAY_PAYMENT_CHANNEL") ?? "")
+      ? Deno.env.get("TOYYIBPAY_PAYMENT_CHANNEL")!
+      : "0",
     billContentEmail: "Terima kasih kerana memperbaharui keahlian Vespa Club Malaysia.",
     billChargeToCustomer: Deno.env.get("TOYYIBPAY_CHARGE_TO_CUSTOMER") ?? "",
     billExpiryDays: "1",

@@ -171,7 +171,9 @@ create trigger on_auth_user_created
 -- A member who is active for this year can pay for next year from
 -- settings.renewal_opens_month (November by default).
 -- =====================================================================
-create or replace function public.renewal_quote()
+-- (dropped first so this file can be re-run after 003 changed its columns)
+drop function if exists public.renewal_quote();
+create function public.renewal_quote()
 returns table (allowed boolean, reason text, coverage_year integer, amount_cents integer)
 language plpgsql stable security definer set search_path = public
 as $$
