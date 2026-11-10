@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kaunter Acara | Vespa Club Malaysia</title>
+<meta name="description" content="Event pick-up counter.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#111214">
+<link rel="icon" type="image/png" href="../assets/img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css?v=18">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../index.html" aria-label="Vespa Club Malaysia home">
+      <img src="../assets/img/logo.png" alt="" width="46" height="46">
+      <span class="brand-text">Vespa Club Malaysia<small>Kelab Vespa Malaysia</small></span>
+    </a>
+    <button class="menu-toggle" aria-label="Menu" aria-expanded="false" aria-controls="site-nav"><span></span></button>
+    <nav class="nav" id="site-nav" aria-label="Main">
+      <a href="../index.html">Home</a>
+      <a href="../about.html">About</a>
+      <a href="../team.html">Team</a>
+      <a href="../events.html">Events</a>
+      <a href="../shop.html">Shop</a>
+      <a href="../contact.html">Contact</a>
+      <a href="../ahli/">Members</a>
+      <a class="btn" data-join href="../ahli/">Join the club</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="portal">
+  <div class="wrap">
+    <div class="portal-head"><span class="eyebrow">Kaunter acara</span><h1>Kaunter</h1><p class="muted" id="ct-event-name"></p></div>
+    <div id="ct-msg" class="notice" hidden aria-live="polite" style="margin-bottom:16px"></div>
+
+    <section class="panel panel--narrow" id="ct-login" hidden>
+      <h2>Log masuk penganjur</h2>
+      <form id="ct-email-form" class="form" novalidate>
+        <div class="field"><label for="ct-email">Emel</label><input id="ct-email" type="email" inputmode="email" autocomplete="email" required></div>
+        <button class="btn" type="submit">Hantar kod</button>
+      </form>
+      <form id="ct-code-form" class="form" novalidate hidden>
+        <p>Kod 6 digit telah dihantar ke <strong id="ct-code-email"></strong>.</p>
+        <div class="field"><label for="ct-code">Kod</label><input id="ct-code" class="code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="10" required></div>
+        <button class="btn" type="submit">Log masuk</button>
+      </form>
+    </section>
+
+    <section id="ct-main" hidden>
+      <div class="toolbar">
+        <div class="field" id="ct-event-field" hidden><label for="ct-event">Acara</label><select id="ct-event"></select></div>
+        <div class="form-actions" style="margin-left:auto"><button class="text-btn" type="button" id="ct-logout">Log keluar</button></div>
+      </div>
+      <div class="ct-tabs" role="tablist">
+        <button type="button" role="tab" data-tab="scan" aria-selected="true">Imbas QR</button>
+        <button type="button" role="tab" data-tab="search" aria-selected="false">Cari</button>
+        <button type="button" role="tab" data-tab="summary" aria-selected="false">Ringkasan</button>
+      </div>
+
+      <div class="panel" data-pane="scan">
+        <div class="ct-camera" id="ct-camera" hidden><video id="ct-video" playsinline muted></video><span class="ct-frame" aria-hidden="true"></span></div>
+        <div class="form-actions"><button class="btn" type="button" id="ct-scan">Mula imbas</button><button class="btn btn--line" type="button" id="ct-stop" hidden>Berhenti</button></div>
+        <form id="ct-manual" class="toolbar" style="margin-top:16px" novalidate>
+          <div class="field"><label for="ct-code-in">Atau tampal pautan / kod tiket</label><input id="ct-code-in" autocomplete="off"></div>
+          <button class="btn btn--line btn--small" type="submit">Semak</button>
+        </form>
+      </div>
+
+      <div class="panel" data-pane="search" hidden>
+        <div class="field"><label for="ct-q">Nama, no. telefon atau no. tempahan</label><input id="ct-q" type="search" autocomplete="off" placeholder="cth ALI, 0123, ISD-0012"></div>
+        <ul class="history" id="ct-results"></ul>
+      </div>
+
+      <div class="panel" data-pane="summary" hidden>
+        <div class="dash-kpis" id="ct-kpis"></div>
+        <h3>Baju ikut saiz</h3>
+        <div class="table-scroll"><table class="table table--compact" style="min-width:0"><thead><tr><th>Saiz</th><th>Dibayar</th><th>Sudah diambil</th><th>Belum diambil</th></tr></thead><tbody id="ct-sizes"></tbody></table></div>
+        <div class="form-actions" style="margin-top:16px"><button class="btn btn--small" type="button" id="ct-csv">Muat turun senarai pembeli (CSV)</button></div>
+      </div>
+    </section>
+
+    <dialog class="modal" id="ct-card-dialog"><div class="panel ct-card" id="ct-card"></div></dialog>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <img src="../assets/img/logo.png" alt="Vespa Club Malaysia badge" width="72" height="72" loading="lazy">
+        <strong>Kelab Vespa Malaysia</strong>
+        <p>Vespa Club Malaysia. Registered with the Registrar of Societies Malaysia (ROS), PPM-010-14-02082019.</p>
+      </div>
+      <div>
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="../about.html">About us</a></li>
+          <li><a href="../team.html">Team</a></li>
+          <li><a href="../events.html">Events &amp; news</a></li>
+          <li><a href="../shop.html">Shop</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="mailto:vespaclubmalaysia1946@gmail.com">vespaclubmalaysia1946@gmail.com</a></li>
+          <li>40, Jalan 8/23E, Taman Danau Kota, 53300 Kuala Lumpur</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Follow us</h4>
+        <div class="socials">
+          <a href="https://www.facebook.com/vespaclubmalaysia/" target="_blank" rel="noopener" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 22v-8h2.7l.4-3.1h-3.1V8.9c0-.9.3-1.5 1.6-1.5h1.7V4.6c-.3 0-1.3-.1-2.5-.1-2.4 0-4.1 1.5-4.1 4.2v2.3H7.5V14h2.7v8h3.3z"/></svg></a>
+          <a href="https://www.instagram.com/vespaclubmalaysia/" target="_blank" rel="noopener" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg></a>
+          <a href="mailto:vespaclubmalaysia1946@gmail.com" aria-label="Email"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="m3 7 9 6 9-6"/></svg></a>
+        </div>
+        <p style="margin-top:22px"><a class="link-arrow" data-join href="../ahli/" style="color:#fff">Join membership <svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M0 6h16M11 1l5 5-5 5"/></svg></a></p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; <span data-year>2026</span> Kelab Vespa Malaysia (Vespa Club Malaysia). All rights reserved.</span>
+      <span>More than just a ride.</span>
+    </div>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
+<script src="../assets/js/supabase-config.js?v=18"></script>
+<script src="../assets/js/main.js?v=18"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="../assets/js/counter.js?v=18"></script>
+</body>
+</html>
