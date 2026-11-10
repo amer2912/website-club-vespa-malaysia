@@ -1,0 +1,7 @@
+# Netlify settings for vespaclubmalaysia.com
+# Publish only the public website. docs/ and supabase/ stay in GitHub and are
+# never put online.
+
+[build]
+  command = "rm -rf dist && mkdir dist && cp -r *.html ahli acara assets dist/"
+  publish = "dist"
