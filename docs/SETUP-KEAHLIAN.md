@@ -237,6 +237,7 @@ Di Supabase, buka **Edge Functions → Secrets** dan tambah:
 | `TOYYIBPAY_SECRET_KEY` | User Secret Key ToyyibPay |
 | `TOYYIBPAY_CATEGORY_CODE` | Category Code |
 | `TOYYIBPAY_BASE_URL` | `https://dev.toyyibpay.com` (sandbox). Tukar ke `https://toyyibpay.com` bila live. |
+| `TOYYIBPAY_PAYMENT_CHANNEL` | Pilihan. `0` = FPX sahaja (lalai), `2` = FPX dan kad kredit/debit, `1` = kad sahaja. Kad mesti diaktifkan dalam akaun ToyyibPay dahulu. Biarkan `TOYYIBPAY_CHARGE_TO_CUSTOMER` kosong (kelab tanggung caj) supaya jumlah bayaran sama dengan bil. |
 | `SITE_URL` | `https://vespaclubmalaysia.com` |
 
 ### 8b. Fungsi `create-bill`

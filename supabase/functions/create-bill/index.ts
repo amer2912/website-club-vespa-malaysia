@@ -118,7 +118,11 @@ Deno.serve(async (req) => {
     billPhone: (member.phone ?? "").replace(/\D/g, ""),
     billSplitPayment: "0",
     billSplitPaymentArgs: "",
-    billPaymentChannel: "0", // FPX only
+    // 0 = FPX only (default), 1 = card only, 2 = FPX and card. Card needs to be
+    // enabled on the ToyyibPay account first.
+    billPaymentChannel: ["0", "1", "2"].includes(Deno.env.get("TOYYIBPAY_PAYMENT_CHANNEL") ?? "")
+      ? Deno.env.get("TOYYIBPAY_PAYMENT_CHANNEL")!
+      : "0",
     billContentEmail: "Terima kasih kerana memperbaharui keahlian Vespa Club Malaysia.",
     billChargeToCustomer: Deno.env.get("TOYYIBPAY_CHARGE_TO_CUSTOMER") ?? "",
     billExpiryDays: "1",
