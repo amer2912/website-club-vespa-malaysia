@@ -95,6 +95,8 @@ Deno.serve(async (req) => {
     p_moto_type: text(body.moto_type, 40),
     p_moto_model: text(body.moto_model, 80),
     p_size: text(body.shirt_size, 10),
+    // optional survey ("interested in"); the database keeps only the event's own options
+    p_interests: Array.isArray(body.interests) ? body.interests.slice(0, 10).map((v) => text(v, 80)).filter(Boolean) : [],
   });
   if (orderError || !order) return json(req, 400, { error: orderError?.message ?? "Could not create the order." });
 

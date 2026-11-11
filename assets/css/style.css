@@ -639,3 +639,4 @@ button.hbar { width: 100%; background: none; border: 0; font: inherit; color: in
 .ct-card h2 { margin: 4px 0 4px; }
 .ct-size { font-size: 1.4rem; }
 .ct-card .ticket__rows { padding: 8px 0 14px; }
+.interest-list { display: grid; gap: 8px; margin-bottom: 6px; }
