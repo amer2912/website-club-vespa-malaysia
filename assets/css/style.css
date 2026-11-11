@@ -639,3 +639,8 @@ button.hbar { width: 100%; background: none; border: 0; font: inherit; color: in
 .ct-card h2 { margin: 4px 0 4px; }
 .ct-size { font-size: 1.4rem; }
 .ct-card .ticket__rows { padding: 8px 0 14px; }
+.interest-list { display: grid; gap: 8px; margin-bottom: 6px; }
+/* tick boxes inside a .field: plain text, box beside the words (not the uppercase field label style) */
+.field .interest-list label.check { font-family: var(--font-body); font-weight: 500; font-size: .95rem; letter-spacing: normal; text-transform: none;
+  color: var(--ink); align-items: center; padding: 14px 16px; }
+.field .interest-list label.check input { margin: 0; min-height: 0; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 4px; box-shadow: none; }

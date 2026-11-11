@@ -39,7 +39,7 @@
     $("#tk-moto").textContent = [t.moto_type, t.moto_model].filter(Boolean).join(" · ");
     $("#tk-paid").textContent = t.status === "paid" ? `RM${(t.amount_cents / 100).toFixed(2)} · ${fmt(t.paid_at)}` : "Not yet";
     $("#tk-collected").textContent = t.shirt_collected_at ? `Collected · ${fmt(t.shirt_collected_at)}` : "Not collected yet";
-    $("#tk-org").textContent = `Organiser: ${t.organizer_name}${t.organizer_contact ? ` · ${t.organizer_contact}` : ""}`;
+    $("#tk-org").textContent = t.organizer_contact ? `Enquiries · Pertanyaan: ${t.organizer_contact}` : "";
     const paid = t.status === "paid";
     $("#tk").classList.toggle("is-pending", !paid);
     $("#tk-status-label").textContent = paid ? "Paid ticket · Tiket dibayar" : t.status === "failed" ? "Payment not completed" : "Waiting for payment";
@@ -71,7 +71,7 @@
       t = (await load()) || t;
       render(t);
     }
-    if (t.status === "pending") note("We have not received confirmation yet. If you paid, refresh this page in a few minutes, or contact the organiser.", "warn");
+    if (t.status === "pending") note("We have not received confirmation yet. If you paid, refresh this page in a few minutes, or contact the event team.", "warn");
     else if (t.status === "paid" && billcode) note("Payment received. Thank you! Save this page or take a screenshot of the QR code.", "success");
   })();
 })();

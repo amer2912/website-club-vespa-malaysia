@@ -330,14 +330,15 @@ Laman web boleh menjual **tiket + baju** untuk acara VCM atau acara rakan pengan
 |---|---|
 | `/acara/isd2026` | Halaman jualan: maklumat acara, borang (nama, telefon, emel, jenis motor, model, saiz baju) dan butang bayar |
 | `/acara/tiket?code=…` | Tiket pembeli dengan kod QR. Pautan ini dihantar dalam emel resit ToyyibPay. |
-| `/acara/kaunter` | Untuk penganjur dan AJK: imbas QR, tanda hadir, serah baju, cari pembeli, ringkasan ikut saiz, muat turun CSV |
+| `/acara/kaunter` | Untuk penganjur dan AJK: imbas QR, tanda hadir, serah baju, cari pembeli, ringkasan ikut saiz dan tinjauan minat, muat turun CSV |
 
 ### Persediaan satu kali
-1. **SQL Editor:** jalankan `supabase/migrations/008_events.sql`.
+1. **SQL Editor:** jalankan `supabase/migrations/008_events.sql`. Fail ini sudah termasuk tinjauan pilihan "berminat menyertai". Kalau versi lama 008 pernah dijalankan, jalankan juga `009_event_interests.sql`.
 2. **Edge Functions:** cipta dua fungsi baharu, `event-checkout` dan `event-callback`, dengan kod dari `supabase/functions/`. **Matikan "Verify JWT"** untuk kedua-duanya.
 
 ### Setiap acara
 1. Jalankan SQL acara: satu baris dalam `events` dan emel penganjur dalam `event_staff`. Contoh: fail `2-acara-isd2026.sql` yang diberi berasingan.
+   Tinjauan pilihan (contohnya Scooter Show dan Dyno) ditetapkan dalam lajur `interest_options`.
 2. Penganjur log masuk ke akaun **ToyyibPay mereka** dan cipta **Category**. Mereka perlukan **Category Code** dan **User Secret Key**.
 3. Masukkan **User Secret Key** penganjur di **Edge Functions → Secrets** dengan nama yang ditetapkan dalam SQL, contohnya `EVENT_TOYYIBPAY_ISD2026`. Jangan kongsi kunci ini dalam group chat. Sebaiknya penganjur sendiri yang menaipnya, atau hantar secara peribadi kepada seorang AJK sahaja. Selepas acara, penganjur boleh menukar kunci di ToyyibPay.
 4. Masukkan **Category Code** dengan SQL: `update public.events set toyyibpay_category_code = '…' where id = '…';`. Jualan hanya dibuka selepas kunci dan Category Code kedua-duanya ada.

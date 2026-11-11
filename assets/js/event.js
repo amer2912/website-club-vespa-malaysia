@@ -35,7 +35,6 @@
     $("#ev-price").textContent = `RM${(ev.price_cents / 100).toFixed(ev.price_cents % 100 ? 2 : 0)}`;
     $("#ev-total").textContent = rm(ev.price_cents);
     $("#ev-close").textContent = new Date(ev.sales_close_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kuala_Lumpur" });
-    $("#ev-org").textContent = ev.organizer_name;
     $("#ev-type").innerHTML = `<option value="">Choose · Pilih</option>` + ev.moto_types.map((t) => `<option>${esc(t)}</option>`).join("");
     const soldOut = new Set(ev.sold_out_sizes || []);
     $("#ev-sizes").innerHTML = ev.sizes.map((s) => `
@@ -43,6 +42,10 @@
         <input type="radio" name="ev-size" value="${esc(s)}"${soldOut.has(s) ? " disabled" : ""}>
         <span>${esc(s)}${soldOut.has(s) ? "<small>Sold out</small>" : ""}</span>
       </label>`).join("");
+    const options = ev.interest_options || [];
+    $("#ev-interests").innerHTML = options.map((o, i) => `
+      <label class="check"><input type="checkbox" name="ev-interest" value="${esc(o)}" id="ev-int-${i}"> <span>${esc(o)}</span></label>`).join("");
+    $("#ev-interest-field").hidden = !options.length;
     if (!ev.open) setClosed(ev.closed_reason || "Ticket sales are closed.");
   }
 
@@ -64,7 +67,8 @@
     note(msg, "Starting payment…", "info");
     const { data, error } = await sb.functions.invoke("event-checkout", {
       body: { event: eventId, full_name: value("#ev-name"), phone: value("#ev-phone"), email: value("#ev-email"),
-              moto_type: value("#ev-type"), moto_model: value("#ev-model"), shirt_size: size },
+              moto_type: value("#ev-type"), moto_model: value("#ev-model"), shirt_size: size,
+              interests: [...form.querySelectorAll("input[name=ev-interest]:checked")].map((c) => c.value) },
     });
     if (error || !data?.url) {
       let text = "Could not start the payment. Please try again.";

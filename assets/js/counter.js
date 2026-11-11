@@ -218,7 +218,7 @@
     paidRows = [];
     for (let from = 0; ; from += 1000) {
       const { data, error } = await sb.from("event_orders")
-        .select("order_no, full_name, phone, email, moto_type, moto_model, shirt_size, amount_cents, paid_at, checked_in_at, checked_in_by, shirt_collected_at, shirt_collected_by")
+        .select("order_no, full_name, phone, email, moto_type, moto_model, shirt_size, interests, amount_cents, paid_at, checked_in_at, checked_in_by, shirt_collected_at, shirt_collected_by")
         .eq("event_id", current.id).eq("status", "paid").order("order_no").range(from, from + 999);
       if (error) { note(error.message, "error"); return; }
       paidRows.push(...(data || []));
@@ -231,6 +231,12 @@
       [paidRows.filter((r) => r.checked_in_at).length, "Sudah hadir"], [paidRows.filter((r) => r.shirt_collected_at).length, "Baju diserahkan"],
     ];
     $("#ct-kpis").innerHTML = tiles.map(([v, l]) => `<div><strong>${esc(v)}</strong><span>${esc(l)}</span></div>`).join("");
+    const interest = {};
+    paidRows.forEach((r) => (r.interests || []).forEach((i) => { interest[i] = (interest[i] || 0) + 1; }));
+    const both = paidRows.filter((r) => (r.interests || []).length >= 2).length;
+    $("#ct-interests").innerHTML = Object.entries(interest).map(([k, v]) => `<li><span>${esc(k)}</span><strong>${v}</strong></li>`).join("")
+      + (Object.keys(interest).length >= 2 ? `<li><span>Kedua-duanya</span><strong>${both}</strong></li>` : "");
+    $("#ct-interests-wrap").hidden = !Object.keys(interest).length;
     const sizes = {};
     paidRows.forEach((r) => { const s = (sizes[r.shirt_size] ||= { paid: 0, got: 0 }); s.paid++; if (r.shirt_collected_at) s.got++; });
     const order = ["XS", "S", "M", "L", "XL", "2XL", "3XL"];
@@ -241,8 +247,8 @@
   const csvCell = (v) => { let s = String(v ?? ""); if (/^[=+\-@]/.test(s)) s = `'${s}`; return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
   $("#ct-csv").addEventListener("click", async () => {
     if (!paidRows.length) await loadSummary();
-    const cols = ["order_no", "full_name", "phone", "email", "moto_type", "moto_model", "shirt_size", "paid_at", "checked_in_at", "checked_in_by", "shirt_collected_at", "shirt_collected_by"];
-    const lines = [cols.join(",")].concat(paidRows.map((r) => cols.map((c) => csvCell(r[c])).join(",")));
+    const cols = ["order_no", "full_name", "phone", "email", "moto_type", "moto_model", "shirt_size", "interests", "paid_at", "checked_in_at", "checked_in_by", "shirt_collected_at", "shirt_collected_by"];
+    const lines = [cols.join(",")].concat(paidRows.map((r) => cols.map((c) => csvCell(c === "interests" ? (r.interests || []).join("; ") : r[c])).join(",")));
     const blob = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
