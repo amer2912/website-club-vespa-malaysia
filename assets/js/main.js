@@ -42,7 +42,8 @@ const EVENTS = [
     place: "Bukit Jalil Stadium, Kuala Lumpur",
     image: "assets/img/events/isd2026-poster.jpg",
     tickets: "acara/isd2026.html",
-    summary: "Scooter gathering, dyno battle, scooter show and lifestyle exhibition, with a Vespa S125 as the grand lucky draw prize. Ticket with the official T-shirt: RM80.",
+    ticketLabel: "Register here / T-shirt purchase",
+    summary: "Scooter gathering, dyno battle, scooter show and lifestyle exhibition, with a Vespa S125 as the grand lucky draw prize. Registration with the official T-shirt: RM80.",
   },
   {
     title: "Vespa ke Puncak Kinabalu",
@@ -116,7 +117,7 @@ function cardHTML(ev, isPast) {
         <div class="card__date">${postponed ? "Postponed · New date TBA" : esc(fmtDate(ev))}</div>
         <h3>${esc(ev.title)} ${ev.subtitle ? `<span class="muted">${esc(ev.subtitle)}</span>` : ""}</h3>
         <p>${esc(ev.place)}</p>
-        ${ev.tickets && !isPast ? `<p><a class="btn btn--small" href="${esc(ev.tickets)}">Buy ticket ${ICON.arrow}</a></p>` : ""}
+        ${ev.tickets && !isPast ? `<p><a class="btn btn--small" href="${esc(ev.tickets)}">${esc(ev.ticketLabel || "Buy ticket")} ${ICON.arrow}</a></p>` : ""}
         ${ev.whatsapp && !isPast ? `<p><a class="card__contact" href="${waLink(ev.whatsapp)}" target="_blank" rel="noopener">${ICON.phone} WhatsApp ${esc(ev.whatsapp)}</a></p>` : ""}
       </div>
     </article>`;
@@ -144,7 +145,7 @@ function featuredHTML(ev) {
         </div>
         <p class="lead" style="margin:0 0 30px">${esc(ev.summary)}</p>
         <div class="form-actions">
-          ${ev.tickets ? `<a class="btn btn--mint" href="${esc(ev.tickets)}">Buy ticket ${ICON.arrow}</a>` : ""}
+          ${ev.tickets ? `<a class="btn btn--mint" href="${esc(ev.tickets)}">${esc(ev.ticketLabel || "Buy ticket")} ${ICON.arrow}</a>` : ""}
           <a class="btn ${ev.tickets ? "btn--line" : "btn--mint"}" href="events.html">All events ${ev.tickets ? "" : ICON.arrow}</a>
         </div>
       </div>

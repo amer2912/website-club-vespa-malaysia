@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ISD 2.0 Italian Scooter Day Tickets | Vespa Club Malaysia</title>
-<meta name="description" content="Buy your ISD 2.0 Italian Scooter Day ticket and official T-shirt (RM80). 29 Nov 2026, Bukit Jalil Stadium.">
+<title>ISD 2.0 Italian Scooter Day Registration | Vespa Club Malaysia</title>
+<meta name="description" content="Register for ISD 2.0 Italian Scooter Day and get the official T-shirt (RM80). 29 Nov 2026, Bukit Jalil Stadium.">
 <meta name="theme-color" content="#111214">
 <link rel="icon" type="image/png" href="../assets/img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/style.css?v=18">
+<link rel="stylesheet" href="../assets/css/style.css?v=19">
 </head>
 <body data-event="isd-2026">
 <a class="skip" href="#main">Skip to content</a>
@@ -39,23 +39,24 @@
     <section class="event-hero">
       <img class="event-poster" src="../assets/img/events/isd2026-poster.jpg" alt="ISD 2.0 Italian Scooter Day 2.0 poster: 29 Nov 2026, Bukit Jalil Stadium" width="1000" height="1333">
       <div>
-        <span class="eyebrow">Tickets · Tiket</span>
+        <span class="eyebrow">Registration · Pendaftaran</span>
         <h1 class="event-title">ISD 2.0 Italian Scooter Day 2.0</h1>
         <p class="event-meta"><strong>Sunday, 29 November 2026</strong><br>Bukit Jalil Stadium, Kuala Lumpur</p>
-        <div class="event-price"><span id="ev-price">RM80</span><small>Ticket + official T-shirt<br>Tiket + baju rasmi</small></div>
+        <div class="event-price"><span id="ev-price">RM80</span><small>Registration + official T-shirt<br>Pendaftaran + baju rasmi</small></div>
         <ul class="event-points">
           <li>Every T-shirt is an <strong>automatic entry to the Scooter Show and the Grand Lucky Draw</strong>, with a <strong>Vespa S125</strong> as the grand prize.</li>
           <li>Collect your T-shirt at the event: show the QR code from your receipt at the counter.<br><span class="muted">Baju diambil di tapak acara dengan menunjukkan kod QR.</span></li>
           <li>Sales close on <strong id="ev-close">27 Nov 2026</strong>.</li>
         </ul>
-        <p class="muted event-org">Organised by <strong id="ev-org">Scoot Pedia</strong>, co-organised with Vespa Club Malaysia and Carazee Artwork. Payment goes directly to the organiser through ToyyibPay.</p>
-        <div class="form-actions"><a class="btn" href="#buy">Buy ticket · Beli tiket</a><a class="btn btn--line" id="my-ticket" href="tiket.html" hidden>My ticket · Tiket saya</a></div>
+        <p class="muted event-org">Co-organised by <strong>Vespa Club Malaysia</strong>, <strong>Carazee Artwork</strong> and <strong>Scoot Pedia</strong>. Payment is processed securely by ToyyibPay.</p>
+        <div class="form-actions"><a class="btn" href="#buy">Register here / T-shirt purchase</a><a class="btn btn--line" id="my-ticket" href="tiket.html" hidden>My registration · Pendaftaran saya</a></div>
       </div>
     </section>
 
     <section class="panel event-buy" id="buy">
-      <h2>Buy ticket · Beli tiket</h2>
-      <p>One ticket includes one T-shirt and one lucky draw entry. Buying for a friend? Make a separate purchase with their details.</p>
+      <h2>Register here / T-shirt purchase</h2>
+      <p class="muted" style="margin:-4px 0 12px">Daftar di sini / Beli baju</p>
+      <p>Each registration includes one official T-shirt and one lucky draw entry. Registering a friend? Make a separate purchase with their details.</p>
       <div id="ev-closed" class="notice notice--warn" hidden></div>
       <form id="ev-form" class="form" novalidate>
         <div class="field"><label for="ev-name">Full name · Nama penuh <span class="req">*</span></label><input id="ev-name" autocomplete="name" maxlength="120" required></div>
@@ -72,7 +73,7 @@
           <div class="size-chips" id="ev-sizes"></div>
           <a class="hint" href="#size-chart">See the size chart · Lihat carta saiz</a>
         </fieldset>
-        <label class="check"><input type="checkbox" id="ev-agree"> <span>I understand the T-shirt is collected at Bukit Jalil Stadium on 29 Nov 2026, and my details are shared with the organiser for this event. <span class="req">*</span></span></label>
+        <label class="check"><input type="checkbox" id="ev-agree"> <span>I understand the T-shirt is collected at Bukit Jalil Stadium on 29 Nov 2026, and my details are shared with the event co-organisers. <span class="req">*</span></span></label>
         <div id="ev-msg" class="notice" hidden aria-live="polite"></div>
         <div class="event-total"><span>Total</span><strong id="ev-total">RM80.00</strong></div>
         <button class="btn btn--mint" type="submit" id="ev-pay">Pay with ToyyibPay <svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M0 6h16M11 1l5 5-5 5"/></svg></button>
@@ -130,8 +131,8 @@
   </div>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
-<script src="../assets/js/supabase-config.js?v=18"></script>
-<script src="../assets/js/main.js?v=18"></script>
-<script src="../assets/js/event.js?v=18"></script>
+<script src="../assets/js/supabase-config.js?v=19"></script>
+<script src="../assets/js/main.js?v=19"></script>
+<script src="../assets/js/event.js?v=19"></script>
 </body>
 </html>

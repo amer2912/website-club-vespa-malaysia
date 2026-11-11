@@ -35,7 +35,6 @@
     $("#ev-price").textContent = `RM${(ev.price_cents / 100).toFixed(ev.price_cents % 100 ? 2 : 0)}`;
     $("#ev-total").textContent = rm(ev.price_cents);
     $("#ev-close").textContent = new Date(ev.sales_close_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kuala_Lumpur" });
-    $("#ev-org").textContent = ev.organizer_name;
     $("#ev-type").innerHTML = `<option value="">Choose · Pilih</option>` + ev.moto_types.map((t) => `<option>${esc(t)}</option>`).join("");
     const soldOut = new Set(ev.sold_out_sizes || []);
     $("#ev-sizes").innerHTML = ev.sizes.map((s) => `
