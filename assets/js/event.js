@@ -34,7 +34,12 @@
     if (error || !ev) { setClosed("Could not load ticket sales. Please refresh the page."); return; }
     $("#ev-price").textContent = `RM${(ev.price_cents / 100).toFixed(ev.price_cents % 100 ? 2 : 0)}`;
     $("#ev-total").textContent = rm(ev.price_cents);
-    $("#ev-close").textContent = new Date(ev.sales_close_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kuala_Lumpur" });
+    // e.g. "29 Nov 2026, 6:00 pm" (the time is left out when sales run to the end of the day)
+    const close = new Date(ev.sales_close_at);
+    const day = close.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kuala_Lumpur" });
+    const hm = close.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Kuala_Lumpur" });
+    const clock = close.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "Asia/Kuala_Lumpur" }).toLowerCase();
+    $("#ev-close").textContent = hm === "23:59" ? day : `${day}, ${clock}`;
     $("#ev-type").innerHTML = `<option value="">Choose · Pilih</option>` + ev.moto_types.map((t) => `<option>${esc(t)}</option>`).join("");
     const soldOut = new Set(ev.sold_out_sizes || []);
     $("#ev-sizes").innerHTML = ev.sizes.map((s) => `
