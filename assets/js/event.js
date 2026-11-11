@@ -34,7 +34,12 @@
     if (error || !ev) { setClosed("Could not load ticket sales. Please refresh the page."); return; }
     $("#ev-price").textContent = `RM${(ev.price_cents / 100).toFixed(ev.price_cents % 100 ? 2 : 0)}`;
     $("#ev-total").textContent = rm(ev.price_cents);
-    $("#ev-close").textContent = new Date(ev.sales_close_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kuala_Lumpur" });
+    // e.g. "29 Nov 2026, 6:00 pm" (the time is left out when sales run to the end of the day)
+    const close = new Date(ev.sales_close_at);
+    const day = close.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kuala_Lumpur" });
+    const hm = close.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Kuala_Lumpur" });
+    const clock = close.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "Asia/Kuala_Lumpur" }).toLowerCase();
+    $("#ev-close").textContent = hm === "23:59" ? day : `${day}, ${clock}`;
     $("#ev-type").innerHTML = `<option value="">Choose · Pilih</option>` + ev.moto_types.map((t) => `<option>${esc(t)}</option>`).join("");
     const soldOut = new Set(ev.sold_out_sizes || []);
     $("#ev-sizes").innerHTML = ev.sizes.map((s) => `
@@ -50,15 +55,25 @@
   }
 
   const value = (id) => $(id).value.trim();
+  // The Custom size asks for a pit / chest measurement.
+  form.addEventListener("change", (e) => {
+    if (e.target.name !== "ev-size") return;
+    const custom = e.target.value === "Custom";
+    $("#ev-note-field").hidden = !custom;
+    if (custom) $("#ev-note").focus();
+  });
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const size = form.querySelector("input[name=ev-size]:checked")?.value;
     const missing = [];
+    const custom = size === "Custom";
     if (value("#ev-name").length < 2) missing.push("full name");
     if (!/^\+?[0-9][0-9 -]{7,18}$/.test(value("#ev-phone"))) missing.push("a valid phone number");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value("#ev-email"))) missing.push("a valid email");
     if (!value("#ev-type")) missing.push("scooter type");
     if (!size) missing.push("T-shirt size");
+    if (custom && value("#ev-note").length < 2) missing.push("your pit / chest measurement for the Custom size");
     if (!$("#ev-agree").checked) missing.push("the agreement tick box");
     if (missing.length) { note(msg, `Please fill in: ${missing.join(", ")}.`, "error"); return; }
 
@@ -68,6 +83,7 @@
     const { data, error } = await sb.functions.invoke("event-checkout", {
       body: { event: eventId, full_name: value("#ev-name"), phone: value("#ev-phone"), email: value("#ev-email"),
               moto_type: value("#ev-type"), moto_model: value("#ev-model"), shirt_size: size,
+              size_note: custom ? value("#ev-note") : "",
               interests: [...form.querySelectorAll("input[name=ev-interest]:checked")].map((c) => c.value) },
     });
     if (error || !data?.url) {
