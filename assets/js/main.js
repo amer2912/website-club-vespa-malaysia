@@ -42,8 +42,8 @@ const EVENTS = [
     place: "Bukit Jalil Stadium, Kuala Lumpur",
     image: "assets/img/events/isd2026-poster.jpg",
     tickets: "acara/isd2026.html",
-    ticketLabel: "Register here / T-shirt purchase",
-    summary: "Scooter gathering, dyno battle, scooter show and lifestyle exhibition, with a Vespa S125 as the grand lucky draw prize. Registration with the official T-shirt: RM80.",
+    ticketLabel: "Buy Official T-shirt",
+    summary: "Scooter gathering, dyno battle, scooter show and lifestyle exhibition, with a Vespa S125 as the grand lucky draw prize. Official T-shirt: RM80, with automatic entry to the Scooter Show and lucky draw.",
   },
   {
     title: "Vespa ke Puncak Kinabalu",
