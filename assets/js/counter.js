@@ -106,6 +106,10 @@
       showCard(null, `Tiket ini untuk acara lain${other ? `: ${other.title}` : ""}.`);
       return;
     }
+    if (t.shirt_size === "Custom") {
+      const { data: extra } = await sb.from("event_orders").select("size_note").eq("id", t.order_id).maybeSingle();
+      t.size_note = extra?.size_note || "";
+    }
     showCard(t, null, code, action);
   }
 
@@ -129,7 +133,7 @@
         <h2>${esc(t.full_name)}</h2>
         <p class="muted">${esc(t.phone)} · ${esc([t.moto_type, t.moto_model].filter(Boolean).join(" "))}</p>
         <dl class="ticket__rows">
-          <div><dt>Saiz baju</dt><dd class="ct-size">${esc(t.shirt_size)}</dd></div>
+          <div><dt>Saiz baju</dt><dd class="ct-size">${esc(t.shirt_size)}${t.size_note ? `<div class="muted" style="font-size:.85rem">${esc(t.size_note)}</div>` : ""}</dd></div>
           <div><dt>Hadir</dt><dd>${t.checked_in_at ? `Ya · ${esc(time(t.checked_in_at))} (${esc(t.checked_in_by || "")})` : "Belum"}</dd></div>
           <div><dt>Baju</dt><dd>${t.shirt_collected_at ? `Diserahkan · ${esc(time(t.shirt_collected_at))} (${esc(t.shirt_collected_by || "")})` : "Belum diambil"}</dd></div>
         </dl>
@@ -221,13 +225,13 @@
     const ors = [`full_name.ilike.*${q}*`, `order_no.ilike.*${q}*`, `email.ilike.*${q}*`];
     if (digits.length >= 3) ors.push(`phone.ilike.*${digits.slice(-7)}*`);
     const { data, error } = await sb.from("event_orders")
-      .select("ticket_code, order_no, full_name, phone, shirt_size, checked_in_at, shirt_collected_at")
+      .select("ticket_code, order_no, full_name, phone, shirt_size, size_note, checked_in_at, shirt_collected_at")
       .eq("event_id", current.id).eq("status", "paid").or(ors.join(",")).order("order_no").limit(30);
     if (error) { $("#ct-results").innerHTML = `<li class="muted">${esc(error.message)}</li>`; return; }
     $("#ct-results").innerHTML = (data || []).map((r) => `
       <li><button type="button" class="ct-row" data-code="${esc(r.ticket_code)}">
         <span><strong>${esc(r.full_name)}</strong><span class="muted"> · ${esc(r.order_no)} · ${esc(r.phone)}</span></span>
-        <span class="pill ${r.shirt_collected_at ? "pill--active" : "pill--new"}">${esc(r.shirt_size)} · ${r.shirt_collected_at ? "Diambil" : "Belum"}</span>
+        <span class="pill ${r.shirt_collected_at ? "pill--active" : "pill--new"}">${esc(r.shirt_size)}${r.size_note ? ` (${esc(r.size_note)})` : ""} · ${r.shirt_collected_at ? "Diambil" : "Belum"}</span>
       </button></li>`).join("") || `<li class="muted">Tiada padanan.</li>`;
   }
   $("#ct-results").addEventListener("click", (e) => { const b = e.target.closest("[data-code]"); if (b) openTicket(b.dataset.code); });
@@ -238,7 +242,7 @@
     paidRows = [];
     for (let from = 0; ; from += 1000) {
       const { data, error } = await sb.from("event_orders")
-        .select("order_no, full_name, phone, email, moto_type, moto_model, shirt_size, interests, amount_cents, paid_at, checked_in_at, checked_in_by, shirt_collected_at, shirt_collected_by")
+        .select("order_no, full_name, phone, email, moto_type, moto_model, shirt_size, size_note, interests, amount_cents, paid_at, checked_in_at, checked_in_by, shirt_collected_at, shirt_collected_by")
         .eq("event_id", current.id).eq("status", "paid").order("order_no").range(from, from + 999);
       if (error) { note(error.message, "error"); return; }
       paidRows.push(...(data || []));
@@ -259,15 +263,15 @@
     $("#ct-interests-wrap").hidden = !Object.keys(interest).length;
     const sizes = {};
     paidRows.forEach((r) => { const s = (sizes[r.shirt_size] ||= { paid: 0, got: 0 }); s.paid++; if (r.shirt_collected_at) s.got++; });
-    const order = ["XS", "S", "M", "L", "XL", "2XL", "3XL"];
-    $("#ct-sizes").innerHTML = Object.keys(sizes).sort((a, b) => order.indexOf(a) - order.indexOf(b))
+    const order = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL", "Custom"];
+    $("#ct-sizes").innerHTML = Object.keys(sizes).sort((a, b) => (order.indexOf(a) + 1 || 99) - (order.indexOf(b) + 1 || 99))
       .map((s) => `<tr><td><strong>${esc(s)}</strong></td><td class="num">${sizes[s].paid}</td><td class="num">${sizes[s].got}</td><td class="num">${sizes[s].paid - sizes[s].got}</td></tr>`).join("")
       || `<tr><td colspan="4" class="muted">Belum ada jualan.</td></tr>`;
   }
   const csvCell = (v) => { let s = String(v ?? ""); if (/^[=+\-@]/.test(s)) s = `'${s}`; return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
   $("#ct-csv").addEventListener("click", async () => {
     if (!paidRows.length) await loadSummary();
-    const cols = ["order_no", "full_name", "phone", "email", "moto_type", "moto_model", "shirt_size", "interests", "paid_at", "checked_in_at", "checked_in_by", "shirt_collected_at", "shirt_collected_by"];
+    const cols = ["order_no", "full_name", "phone", "email", "moto_type", "moto_model", "shirt_size", "size_note", "interests", "paid_at", "checked_in_at", "checked_in_by", "shirt_collected_at", "shirt_collected_by"];
     const lines = [cols.join(",")].concat(paidRows.map((r) => cols.map((c) => csvCell(c === "interests" ? (r.interests || []).join("; ") : r[c])).join(",")));
     const blob = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a");

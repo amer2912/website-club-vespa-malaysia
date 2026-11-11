@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/style.css?v=25">
+<link rel="stylesheet" href="../assets/css/style.css?v=26">
 </head>
 <body data-event="isd-2026">
 <a class="skip" href="#main">Skip to content</a>
@@ -72,6 +72,11 @@
           <legend>T-shirt size · Saiz baju <span class="req">*</span></legend>
           <div class="size-chips" id="ev-sizes"></div>
           <a class="hint" href="#size-chart">See the size chart · Lihat carta saiz</a>
+          <div class="field" id="ev-note-field" hidden style="margin-top:12px">
+            <label for="ev-note">Custom size: pit / chest measurement · Ukuran ketiak (pit) / dada <span class="req">*</span></label>
+            <input id="ev-note" maxlength="100" placeholder="e.g. Pit 28 inci">
+            <span class="hint">Custom T-shirts are sewn early, so Custom orders may close sooner. · Baju custom dijahit awal.</span>
+          </div>
         </fieldset>
         <fieldset class="field size-field" id="ev-interest-field" hidden>
           <legend>Interested in joining? (optional) · Berminat menyertai? (pilihan)</legend>
@@ -136,8 +141,8 @@
   </div>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
-<script src="../assets/js/supabase-config.js?v=25"></script>
-<script src="../assets/js/main.js?v=25"></script>
-<script src="../assets/js/event.js?v=25"></script>
+<script src="../assets/js/supabase-config.js?v=26"></script>
+<script src="../assets/js/main.js?v=26"></script>
+<script src="../assets/js/event.js?v=26"></script>
 </body>
 </html>

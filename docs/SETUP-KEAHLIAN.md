@@ -344,6 +344,11 @@ Laman web boleh menjual **tiket + baju** untuk acara VCM atau acara rakan pengan
 4. Masukkan **Category Code** dengan SQL: `update public.events set toyyibpay_category_code = '…' where id = '…';`. Jualan hanya dibuka selepas kunci dan Category Code kedua-duanya ada.
 5. **Uji RM1** dahulu (arahan ada dalam fail SQL acara), kemudian pulangkan harga asal.
 
+### Saiz "Custom" (fail 010)
+Pembeli yang memilih saiz **Custom** wajib mengisi ukuran ketiak (pit) atau dada. Ukuran itu dipaparkan di kaunter dan dalam CSV (lajur `size_note`).
+- Tambah saiz Custom: `update public.events set sizes = array_append(sizes, 'Custom') where id = 'isd-2026' and not ('Custom' = any (sizes));`
+- Hentikan tempahan Custom (contohnya bila tukang jahit perlukan senarai akhir): `update public.events set size_stock = size_stock || '{"Custom": 0}' where id = 'isd-2026';`
+
 ### Akaun kaunter dengan username dan kata laluan
 Petugas boleh log masuk ke `/acara/kaunter` dengan **username dan kata laluan**, tanpa emel kod. Username `isd1` menjadi alamat dalaman `isd1@kaunter.vespaclubmalaysia.com`. Tiada emel dihantar ke alamat ini.
 
