@@ -344,6 +344,16 @@ Laman web boleh menjual **tiket + baju** untuk acara VCM atau acara rakan pengan
 4. Masukkan **Category Code** dengan SQL: `update public.events set toyyibpay_category_code = '…' where id = '…';`. Jualan hanya dibuka selepas kunci dan Category Code kedua-duanya ada.
 5. **Uji RM1** dahulu (arahan ada dalam fail SQL acara), kemudian pulangkan harga asal.
 
+### Akaun kaunter dengan username dan kata laluan
+Petugas boleh log masuk ke `/acara/kaunter` dengan **username dan kata laluan**, tanpa emel kod. Username `isd1` menjadi alamat dalaman `isd1@kaunter.vespaclubmalaysia.com`. Tiada emel dihantar ke alamat ini.
+
+1. **SQL Editor** (buat dahulu, supaya akaun ini tidak dikira sebagai ahli):
+   ```sql
+   insert into public.event_staff (event_id, email) values ('isd-2026', 'isd1@kaunter.vespaclubmalaysia.com') on conflict do nothing;
+   ```
+2. **Authentication → Users → Add user → Create new user**: emel `isd1@kaunter.vespaclubmalaysia.com`, kata laluan sekurang-kurangnya 8 aksara, dan tandakan **Auto Confirm User**.
+3. Selepas acara, padam akaun itu di **Authentication → Users**, dan barisnya dalam `event_staff`.
+
 ### Keselamatan
 - Penganjur hanya nampak pembeli **acara mereka sendiri**. Mereka tak nampak data ahli VCM, dan akaun mereka tidak dikira sebagai ahli.
 - AJK editor boleh menjalankan kaunter untuk semua acara. AJK viewer hanya boleh melihat.
