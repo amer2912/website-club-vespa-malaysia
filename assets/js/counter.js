@@ -21,6 +21,26 @@
   let pendingEmail = "";
 
   /* ---------- login ---------- */
+  // Username login: counter accounts are created by AJK in Supabase as
+  // <username>@kaunter.vespaclubmalaysia.com with a password (no email is sent).
+  const COUNTER_DOMAIN = "kaunter.vespaclubmalaysia.com";
+  const loginEmail = (u) => (u.includes("@") ? u : `${u}@${COUNTER_DOMAIN}`).toLowerCase();
+  $("#ct-pass-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const user = $("#ct-user").value.trim();
+    const password = $("#ct-pass").value;
+    if (!user || !password) { note("Sila isi username dan kata laluan.", "error"); return; }
+    const btn = $("#ct-pass-form button[type=submit]");
+    btn.disabled = true;
+    const { error } = await sb.auth.signInWithPassword({ email: loginEmail(user), password });
+    btn.disabled = false;
+    if (error) { note("Username atau kata laluan salah.", "error"); return; }
+    $("#ct-pass").value = "";
+    start();
+  });
+  $("#ct-use-email").addEventListener("click", () => { $("#ct-pass-form").hidden = true; $("#ct-email-form").hidden = false; note(""); });
+  $("#ct-use-pass").addEventListener("click", () => { $("#ct-email-form").hidden = true; $("#ct-code-form").hidden = true; $("#ct-pass-form").hidden = false; note(""); });
+
   $("#ct-email-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     pendingEmail = $("#ct-email").value.trim().toLowerCase();

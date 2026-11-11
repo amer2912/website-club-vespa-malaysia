@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/style.css?v=22">
+<link rel="stylesheet" href="../assets/css/style.css?v=24">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -41,10 +41,17 @@
     <div id="ct-msg" class="notice" hidden aria-live="polite" style="margin-bottom:16px"></div>
 
     <section class="panel panel--narrow" id="ct-login" hidden>
-      <h2>Log masuk penganjur</h2>
-      <form id="ct-email-form" class="form" novalidate>
+      <h2>Log masuk petugas</h2>
+      <form id="ct-pass-form" class="form" novalidate>
+        <div class="field"><label for="ct-user">Username</label><input id="ct-user" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required></div>
+        <div class="field"><label for="ct-pass">Kata laluan</label><input id="ct-pass" type="password" autocomplete="current-password" required></div>
+        <button class="btn" type="submit">Log masuk</button>
+        <button class="text-btn" type="button" id="ct-use-email">Log masuk dengan emel (kod 6 digit)</button>
+      </form>
+      <form id="ct-email-form" class="form" novalidate hidden>
         <div class="field"><label for="ct-email">Emel</label><input id="ct-email" type="email" inputmode="email" autocomplete="email" required></div>
         <button class="btn" type="submit">Hantar kod</button>
+        <button class="text-btn" type="button" id="ct-use-pass">Log masuk dengan username</button>
       </form>
       <form id="ct-code-form" class="form" novalidate hidden>
         <p>Kod 6 digit telah dihantar ke <strong id="ct-code-email"></strong>.</p>
@@ -132,9 +139,9 @@
   </div>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
-<script src="../assets/js/supabase-config.js?v=20"></script>
-<script src="../assets/js/main.js?v=20"></script>
+<script src="../assets/js/supabase-config.js?v=24"></script>
+<script src="../assets/js/main.js?v=24"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
-<script src="../assets/js/counter.js?v=20"></script>
+<script src="../assets/js/counter.js?v=24"></script>
 </body>
 </html>
