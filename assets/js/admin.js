@@ -159,7 +159,12 @@
     if (!btn) return;
     current = members.find((m) => m.id === btn.dataset.pay);
     if (!current) return;
-    const nextYear = current.expires_on && Number(current.expires_on.slice(0, 4)) >= yearMYT() ? Number(current.expires_on.slice(0, 4)) + 1 : yearMYT();
+    // Active members pay the year after their expiry. New members who join once
+    // next year's renewal is open (November by default) pay for next year.
+    const opensMonth = Number(fees.renewal_opens_month) || 11;
+    const lateInYear = Number(todayMYT().slice(5, 7)) >= opensMonth;
+    const nextYear = current.expires_on && Number(current.expires_on.slice(0, 4)) >= yearMYT() ? Number(current.expires_on.slice(0, 4)) + 1
+      : !current.member_no && !current.expires_on && lateInYear ? yearMYT() + 1 : yearMYT();
     $("#pay-member").textContent = `${current.full_name || current.email} (${current.member_no || "new"})`;
     $("#pay-year").value = nextYear;
     const isNew = !current.member_no && !current.expires_on;

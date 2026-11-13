@@ -95,6 +95,9 @@ Ulang langkah yang sama untuk fail kelima, [`supabase/migrations/005_import_and_
 
 Jalankan fail mengikut susunan `001` hingga `005`. Semuanya selamat untuk dijalankan semula, dan nombor ahli tidak akan berundur.
 
+### 2f. Ahli baharu hujung tahun bayar untuk tahun depan (fail 011)
+Mulai bulan pembaharuan dibuka (`settings.renewal_opens_month`, lalai November), **ahli baharu** yang membayar RM130 mendapat keahlian **hingga 31 Dis tahun depan**, bukan beberapa minggu sahaja. Ahli sedia ada tidak terjejas. Jalankan `supabase/migrations/011_new_member_next_year.sql`.
+
 ## Langkah 3: Tetapan log masuk emel
 
 ### 3a. Alamat laman
