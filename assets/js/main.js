@@ -11,7 +11,9 @@
 
 const VCM = {
   membershipForm: "/ahli/", // member portal: join or renew online
-  email: "vespaclubmalaysia1946@gmail.com",
+  // The club email is kept in two parts and joined in the browser, so simple
+  // address-harvesting bots reading the page source do not pick it up.
+  emailParts: ["vespaclubmalaysia1946", "gmail.com"],
   facebook: "https://www.facebook.com/vespaclubmalaysia/",
   instagram: "https://www.instagram.com/vespaclubmalaysia/",
 };
@@ -235,6 +237,11 @@ function initReveal() {
 function fillLinks() {
   $$("[data-join]").forEach((a) => { a.href = VCM.membershipForm; });
   $$("[data-year]").forEach((el) => (el.textContent = new Date().getFullYear()));
+  const email = VCM.emailParts.join("@");
+  $$("[data-email]").forEach((a) => {
+    a.href = `mailto:${email}`;
+    if (a.textContent.includes("[at]")) a.textContent = email;
+  });
 }
 
 document.documentElement.classList.remove("no-js");

@@ -419,7 +419,7 @@ h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.05; margin: 0;
 @media (max-width: 860px) { .portal-grid { grid-template-columns: 1fr; } }
 
 .form { display: grid; gap: 18px; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
 @media (max-width: 560px) { .form-row { grid-template-columns: 1fr; } }
 .field { display: grid; gap: 6px; min-width: 0; }
 .field label { font-family: var(--font-display); font-weight: 600; font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
@@ -644,3 +644,11 @@ button.hbar { width: 100%; background: none; border: 0; font: inherit; color: in
 .field .interest-list label.check { font-family: var(--font-body); font-weight: 500; font-size: .95rem; letter-spacing: normal; text-transform: none;
   color: var(--ink); align-items: center; padding: 14px 16px; }
 .field .interest-list label.check input { margin: 0; min-height: 0; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 4px; box-shadow: none; }
+
+/* WhatsApp help box (member portal, event pages) */
+.help-wa { display: flex; gap: 14px; align-items: flex-start; max-width: 760px; margin: 24px auto; padding: 18px 20px;
+  background: #fff; border: 1px solid var(--line); border-left: 4px solid #25d366; border-radius: 12px; }
+.help-wa__icon { flex: none; width: 40px; height: 40px; border-radius: 50%; background: #25d366; color: #fff; display: grid; place-items: center; }
+.help-wa strong { display: block; }
+.help-wa div > span { display: block; color: var(--muted); font-size: .9rem; margin-top: 2px; }
+.help-wa a { display: inline-block; margin-top: 8px; font-weight: 700; color: #128c4a; text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
