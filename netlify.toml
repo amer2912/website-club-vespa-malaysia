@@ -5,3 +5,44 @@
 [build]
   command = "rm -rf dist && mkdir dist && cp -r *.html robots.txt sitemap.xml favicon.ico ahli acara assets dist/"
   publish = "dist"
+
+# Security headers for every page.
+# - frame-ancestors / X-Frame-Options: no other site may show our pages in a
+#   frame (stops "clickjacking" on the admin and counter pages).
+# - nosniff: browsers trust the file types Netlify sends.
+# - Referrer-Policy: other sites only see "vespaclubmalaysia.com", never the
+#   full page address.
+# - Permissions-Policy: only our own pages may ask for the camera (the event
+#   counter's QR scanner); microphone and location are never used.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "frame-ancestors 'none'"
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(self), microphone=(), geolocation=(), payment=()"
+
+# Ticket links carry a private code in the address: never send it anywhere
+# and keep these pages out of search engines.
+[[headers]]
+  for = "/acara/tiket*"
+  [headers.values]
+    Referrer-Policy = "no-referrer"
+    X-Robots-Tag = "noindex, nofollow"
+
+# Staff-only pages stay out of search engines.
+[[headers]]
+  for = "/acara/kaunter*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/ahli/admin*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/ahli/dashboard*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
