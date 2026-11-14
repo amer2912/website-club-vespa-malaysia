@@ -3,5 +3,5 @@
 # never put online.
 
 [build]
-  command = "rm -rf dist && mkdir dist && cp -r *.html ahli acara assets dist/"
+  command = "rm -rf dist && mkdir dist && cp -r *.html robots.txt sitemap.xml favicon.ico ahli acara assets dist/"
   publish = "dist"

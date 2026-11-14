@@ -1,0 +1,11 @@
+# Vespa Club Malaysia · vespaclubmalaysia.com
+User-agent: *
+Allow: /
+
+# Private areas: member admin, the event counter, and personal ticket links.
+Disallow: /ahli/admin
+Disallow: /ahli/dashboard
+Disallow: /acara/kaunter
+Disallow: /acara/tiket
+
+Sitemap: https://vespaclubmalaysia.com/sitemap.xml
