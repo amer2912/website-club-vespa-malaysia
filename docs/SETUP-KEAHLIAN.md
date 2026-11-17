@@ -367,3 +367,18 @@ Petugas boleh log masuk ke `/acara/kaunter` dengan **username dan kata laluan**,
 - AJK editor boleh menjalankan kaunter untuk semua acara. AJK viewer hanya boleh melihat.
 - Setiap bayaran disahkan semula dengan ToyyibPay, dan jumlahnya mesti tepat, sebelum tiket diberi nombor (contohnya ISD-0001, yang juga nombor cabutan bertuah).
 - QR hanya mengandungi kod rawak. Setiap serahan baju direkodkan siapa dan bila, dan baju tak boleh dituntut dua kali.
+
+### Harga ahli untuk acara (fail 012)
+Acara boleh ada harga lebih rendah untuk **ahli VCM aktif**, contohnya Vespa Day 2026: RM50 biasa, RM40 ahli.
+
+- **Siapa layak:** keahlian masih sah pada tarikh acara (termasuk yang sudah renew untuk tahun depan), profil ahli lengkap, dan ahli log masuk ke portal ahli dengan emel dalam rekod keahlian.
+- **Had:** satu pesanan harga ahli bagi setiap ahli untuk setiap acara. Pek tambahan untuk orang lain dibeli pada harga biasa (buang tanda "Member price" di borang). Pesanan harga ahli yang tidak dibayar dilepaskan semula selepas 30 minit.
+- **Keselamatan:** harga ditentukan di pangkalan data. Fungsi `event-checkout` mengesahkan log masuk ahli dengan Supabase Auth sebelum menghantar ID ahli ke pangkalan data; pelayar tidak boleh menukar harga.
+- **Cara aktifkan:** jalankan `supabase/migrations/012_event_member_price.sql` sekali, deploy semula `event-checkout`, kemudian:
+  ```sql
+  update public.events set member_price_cents = 4000 where id = 'vespa-day-2026';
+  ```
+- **Aliran ahli:** halaman acara → "Log in for member price" → portal ahli (kod 6 digit; profil diminta jika belum lengkap; ahli yang tamat boleh renew dahulu) → dibawa kembali ke halaman acara dengan harga ahli.
+- **Pertanyaan biasa ahli:**
+  - *Harga masih RM50 selepas log masuk:* ahli guna emel lain daripada rekod keahlian, atau keahlian tamat sebelum tarikh acara. Semak di halaman admin portal.
+  - *Kod tidak sampai:* semak folder spam/promotions, tunggu 1 minit, tekan "resend".

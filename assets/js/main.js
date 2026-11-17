@@ -38,6 +38,17 @@ const EVENTS = [
     summary: "A scooter ride to the coast of Bachok, Kelantan. Contact the organiser on WhatsApp for details and registration.",
   },
   {
+    title: "Vespa Day 2026",
+    subtitle: "80th Anniversary",
+    date: "2026-11-28",
+    place: "Putrajaya Challenge Park, Putrajaya",
+    image: "assets/img/events/vespaday2026-poster.jpg",
+    tickets: "acara/vespa-day-2026.html",
+    ticketLabel: "Buy Anniversary Pack",
+    posterBg: "linear-gradient(#476364, #31494b)",
+    summary: "Celebrating 80 years of Vespa, 4 PM to 10 PM. Free entrance for everyone. Vespa Anniversary Pack RM50: T-shirt, tote bag, badge, Vespa bib and food voucher, with entry to the lucky draw for a Vespa.",
+  },
+  {
     title: "Italian Scooter Day",
     subtitle: "2.0",
     date: "2026-11-29",
@@ -154,12 +165,49 @@ function featuredHTML(ev) {
     </div>`;
 }
 
+// Two or more events in the same week share the spotlight: equal cards, side by side.
+function featuredGroupHTML(list) {
+  const card = (ev) => `
+      <article class="featured-pair__card reveal">
+        <a class="featured-pair__poster" href="${esc(ev.tickets || "events.html")}"${ev.posterBg ? ` style="background:${esc(ev.posterBg)}"` : ""}>
+          <img src="${esc(ev.image)}" alt="${esc(ev.title)} ${esc(ev.subtitle || "")} poster">
+        </a>
+        <div class="featured-pair__body">
+          <h3 class="h3">${esc(ev.title)} ${ev.subtitle ? `<span class="muted">${esc(ev.subtitle)}</span>` : ""}</h3>
+          <ul class="meta">
+            <li>${ICON.cal}${esc(fmtDate(ev))}</li>
+            <li>${ICON.pin}${esc(ev.place)}</li>
+          </ul>
+          <div class="countdown countdown--small" data-countdown="${esc(ev.date)}" aria-live="polite">
+            <div><strong data-u="d">00</strong><span>Days</span></div>
+            <div><strong data-u="h">00</strong><span>Hours</span></div>
+            <div><strong data-u="m">00</strong><span>Min</span></div>
+            <div><strong data-u="s">00</strong><span>Sec</span></div>
+          </div>
+          <p class="featured-pair__summary">${esc(ev.summary)}</p>
+          ${ev.tickets ? `<a class="btn btn--mint" href="${esc(ev.tickets)}">${esc(ev.ticketLabel || "Buy ticket")} ${ICON.arrow}</a>` : ""}
+        </div>
+      </article>`;
+  return `
+    <div class="featured-pair">
+      <div class="featured-pair__head reveal">
+        <span class="eyebrow">Next on the calendar</span>
+        <h2 class="h2">${list.length} events, one week</h2>
+      </div>
+      <div class="featured-pair__grid">${list.map(card).join("")}</div>
+      <p class="featured-pair__all reveal"><a class="btn btn--line" href="events.html">All events</a></p>
+    </div>`;
+}
+
 function renderEvents() {
   const { upcoming, past, postponed } = splitEvents();
 
   const featured = $("[data-featured-event]");
   if (featured) {
-    featured.innerHTML = upcoming.length
+    const week = upcoming.filter((e) => upcoming.length && startOf(e.date) - startOf(upcoming[0].date) < 7 * 864e5).slice(0, 3);
+    featured.innerHTML = week.length > 1
+      ? featuredGroupHTML(week)
+      : upcoming.length
       ? featuredHTML(upcoming[0])
       : `<div class="reveal"><span class="eyebrow">Events</span><h2 class="h2" style="margin-top:14px">New rides coming soon</h2><p class="lead">Follow us on social media to be the first to know.</p></div>`;
   }

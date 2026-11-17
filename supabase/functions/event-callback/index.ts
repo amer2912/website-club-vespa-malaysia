@@ -1,6 +1,9 @@
 // Supabase Edge Function: event-callback
 // ToyyibPay calls this after an event ticket payment. The ticket page also
-// calls it when the buyer comes back from the payment page.
+// calls it when the buyer comes back from the payment page (with the bill
+// code), and whenever a still-unpaid ticket is opened later (with the secret
+// ticket code), so a payment whose ToyyibPay notice never arrived is still
+// picked up.
 //
 // The posted data is never trusted: the bill is checked again with ToyyibPay
 // (getBillTransactions) and only a confirmed payment of the exact amount, for
@@ -46,17 +49,19 @@ type ToyyibTransaction = {
   billExternalReferenceNo?: string;
 };
 
-async function readBillCode(req: Request): Promise<string | null> {
+type CallbackInput = { billCode: string | null; ticketCode: string | null };
+
+async function readInput(req: Request): Promise<CallbackInput> {
   const type = req.headers.get("Content-Type") ?? "";
   try {
     if (type.includes("application/json")) {
       const body = await req.json();
-      return body?.billcode ?? body?.billCode ?? null;
+      return { billCode: body?.billcode ?? body?.billCode ?? null, ticketCode: body?.code ?? null };
     }
     const form = await req.formData();
-    return (form.get("billcode") ?? form.get("billCode"))?.toString() ?? null;
+    return { billCode: (form.get("billcode") ?? form.get("billCode"))?.toString() ?? null, ticketCode: form.get("code")?.toString() ?? null };
   } catch {
-    return null;
+    return { billCode: null, ticketCode: null };
   }
 }
 
@@ -64,19 +69,22 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   if (req.method !== "POST") return reply(405, { error: "Method not allowed" });
 
-  const billCode = (await readBillCode(req))?.trim();
-  if (!billCode || !/^[A-Za-z0-9]{4,32}$/.test(billCode)) return reply(400, { error: "Missing bill code" });
+  const input = await readInput(req);
+  const givenBill = input.billCode?.trim() ?? "";
+  const ticketCode = input.ticketCode?.trim().toLowerCase() ?? "";
+  const byBill = /^[A-Za-z0-9]{4,32}$/.test(givenBill);
+  const byTicket = !byBill && /^[0-9a-f]{32}$/.test(ticketCode);
+  if (!byBill && !byTicket) return reply(400, { error: "Missing bill code" });
   if (!SERVICE_KEY) return reply(500, { error: "Server keys are not configured." });
 
   const service = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
-  const { data: order, error: findError } = await service
-    .from("event_orders")
-    .select("id, amount_cents, status")
-    .eq("bill_code", billCode)
-    .maybeSingle();
+  const lookup = service.from("event_orders").select("id, amount_cents, status, bill_code");
+  const { data: order, error: findError } = await (byBill ? lookup.eq("bill_code", givenBill) : lookup.eq("ticket_code", ticketCode)).maybeSingle();
   if (findError) return reply(500, { error: "Lookup failed" });
   if (!order) return reply(404, { error: "Unknown bill" });
   if (order.status === "paid") return reply(200, { status: "paid" });
+  const billCode: string = order.bill_code ?? "";
+  if (!billCode) return reply(200, { status: order.status }); // payment page was never opened
 
   let transactions: ToyyibTransaction[] = [];
   try {

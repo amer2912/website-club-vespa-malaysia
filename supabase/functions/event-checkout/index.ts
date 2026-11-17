@@ -3,7 +3,11 @@
 // Creates a pending order in the database, then a ToyyibPay bill on the
 // ORGANISER's ToyyibPay account, so the money goes straight to them.
 //
-// Deploy with JWT verification turned OFF (buyers do not log in).
+// Deploy with JWT verification turned OFF (buyers do not have to log in).
+// Member price: when the buyer ticks "member price", the request carries
+// their member-portal login; it is verified here with Supabase Auth and the
+// database decides whether the member qualifies (active on the event date,
+// profile complete, one member-price order per event).
 //
 // Secrets (Dashboard -> Edge Functions -> Secrets):
 //   EVENT_TOYYIBPAY_<NAME>  the organiser's ToyyibPay user secret key; the
@@ -86,7 +90,18 @@ Deno.serve(async (req) => {
     return json(req, 503, { error: "Ticket payment is not open yet. Please try again later." });
   }
 
-  // All checks (open, sales close, size stock, limits) happen in the database.
+  // Member price: only when asked for, and only with a valid member-portal login.
+  let memberUser: string | null = null;
+  if (body.use_member === true) {
+    const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+    const { data: who } = token ? await service.auth.getUser(token) : { data: { user: null } };
+    if (!who?.user?.id) {
+      return json(req, 401, { error: "Please log in to the member portal again to get the member price." });
+    }
+    memberUser = who.user.id;
+  }
+
+  // All checks (open, sales close, size stock, limits, member price) happen in the database.
   const { data: order, error: orderError } = await service.rpc("event_start_order", {
     p_event: eventId,
     p_full_name: text(body.full_name, 120),
@@ -98,6 +113,7 @@ Deno.serve(async (req) => {
     // optional survey ("interested in"); the database keeps only the event's own options
     p_size_note: text(body.size_note, 100),
     p_interests: Array.isArray(body.interests) ? body.interests.slice(0, 10).map((v) => text(v, 80)).filter(Boolean) : [],
+    p_member_user: memberUser,
   });
   if (orderError || !order) return json(req, 400, { error: orderError?.message ?? "Could not create the order." });
 
@@ -120,7 +136,7 @@ Deno.serve(async (req) => {
     billSplitPaymentArgs: "",
     billPaymentChannel: event.payment_channel ?? "0",
     billContentEmail:
-      `Terima kasih! Tiket dan kod QR anda: ${ticketUrl} . Tunjukkan kod QR ini di kaunter pada hari acara untuk ambil baju. ` +
+      `Terima kasih! Tiket dan kod QR anda: ${ticketUrl} . Tunjukkan kod QR ini di kaunter pada hari acara untuk ambil baju / pek anda. ` +
       `Thank you! Your ticket and QR code: ${ticketUrl}`,
     billChargeToCustomer: "",
     billExpiryDays: "1",
