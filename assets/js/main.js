@@ -46,7 +46,7 @@ const EVENTS = [
     tickets: "acara/vespa-day-2026.html",
     ticketLabel: "Buy Anniversary Pack",
     posterBg: "linear-gradient(#476364, #31494b)",
-    summary: "Celebrating 80 years of Vespa, 4 PM to 10 PM. Free entrance for everyone. Vespa Anniversary Pack RM50: T-shirt, tote bag, badge, Vespa bib and food voucher, with entry to the lucky draw for a Vespa.",
+    summary: "Celebrating 80 years of Vespa, 4 PM to 10 PM. Free entrance for everyone. Vespa Anniversary Pack RM50 (VCM members 20% off: RM40): T-shirt, tote bag, badge, Vespa bib and food voucher, with entry to the lucky draw for a Vespa.",
   },
   {
     title: "Italian Scooter Day",

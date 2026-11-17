@@ -55,11 +55,15 @@
     const { data: mp } = await sb.rpc("event_member_price", { p_event: eventId });
     memberPrice = Number(mp) || null;
     if (!memberPrice) { memberBox.hidden = true; return; }
+    const pct = price ? Math.round((1 - memberPrice / price) * 100) : 0;
+    const off = pct > 0 ? `${pct}% OFF` : "";
     const priceNote = $("#ev-member-price-note");
     if (priceNote) priceNote.textContent = `${rm(memberPrice).replace(".00", "")} for active VCM members`;
+    const badge = $("#ev-save-badge");
+    if (badge) { badge.hidden = !off; if (off) badge.innerHTML = `VCM members<b>${off}</b>`; }
     const { data: sess } = await sb.auth.getSession();
     if (!sess?.session) {
-      memberBox.innerHTML = `<strong>Active VCM member? Pay ${esc(rm(memberPrice))}.</strong>
+      memberBox.innerHTML = `${off ? `<span class="save-chip">${esc(off)} for members · Jimat ${pct}%</span>` : ""}<strong>Active VCM member? Pay ${esc(rm(memberPrice))} instead of ${esc(rm(price))}.</strong>
         <span>Ahli VCM aktif? Log masuk portal ahli untuk harga ahli. You will come back here after logging in.</span>
         <a class="btn btn--small" href="${loginLink()}">Log in for member price · Log masuk</a>`;
       memberBox.hidden = false;
@@ -73,7 +77,7 @@
     const logout = `<button type="button" class="link-btn" id="ev-logout">Not you? Log out · Log keluar</button>`;
     const html = {
       ok: `<label class="check member-box__check"><input type="checkbox" id="ev-use-member" checked>
-             <span><strong>Member price ${esc(rm(memberPrice))} for my own pack</strong> · Harga ahli untuk pek saya<br><span class="muted">${who}</span></span></label>
+             <span><strong>Member price ${esc(rm(memberPrice))} for my own pack</strong>${off ? ` <span class="save-chip">${esc(off)}</span>` : ""} · Harga ahli untuk pek saya<br><span class="muted">${who}</span></span></label>
            <span class="muted">Untick to buy an extra pack for someone else at ${esc(rm(price))}. · Buang tanda untuk beli pek tambahan untuk orang lain.</span>`,
       used: `<strong>You have already bought your member-price pack.</strong>
              <span>Anda telah membeli pek harga ahli. Extra packs are ${esc(rm(price))}. · ${who}</span>`,

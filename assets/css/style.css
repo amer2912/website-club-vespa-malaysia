@@ -679,3 +679,10 @@ button.hbar { width: 100%; background: none; border: 0; font: inherit; color: in
 .member-box label.check input { width: 22px; height: 22px; min-height: 0; padding: 0; margin: 2px 0 0; }
 .link-btn { background: none; border: 0; padding: 0; color: var(--muted); font: inherit; font-size: .85rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 #ev-name[readonly] { background: #f3f4f2; color: var(--ink-2); }
+
+/* "20% OFF" member badge on event pages */
+.event-price { flex-wrap: wrap; }
+.save-badge { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.05; padding: 8px 12px; border-radius: 12px; background: var(--ink); color: var(--mint); font-size: .62rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; transform: rotate(-3deg); box-shadow: 0 8px 18px -10px rgba(0,0,0,.6); }
+.save-badge b { font-family: var(--font-display); font-size: 1.35rem; letter-spacing: .02em; color: #fff; }
+.save-chip { display: inline-block; padding: 3px 9px; border-radius: 999px; background: var(--ink); color: var(--mint); font-size: .72rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; vertical-align: middle; }
+.member-box > .save-chip { justify-self: start; }
