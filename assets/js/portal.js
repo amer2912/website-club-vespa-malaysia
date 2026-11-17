@@ -52,6 +52,35 @@
   let pendingEmail = "";
   let paymentResult = null;
 
+  /* ---------------- return to an event page after logging in ----------------
+     Event pages link here with ?next=/acara/<page> so members can log in for
+     the member price. It is kept for 30 minutes (the email login link may open
+     in a new tab) and used once the member is active with a complete profile. */
+  const NEXT_KEY = "vcm-next";
+  const safeNext = (p) => (/^\/acara\/[a-z0-9-]{3,40}(\.html)?$/.test(p || "") ? p : null);
+  (() => {
+    const p = safeNext(new URLSearchParams(location.search).get("next"));
+    if (!p) return;
+    try { localStorage.setItem(NEXT_KEY, JSON.stringify({ p, t: Date.now() })); } catch { /* private mode */ }
+    history.replaceState(null, "", location.pathname);
+  })();
+  const pendingNext = () => {
+    try {
+      const v = JSON.parse(localStorage.getItem(NEXT_KEY) || "null");
+      if (v && safeNext(v.p) && Date.now() - v.t < 30 * 60 * 1000) return v.p;
+      localStorage.removeItem(NEXT_KEY);
+    } catch { /* ignore */ }
+    return null;
+  };
+  // Back to the event page once the membership is active and the profile is complete.
+  function goNextIfReady() {
+    const p = pendingNext();
+    if (!p || !member?.profile_completed_at || !member.expires_on || member.expires_on < todayMYT()) return false;
+    try { localStorage.removeItem(NEXT_KEY); } catch { /* ignore */ }
+    location.href = p;
+    return true;
+  }
+
   /* ---------------- routing ---------------- */
   let routing = null;
   let rerun = false;
@@ -87,6 +116,7 @@
 
   /* ---------------- login ---------------- */
   function showLogin() {
+    if (pendingNext()) note($("#login-msg"), "Log in to get your member price. You will go back to the event page after logging in. · Log masuk untuk harga ahli.", "info");
     $("#login-step-email").hidden = false;
     $("#login-step-code").hidden = true;
     show("login");
@@ -292,6 +322,10 @@
 
   /* ---------------- dashboard ---------------- */
   async function openDashboard(flash) {
+    if (goNextIfReady()) return;
+    if (pendingNext() && !flash && !paymentResult && member?.profile_completed_at) {
+      paymentResult = ["info", "Renew your membership below to get the event member price. After paying you will go back to the event page automatically. · Perbaharui keahlian untuk harga ahli."];
+    }
     const st = statusOf(member);
     $("#card-name").textContent = member.full_name || member.email;
     $("#card-no").textContent = member.member_no || "Given after first payment";

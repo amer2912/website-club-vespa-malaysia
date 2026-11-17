@@ -670,3 +670,12 @@ button.hbar { width: 100%; background: none; border: 0; font: inherit; color: in
 .countdown--small { gap: 10px; margin: 0 0 18px; }
 .countdown--small strong { font-size: 1.6rem; }
 .countdown--small span { font-size: .62rem; }
+
+/* Event member price box (event pages) */
+.member-box { display: grid; gap: 8px; justify-items: start; padding: 16px 18px; margin-bottom: 18px; border: 1px solid #b8ecd8; border-left: 4px solid var(--mint); border-radius: 12px; background: #f1fbf7; }
+.member-box > span { color: var(--muted); font-size: .9rem; }
+.member-box .muted { font-size: .88rem; }
+.field .member-box label.check, .member-box label.check { margin: 0; padding: 0; background: none; font-family: var(--font-body); font-weight: 500; font-size: .98rem; letter-spacing: normal; text-transform: none; }
+.member-box label.check input { width: 22px; height: 22px; min-height: 0; padding: 0; margin: 2px 0 0; }
+.link-btn { background: none; border: 0; padding: 0; color: var(--muted); font: inherit; font-size: .85rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+#ev-name[readonly] { background: #f3f4f2; color: var(--ink-2); }
