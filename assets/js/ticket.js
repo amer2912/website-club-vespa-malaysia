@@ -37,10 +37,11 @@
     $("#tk-no").textContent = t.order_no || "Given after payment";
     $("#tk-name").textContent = t.full_name;
     $("#tk-size").textContent = t.shirt_size;
-    $("#tk-moto").textContent = [t.moto_type, t.moto_model].filter(Boolean).join(" · ");
+    $("#tk-moto").textContent = [t.moto_type, t.moto_model].filter((v) => v && v !== "-").join(" · ");
     // Fixed packs (one size "Pack", no scooter question "-") leave those rows out.
     $("#tk-size").parentElement.hidden = t.shirt_size === "Pack";
-    $("#tk-moto").parentElement.hidden = t.moto_type === "-";
+    $("#tk-moto").parentElement.hidden = t.moto_type === "-" && !t.moto_model;
+    if (t.moto_type === "-") $("#tk-moto").parentElement.querySelector("dt").textContent = "Vespa";
     // Events that sell a merchandise pack (not just a T-shirt) say "pack".
     if (t.shirt_size === "Pack" || PACK_EVENTS.has(t.event_id)) {
       $("#tk-collected").parentElement.querySelector("dt").textContent = "Pack · Pek";

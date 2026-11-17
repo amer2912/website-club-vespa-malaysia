@@ -131,7 +131,7 @@
         <div class="ct-badge">${esc(state[1])}</div>
         <p class="ct-no">${esc(t.order_no || "—")}</p>
         <h2>${esc(t.full_name)}</h2>
-        <p class="muted">${esc(t.phone)} · ${esc([t.moto_type, t.moto_model].filter(Boolean).join(" "))}</p>
+        <p class="muted">${esc(t.phone)} · ${esc([t.moto_type, t.moto_model].filter((v) => v && v !== "-").join(" "))}</p>
         <dl class="ticket__rows">
           <div><dt>Saiz baju</dt><dd class="ct-size">${esc(t.shirt_size)}${t.size_note ? `<div class="muted" style="font-size:.85rem">${esc(t.size_note)}</div>` : ""}</dd></div>
           <div><dt>Hadir</dt><dd>${t.checked_in_at ? `Ya · ${esc(time(t.checked_in_at))} (${esc(t.checked_in_by || "")})` : "Belum"}</dd></div>

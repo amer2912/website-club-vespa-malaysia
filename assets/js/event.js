@@ -57,8 +57,10 @@
     const onlySize = ev.sizes.length === 1;
     $("#ev-sizes").closest(".size-field").hidden = onlySize;
     if (onlySize) { const r = form.querySelector("input[name=ev-size]"); if (r && !r.disabled) r.checked = true; }
+    // A single scooter choice is not asked; the (optional) model box stays and takes the full row.
     const onlyType = ev.moto_types.length === 1;
-    $("#ev-type").closest(".form-row").hidden = onlyType;
+    $("#ev-type").closest(".field").hidden = onlyType;
+    $("#ev-type").closest(".form-row").style.gridTemplateColumns = onlyType ? "1fr" : "";
     if (onlyType) $("#ev-type").value = ev.moto_types[0];
     if (!ev.open) setClosed(ev.closed_reason || "Ticket sales are closed.");
   }
