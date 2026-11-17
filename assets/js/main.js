@@ -38,6 +38,16 @@ const EVENTS = [
     summary: "A scooter ride to the coast of Bachok, Kelantan. Contact the organiser on WhatsApp for details and registration.",
   },
   {
+    title: "Vespa Day 2026",
+    subtitle: "80th Anniversary",
+    date: "2026-11-28",
+    place: "Putrajaya Challenge Park, Putrajaya",
+    image: "assets/img/events/vespaday2026-poster.jpg",
+    tickets: "acara/vespa-day-2026.html",
+    ticketLabel: "Buy Anniversary Pack",
+    summary: "Celebrating 80 years of Vespa, 4 PM to 10 PM. Free entrance for everyone. Vespa Anniversary Pack RM50: T-shirt, tote bag, badge, Vespa bib and food voucher.",
+  },
+  {
     title: "Italian Scooter Day",
     subtitle: "2.0",
     date: "2026-11-29",

@@ -31,7 +31,8 @@
   async function load() {
     const { data, error } = await sb.rpc("event_public", { p_event: eventId });
     const ev = Array.isArray(data) ? data[0] : data;
-    if (error || !ev) { setClosed("Could not load ticket sales. Please refresh the page."); return; }
+    if (!error && !ev) { setClosed("Sales open soon. · Jualan akan dibuka tidak lama lagi."); return; }
+    if (error) { setClosed("Could not load ticket sales. Please refresh the page."); return; }
     $("#ev-price").textContent = `RM${(ev.price_cents / 100).toFixed(ev.price_cents % 100 ? 2 : 0)}`;
     $("#ev-total").textContent = rm(ev.price_cents);
     // e.g. "29 Nov 2026, 6:00 pm" (the time is left out when sales run to the end of the day)
