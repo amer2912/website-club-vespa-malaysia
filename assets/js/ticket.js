@@ -14,6 +14,7 @@
   const code = (params.get("code") || "").toLowerCase();
   const billcode = params.get("billcode");
   const done = () => { $("#tk-loading").hidden = true; };
+  const PACK_EVENTS = new Set(["vespa-day-2026"]);
 
   if (!/^[0-9a-f]{32}$/.test(code)) { done(); note("This ticket link is not complete. Open the link from your receipt email again.", "error"); return; }
   if (!cfg.url || !cfg.anonKey || !window.supabase?.createClient) { done(); note("Tickets are not available yet.", "error"); return; }
@@ -40,7 +41,8 @@
     // Fixed packs (one size "Pack", no scooter question "-") leave those rows out.
     $("#tk-size").parentElement.hidden = t.shirt_size === "Pack";
     $("#tk-moto").parentElement.hidden = t.moto_type === "-";
-    if (t.shirt_size === "Pack") {
+    // Events that sell a merchandise pack (not just a T-shirt) say "pack".
+    if (t.shirt_size === "Pack" || PACK_EVENTS.has(t.event_id)) {
       $("#tk-collected").parentElement.querySelector("dt").textContent = "Pack · Pek";
       $("#tk-hint").innerHTML = 'Show this QR code at the counter to collect your pack. A screenshot works too.<br><span class="muted">Tunjukkan kod QR ini di kaunter untuk ambil pek anda. Screenshot pun boleh.</span>';
     }
