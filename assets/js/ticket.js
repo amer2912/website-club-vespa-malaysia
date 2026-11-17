@@ -37,6 +37,14 @@
     $("#tk-name").textContent = t.full_name;
     $("#tk-size").textContent = t.shirt_size;
     $("#tk-moto").textContent = [t.moto_type, t.moto_model].filter(Boolean).join(" · ");
+    // Fixed packs (one size "Pack", no scooter question "-") leave those rows out.
+    $("#tk-size").parentElement.hidden = t.shirt_size === "Pack";
+    $("#tk-moto").parentElement.hidden = t.moto_type === "-";
+    if (t.shirt_size === "Pack") {
+      $("#tk-no").parentElement.querySelector("dt").textContent = "Order no. · No. tempahan";
+      $("#tk-collected").parentElement.querySelector("dt").textContent = "Pack · Pek";
+      $("#tk-hint").innerHTML = 'Show this QR code at the counter to collect your pack. A screenshot works too.<br><span class="muted">Tunjukkan kod QR ini di kaunter untuk ambil pek anda. Screenshot pun boleh.</span>';
+    }
     $("#tk-paid").textContent = t.status === "paid" ? `RM${(t.amount_cents / 100).toFixed(2)} · ${fmt(t.paid_at)}` : "Not yet";
     $("#tk-collected").textContent = t.shirt_collected_at ? `Collected · ${fmt(t.shirt_collected_at)}` : "Not collected yet";
     $("#tk-org").textContent = t.organizer_contact ? `Enquiries · Pertanyaan: ${t.organizer_contact}` : "";

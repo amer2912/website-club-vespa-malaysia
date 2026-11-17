@@ -52,6 +52,14 @@
     $("#ev-interests").innerHTML = options.map((o, i) => `
       <label class="check"><input type="checkbox" name="ev-interest" value="${esc(o)}" id="ev-int-${i}"> <span>${esc(o)}</span></label>`).join("");
     $("#ev-interest-field").hidden = !options.length;
+    // An event with a single size or scooter choice (e.g. a fixed merchandise
+    // pack) does not ask: the only value is chosen for the buyer and hidden.
+    const onlySize = ev.sizes.length === 1;
+    $("#ev-sizes").closest(".size-field").hidden = onlySize;
+    if (onlySize) { const r = form.querySelector("input[name=ev-size]"); if (r && !r.disabled) r.checked = true; }
+    const onlyType = ev.moto_types.length === 1;
+    $("#ev-type").closest(".form-row").hidden = onlyType;
+    if (onlyType) $("#ev-type").value = ev.moto_types[0];
     if (!ev.open) setClosed(ev.closed_reason || "Ticket sales are closed.");
   }
 
