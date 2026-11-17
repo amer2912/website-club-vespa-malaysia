@@ -57,21 +57,31 @@
     else if (t.status === "failed") note("The payment was not completed, so no ticket was issued. No money was taken. You can buy again on the event page.", "error");
   }
 
+  // Ask the server to check this ticket's bill with ToyyibPay again. Uses the
+  // bill code when just back from paying, otherwise the ticket code, so an
+  // unpaid ticket opened later still picks up a payment that went through.
+  const recheck = () => sb.functions.invoke("event-callback", { body: billcode ? { billcode } : { code } }).catch(() => null);
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
   (async () => {
-    if (billcode) await sb.functions.invoke("event-callback", { body: { billcode } }).catch(() => null);
+    if (billcode) await recheck();
     let t = await load();
+    if (t && t.status === "pending" && !billcode) { await recheck(); t = (await load()) || t; }
     done();
     if (!t) { note("Ticket not found. Check the link in your receipt email.", "error"); return; }
     render(t);
-    // Just back from paying: ToyyibPay can take a moment to confirm.
-    for (let i = 0; t.status === "pending" && i < 10; i++) {
-      note("Confirming your payment with ToyyibPay…", "info");
-      await new Promise((r) => setTimeout(r, 3000));
-      if (billcode) await sb.functions.invoke("event-callback", { body: { billcode } }).catch(() => null);
+    // FPX banks can take a minute or two to confirm: keep checking for about 2 minutes.
+    for (let i = 0; t.status === "pending" && i < 16; i++) {
+      note("Confirming your payment with ToyyibPay… · Mengesahkan bayaran anda…", "info");
+      await wait(i < 6 ? 4000 : 10000);
+      await recheck();
       t = (await load()) || t;
       render(t);
     }
-    if (t.status === "pending") note("We have not received confirmation yet. If you paid, refresh this page in a few minutes, or contact the event team.", "warn");
-    else if (t.status === "paid" && billcode) note("Payment received. Thank you! Save this page or take a screenshot of the QR code.", "success");
+    if (t.status === "pending") {
+      note("Your bank has not confirmed the payment yet. If money was taken, it is usually confirmed within a few minutes: open this link again later. Still not confirmed after an hour? WhatsApp us with your bank receipt. · Bank belum mengesahkan bayaran. Jika wang telah ditolak, buka semula pautan ini sebentar lagi.", "warn");
+    } else if (t.status === "paid" && billcode) {
+      note("Payment received. Thank you! Save this page or take a screenshot of the QR code.", "success");
+    }
   })();
 })();
