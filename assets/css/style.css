@@ -652,3 +652,21 @@ button.hbar { width: 100%; background: none; border: 0; font: inherit; color: in
 .help-wa strong { display: block; }
 .help-wa div > span { display: block; color: var(--muted); font-size: .9rem; margin-top: 2px; }
 .help-wa a { display: inline-block; margin-top: 8px; font-weight: 700; color: #128c4a; text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
+
+/* Featured: events in the same week, equal cards side by side */
+.featured-pair__head { text-align: center; margin-bottom: 34px; }
+.featured-pair__head .eyebrow { justify-content: center; }
+.featured-pair__head h2 { margin: 14px 0 0; }
+.featured-pair__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: clamp(20px, 3vw, 40px); align-items: stretch; }
+.featured-pair__card { display: flex; flex-direction: column; background: #fff; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.featured-pair__poster { display: block; aspect-ratio: 3 / 4; background: #111214; }
+.featured-pair__poster img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.featured-pair__body { display: flex; flex-direction: column; flex: 1; padding: 22px 24px 26px; }
+.featured-pair__body h3 { margin: 0 0 12px; }
+.featured-pair__body .meta { margin-bottom: 16px; }
+.featured-pair__summary { color: var(--ink-2); margin: 0 0 20px; flex: 1; }
+.featured-pair__body .btn { align-self: flex-start; }
+.featured-pair__all { text-align: center; margin: 30px 0 0; }
+.countdown--small { gap: 10px; margin: 0 0 18px; }
+.countdown--small strong { font-size: 1.6rem; }
+.countdown--small span { font-size: .62rem; }

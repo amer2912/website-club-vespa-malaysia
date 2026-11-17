@@ -41,7 +41,6 @@
     $("#tk-size").parentElement.hidden = t.shirt_size === "Pack";
     $("#tk-moto").parentElement.hidden = t.moto_type === "-";
     if (t.shirt_size === "Pack") {
-      $("#tk-no").parentElement.querySelector("dt").textContent = "Order no. · No. tempahan";
       $("#tk-collected").parentElement.querySelector("dt").textContent = "Pack · Pek";
       $("#tk-hint").innerHTML = 'Show this QR code at the counter to collect your pack. A screenshot works too.<br><span class="muted">Tunjukkan kod QR ini di kaunter untuk ambil pek anda. Screenshot pun boleh.</span>';
     }
