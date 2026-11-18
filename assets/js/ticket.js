@@ -49,7 +49,8 @@
     }
     $("#tk-paid").textContent = t.status === "paid" ? `RM${(t.amount_cents / 100).toFixed(2)} · ${fmt(t.paid_at)}` : "Not yet";
     $("#tk-collected").textContent = t.shirt_collected_at ? `Collected · ${fmt(t.shirt_collected_at)}` : "Not collected yet";
-    $("#tk-org").textContent = t.organizer_contact ? `Enquiries · Pertanyaan: ${t.organizer_contact}` : "";
+    const hideContact = window.VCM_MAINTENANCE?.hideContactNumber === true;
+    $("#tk-org").textContent = t.organizer_contact && !hideContact ? `Enquiries · Pertanyaan: ${t.organizer_contact}` : "";
     const paid = t.status === "paid";
     $("#tk").classList.toggle("is-pending", !paid);
     $("#tk-status-label").textContent = paid ? "Paid ticket · Tiket dibayar" : t.status === "failed" ? "Payment not completed" : "Waiting for payment";
