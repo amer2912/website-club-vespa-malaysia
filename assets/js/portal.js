@@ -356,9 +356,12 @@
   async function loadQuote() {
     const box = $("#renew-box");
     // Site-wide maintenance switch (supabase-config.js): no new online payments.
-    if (window.VCM_MAINTENANCE?.paymentsPaused === true) {
+    const paused = window.VCM_MAINTENANCE?.paymentsPaused === true;
+    ["#fee-options", "#fee-provider-note"].forEach((id) => { const el = $(id); if (el) el.hidden = paused; });
+    if (paused) {
       $("#renew-title").textContent = "Membership";
-      $("#renew-text").textContent = window.VCM_MAINTENANCE.message || "Online payment is under maintenance. Please check back soon.";
+      $("#renew-text").textContent = "";
+      note($("#renew-msg"), window.VCM_MAINTENANCE.message || "Online payment is under maintenance. Please check back soon.", "warn");
       ["#pay-new", "#pay-renewal"].forEach((id) => { const b = $(id); if (b) b.disabled = true; });
       box.hidden = false;
       return;
