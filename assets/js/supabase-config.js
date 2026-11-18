@@ -14,3 +14,17 @@ window.VCM_SUPABASE = {
   url: "https://iyjlrjrqnmkgfcadwydg.supabase.co",
   anonKey: "sb_publishable_qxkuJfHMD9DHBVG1QwYLqw_p7YoO4dV", // publishable key (safe to be public)
 };
+
+/* =========================================================
+   Maintenance switch for online payments
+   ---------------------------------------------------------
+   paymentsPaused: true  -> event pages (Vespa Day, ISD) and the
+   member portal stop taking new online payments and show the
+   message below. Paid tickets, QR codes, the event counter and
+   member logins keep working.
+   To start taking payments again, set paymentsPaused to false.
+   ========================================================= */
+window.VCM_MAINTENANCE = {
+  paymentsPaused: true,
+  message: "Sistem pembayaran sedang diselenggara buat sementara waktu. Sila kembali tidak lama lagi. · Our payment system is under maintenance for a short while. Please check back soon.",
+};

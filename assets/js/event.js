@@ -13,6 +13,10 @@
   const rm = (cents) => `RM${(cents / 100).toFixed(2)}`;
   const note = (el, text, kind = "info") => { el.textContent = text || ""; el.className = `notice notice--${kind}`; el.hidden = !text; };
   const eventId = document.body.dataset.event;
+  // Site-wide maintenance switch (supabase-config.js): no new online payments.
+  const pause = window.VCM_MAINTENANCE || {};
+  const paused = pause.paymentsPaused === true;
+  const pauseText = pause.message || "Online payment is under maintenance. Please check back soon.";
   const form = $("#ev-form");
   const msg = $("#ev-msg");
   const store = { get: (k) => { try { return localStorage.getItem(k); } catch { return null; } },
@@ -52,6 +56,7 @@
 
   async function loadMember() {
     if (!memberBox) return;
+    if (paused) { memberBox.hidden = true; return; }
     const { data: mp } = await sb.rpc("event_member_price", { p_event: eventId });
     memberPrice = Number(mp) || null;
     if (!memberPrice) { memberBox.hidden = true; return; }
@@ -133,7 +138,8 @@
     $("#ev-type").closest(".field").hidden = onlyType;
     $("#ev-type").closest(".form-row").style.gridTemplateColumns = onlyType ? "1fr" : "";
     if (onlyType) $("#ev-type").value = ev.moto_types[0];
-    if (!ev.open) setClosed(ev.closed_reason || "Ticket sales are closed.");
+    if (paused) setClosed(pauseText);
+    else if (!ev.open) setClosed(ev.closed_reason || "Ticket sales are closed.");
   }
 
   const value = (id) => $(id).value.trim();
@@ -147,6 +153,7 @@
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    if (paused) { note(msg, pauseText, "warn"); return; }
     const size = form.querySelector("input[name=ev-size]:checked")?.value;
     const missing = [];
     const custom = size === "Custom";
