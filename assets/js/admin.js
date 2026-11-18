@@ -222,7 +222,31 @@
       p_state: v.state, p_vespa_model: v.vespa_model, p_plate_no: v.plate_no, p_expires_on: v.expires_on,
     });
     btn.disabled = false;
-    if (error) { note($("#edit-msg"), error.message, "error"); return; }
+    if (error) {
+      // The number belongs to a pre-registration made with another email (old Google Form):
+      // offer to move that pre-registration onto this account.
+      const m = error.message.match(/reserved for (\S+@\S+) in the pre-registered list/);
+      if (!m) { note($("#edit-msg"), error.message, "error"); return; }
+      const box = $("#edit-msg");
+      box.className = "notice notice--warn"; box.hidden = false;
+      box.innerHTML = `${esc(error.message)}.<br>If this is the same person (old Google Form email), link it to this account: the member number and paid-until date move here and the pre-registration is removed.
+        <br><button type="button" class="btn btn--small" id="edit-link" style="margin-top:10px">Link pre-registration to this account</button>`;
+      $("#edit-link").addEventListener("click", async () => {
+        const linkBtn = $("#edit-link"); linkBtn.disabled = true;
+        const { error: linkError } = await sb.rpc("admin_link_import", { p_member_id: editing.id, p_email: m[1] });
+        if (linkError) { linkBtn.disabled = false; note(box, linkError.message, "error"); return; }
+        // Save the rest of the form now that the number is free.
+        const { error: saveError } = await sb.rpc("admin_update_member", {
+          p_member_id: editing.id, p_member_no: v.member_no, p_full_name: v.full_name, p_phone: v.phone,
+          p_state: v.state, p_vespa_model: v.vespa_model, p_plate_no: v.plate_no, p_expires_on: v.expires_on,
+        });
+        if (saveError) { note(box, `Linked, but could not save the other changes: ${saveError.message}`, "error"); await loadMembers(); await loadImports(); return; }
+        editDialog.close();
+        note($("#adm-msg"), `Linked ${m[1]} to ${v.full_name || editing.email} and saved.`, "success");
+        await loadMembers(); await loadImports();
+      });
+      return;
+    }
     editDialog.close();
     note($("#adm-msg"), `Saved changes for ${v.full_name || editing.email}.`, "success");
     await loadMembers();
@@ -249,9 +273,10 @@
 
   const preDialog = $("#pre-dialog");
   const PRE = ["email", "member_no", "full_name", "phone", "expires_on"];
+  let preOriginalEmail = null;
   function openPre(row) {
     PRE.forEach((f) => { $(`#pre-${f}`).value = row?.[f] ?? ""; });
-    $("#pre-email").readOnly = !!row;
+    preOriginalEmail = row ? row.email : null;  // the email can be corrected before they log in
     $("#pre-title").textContent = row ? "Edit pre-registered member" : "Add member";
     note($("#pre-msg"), "");
     preDialog.showModal();
@@ -275,6 +300,11 @@
     if (v.phone && !/^\+?[0-9][0-9 -]{7,18}$/.test(v.phone)) { note($("#pre-msg"), "Please enter a valid phone number.", "error"); return; }
     const btn = e.submitter || $("#pre-form button[type=submit]");
     btn.disabled = true;
+    if (preOriginalEmail && v.email.toLowerCase() !== preOriginalEmail) {
+      const { error: mvError } = await sb.rpc("admin_change_import_email", { p_old: preOriginalEmail, p_new: v.email });
+      if (mvError) { btn.disabled = false; note($("#pre-msg"), mvError.message, "error"); return; }
+      preOriginalEmail = v.email.toLowerCase();
+    }
     const { error } = await sb.rpc("admin_upsert_import", {
       p_email: v.email, p_member_no: v.member_no, p_full_name: v.full_name, p_phone: v.phone, p_expires_on: v.expires_on,
     });
