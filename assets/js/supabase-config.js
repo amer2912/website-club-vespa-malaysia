@@ -25,7 +25,7 @@ window.VCM_SUPABASE = {
    To start taking payments again, set paymentsPaused to false.
    ========================================================= */
 window.VCM_MAINTENANCE = {
-  paymentsPaused: true,
+  paymentsPaused: false,
   // true hides the secretary's WhatsApp number shown on tickets (organiser contact).
   hideContactNumber: true,
   message: "Sistem pembayaran sedang diselenggara buat sementara waktu. Sila kembali tidak lama lagi. · Our payment system is under maintenance for a short while. Please check back soon.",
