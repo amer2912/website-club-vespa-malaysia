@@ -690,3 +690,9 @@ button.hbar { width: 100%; background: none; border: 0; font: inherit; color: in
 /* Vespa Day: pack poster and size chart side by side */
 .vd-gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 1000px; margin: 28px auto 0; align-items: start; }
 @media (max-width: 720px) { .vd-gallery { grid-template-columns: 1fr; } }
+
+/* counter: size change (super admin) */
+.ct-size-changed { margin-top: 4px; font-size: .8rem; font-weight: 600; color: #8a5a00; }
+.ct-resize { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line, #e3e3e3); }
+.ct-resize h3 { margin: 0 0 4px; font-size: 1rem; }
+.ct-resize .form-actions { margin-top: 12px; }
