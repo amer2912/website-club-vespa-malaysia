@@ -36,6 +36,7 @@
 
   let members = [];
   let imports = [];
+  let paidYears = new Map();
   let fees = { new_member_fee_cents: 13000, fee_cents: 6000 };
   let current = null;
   let editing = null;
@@ -65,11 +66,43 @@
   }
 
   async function loadMembers() {
-    const { data, error } = await sb.from("members").select("*").order("member_no", { ascending: true, nullsFirst: false });
+    const [{ data, error }, paid] = await Promise.all([
+      sb.from("members").select("*").order("member_no", { ascending: true, nullsFirst: false }),
+      sb.from("payments").select("member_id, coverage_year, kind, method").eq("status", "paid"),
+    ]);
     if (error) { note($("#adm-msg"), `Could not load members: ${error.message}`, "error"); return; }
     members = data || [];
+    // member id -> { year: "new" | "renewal" } from paid payments (portal, cash, transfer, old Google Form)
+    paidYears = new Map();
+    (paid.data || []).forEach((p) => {
+      if (!paidYears.has(p.member_id)) paidYears.set(p.member_id, {});
+      const y = paidYears.get(p.member_id);
+      if (!y[p.coverage_year] || p.kind === "new") y[p.coverage_year] = p.kind === "new" ? "new" : "renewal";
+    });
+    fillYears();
     renderStats();
     renderRows();
+  }
+
+  // Membership years for a member: years with a paid payment, plus the year of
+  // their "valid until" date when no payment is recorded for it (members who
+  // paid before the portal, through the old Google Form).
+  function yearsOf(m) {
+    const y = { ...(paidYears.get(m.id) || {}) };
+    const until = m.expires_on ? Number(m.expires_on.slice(0, 4)) : null;
+    if (until && !y[until]) y[until] = "legacy";
+    return y;
+  }
+  const KIND = { new: "New member", renewal: "Renewal", legacy: "Before portal" };
+  function fillYears() {
+    const sel = $("#adm-year");
+    const keep = sel.value;
+    let max = yearMYT() + 1;
+    members.forEach((m) => Object.keys(yearsOf(m)).forEach((y) => { max = Math.max(max, Number(y)); }));
+    const opts = ['<option value="all">All years</option>'];
+    for (let y = max; y >= 2019; y--) opts.push(`<option value="${y}">${y}</option>`);
+    sel.innerHTML = opts.join("");
+    sel.value = [...sel.options].some((o) => o.value === keep) ? keep : "all";
   }
 
   async function loadPayments() {
@@ -97,12 +130,30 @@
   function filtered() {
     const q = $("#adm-search").value.trim().toLowerCase();
     const f = $("#adm-filter").value;
+    const year = $("#adm-year").value;
+    const kind = $("#adm-kind").value;
     return members.filter((m) => {
-      if (f === "incomplete" ? m.profile_completed_at : f !== "all" && statusOf(m) !== f) return false;
+      const st = statusOf(m);
+      if (f === "incomplete" ? m.profile_completed_at : f === "inactive" ? st === "active" : f !== "all" && st !== f) return false;
+      if (year !== "all" || kind !== "all") {
+        const ys = yearsOf(m);
+        if (year !== "all") {
+          if (!ys[year]) return false;
+          if (kind !== "all" && ys[year] !== kind) return false;
+        } else if (!Object.values(ys).includes(kind)) return false;
+      }
       if (!q) return true;
       return [m.member_no, m.claimed_member_no, m.full_name, m.email, m.phone, m.plate_no, m.state, m.vespa_model, m.nric]
         .some((v) => String(v || "").toLowerCase().includes(q));
     });
+  }
+
+  // Under the status pill: how the member joined for the selected year (or their latest year).
+  function typeNote(m) {
+    const ys = yearsOf(m);
+    const year = $("#adm-year").value;
+    const y = year !== "all" ? year : Object.keys(ys).sort().pop();
+    return y && ys[y] ? `<div class="muted" style="font-size:.78rem;margin-top:4px">${esc(KIND[ys[y]])} · ${esc(y)}</div>` : "";
   }
 
   function renderRows() {
@@ -117,18 +168,27 @@
         <td>${esc(m.state || "—")}</td>
         <td>${esc(m.vespa_model || "—")}<div class="muted">${esc(m.plate_no || "")}</div></td>
         <td class="num">${esc(fmtDate(m.expires_on))}</td>
-        <td><span class="pill pill--${st}">${LABEL[st]}</span></td>
+        <td><span class="pill pill--${st}">${LABEL[st]}</span>${typeNote(m)}</td>
         <td><div class="form-actions" style="flex-wrap:nowrap">
           <button class="btn btn--line btn--small" type="button" data-edit="${esc(m.id)}">Edit</button>
           <button class="btn btn--line btn--small" type="button" data-pay="${esc(m.id)}">Payment</button>
         </div></td>
       </tr>`;
     }).join("") || `<tr><td colspan="8" class="muted">No members match.</td></tr>`;
-    $("#adm-count").textContent = `Showing ${rows.length} of ${members.length}`;
+    const year = $("#adm-year").value;
+    let summary = `Showing ${rows.length} of ${members.length}`;
+    if (year !== "all") {
+      const tally = { new: 0, renewal: 0, legacy: 0 };
+      rows.forEach((m) => { const k = yearsOf(m)[year]; if (k) tally[k]++; });
+      summary += ` · ${year}: ${tally.new} new, ${tally.renewal} renewal${tally.legacy ? `, ${tally.legacy} before portal` : ""}`;
+    }
+    $("#adm-count").textContent = summary;
   }
 
   $("#adm-search").addEventListener("input", renderRows);
   $("#adm-filter").addEventListener("change", renderRows);
+  $("#adm-year").addEventListener("change", renderRows);
+  $("#adm-kind").addEventListener("change", renderRows);
 
   /* ---------- CSV export ---------- */
   const csvCell = (v) => {
@@ -140,8 +200,10 @@
     const cols = ["member_no", "claimed_member_no", "full_name", "nationality", "nric", "gender", "age", "email", "phone",
       "address", "state", "beneficiary_name", "beneficiary_nric", "beneficiary_relation", "oku",
       "vespa_model", "plate_no", "tshirt_size", "club_group", "remark", "expires_on", "joined_on", "declaration_accepted_at"];
-    const lines = [[...cols, "status"].join(",")].concat(
-      filtered().map((m) => [...cols.map((c) => csvCell(m[c])), LABEL[statusOf(m)]].join(","))
+    const yearSel = $("#adm-year").value;
+    const typeFor = (m) => { const ys = yearsOf(m); const y = yearSel !== "all" ? yearSel : Object.keys(ys).sort().pop(); return y && ys[y] ? `${KIND[ys[y]]} ${y}` : ""; };
+    const lines = [[...cols, "status", "membership_type"].join(",")].concat(
+      filtered().map((m) => [...cols.map((c) => csvCell(m[c])), LABEL[statusOf(m)], csvCell(typeFor(m))].join(","))
     );
     const blob = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a");
