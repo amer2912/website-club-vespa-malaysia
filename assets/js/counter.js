@@ -19,6 +19,7 @@
   let events = [];
   let current = null;      // selected event
   let pendingEmail = "";
+  let sizeOptions = null;  // sizes the super admin may switch to (null for everyone else)
 
   /* ---------- login ---------- */
   // Username login: counter accounts are created by AJK in Supabase as
@@ -80,8 +81,14 @@
     note("");
   }
   $("#ct-event").addEventListener("change", (e) => selectEvent(e.target.value));
-  function selectEvent(id) {
+  async function selectEvent(id) {
     current = events.find((ev) => ev.id === id);
+    sizeOptions = null;
+    if (current.can_work) {
+      // Only the super admin gets a list back; counter accounts and other AJK get null.
+      const { data, error } = await sb.rpc("event_size_options", { p_event: id });
+      if (current?.id === id) sizeOptions = !error && Array.isArray(data) && data.length ? data : null;
+    }
     $("#ct-event-name").textContent = `${current.title}${current.can_work ? "" : " · lihat sahaja"}`;
     $("#ct-results").innerHTML = "";
     if (!$("[data-pane=summary]").hidden) loadSummary();
@@ -106,7 +113,10 @@
       showCard(null, `Tiket ini untuk acara lain${other ? `: ${other.title}` : ""}.`);
       return;
     }
-    if (t.shirt_size === "Custom") {
+    // Size note and size change record (the change columns exist once SQL 015 is run).
+    const more = await sb.from("event_orders").select("size_note, size_changed_from, size_changed_at, size_changed_by").eq("id", t.order_id).maybeSingle();
+    if (!more.error && more.data) Object.assign(t, more.data);
+    else if (t.shirt_size === "Custom") {
       const { data: extra } = await sb.from("event_orders").select("size_note").eq("id", t.order_id).maybeSingle();
       t.size_note = extra?.size_note || "";
     }
@@ -133,7 +143,7 @@
         <h2>${esc(t.full_name)}</h2>
         <p class="muted">${esc(t.phone)} · ${esc([t.moto_type, t.moto_model].filter((v) => v && v !== "-").join(" "))}</p>
         <dl class="ticket__rows">
-          <div><dt>Saiz baju</dt><dd class="ct-size">${esc(t.shirt_size)}${t.size_note ? `<div class="muted" style="font-size:.85rem">${esc(t.size_note)}</div>` : ""}</dd></div>
+          <div><dt>Saiz baju</dt><dd class="ct-size">${esc(t.shirt_size)}${t.size_note ? `<div class="muted" style="font-size:.85rem">${esc(t.size_note)}</div>` : ""}${t.size_changed_from && t.size_changed_from !== t.shirt_size ? `<div class="ct-size-changed">Ditukar dari ${esc(t.size_changed_from)} · ${esc(time(t.size_changed_at))} (${esc(t.size_changed_by || "")})</div>` : ""}</dd></div>
           <div><dt>Hadir</dt><dd>${t.checked_in_at ? `Ya · ${esc(time(t.checked_in_at))} (${esc(t.checked_in_by || "")})` : "Belum"}</dd></div>
           <div><dt>Baju</dt><dd>${t.shirt_collected_at ? `Diserahkan · ${esc(time(t.shirt_collected_at))} (${esc(t.shirt_collected_by || "")})` : "Belum diambil"}</dd></div>
         </dl>
@@ -141,8 +151,21 @@
           ${can && !t.checked_in_at ? `<button class="btn btn--line" type="button" data-act="checkin">Tanda hadir</button>` : ""}
           ${can && !t.shirt_collected_at ? `<button class="btn btn--line" type="button" data-act="shirt">Serah baju</button>` : ""}
           ${can && !t.checked_in_at && !t.shirt_collected_at ? `<button class="btn btn--mint" type="button" data-act="both">Serah semua</button>` : ""}
+          ${paid && sizeOptions ? `<button class="btn btn--line" type="button" data-resize>Tukar saiz</button>` : ""}
           <button class="btn ${can && !allDone ? "btn--line" : ""}" type="button" data-close>Tutup</button>
-        </div>`;
+        </div>
+        ${paid && sizeOptions ? `
+        <form class="ct-resize" data-resize-form hidden novalidate>
+          <h3>Tukar saiz baju</h3>
+          <p class="muted">Hanya super admin. Saiz asal pembeli akan direkodkan.</p>
+          <div class="field"><label for="ct-new-size">Saiz baharu</label>
+            <select id="ct-new-size">${sizeOptions.map((s) => `<option value="${esc(s)}"${s === t.shirt_size ? " selected" : ""}>${esc(s)}</option>`).join("")}</select></div>
+          <div class="field" data-resize-note${t.shirt_size === "Custom" ? "" : " hidden"}><label for="ct-new-note">Ukuran custom</label>
+            <input id="ct-new-note" maxlength="100" value="${esc(t.size_note || "")}" placeholder="cth dada 52 inci"></div>
+          <p class="notice notice--error" data-resize-msg hidden></p>
+          <div class="form-actions"><button class="btn btn--mint" type="submit">Simpan saiz</button><button class="text-btn" type="button" data-resize-cancel>Batal</button></div>
+        </form>` : ""}`;
+      card.dataset.orderId = t.order_id;
       card.dataset.code = code;
       if (action && !t.already && navigator.vibrate) navigator.vibrate(60);
     }
@@ -150,10 +173,30 @@
   }
   $("#ct-card").addEventListener("click", async (e) => {
     if (e.target.closest("[data-close]")) { dlg.close(); return; }
+    const form = $("[data-resize-form]", $("#ct-card"));
+    if (e.target.closest("[data-resize]")) { form.hidden = false; $("#ct-new-size").focus(); return; }
+    if (e.target.closest("[data-resize-cancel]")) { form.hidden = true; return; }
     const b = e.target.closest("[data-act]");
     if (!b) return;
     b.disabled = true;
     await openTicket($("#ct-card").dataset.code, b.dataset.act);
+  });
+  $("#ct-card").addEventListener("change", (e) => {
+    if (e.target.id === "ct-new-size") $("[data-resize-note]", $("#ct-card")).hidden = e.target.value !== "Custom";
+  });
+  $("#ct-card").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const card = $("#ct-card");
+    const msg = $("[data-resize-msg]", card);
+    const size = $("#ct-new-size").value;
+    const btn = $("[data-resize-form] button[type=submit]", card);
+    btn.disabled = true; msg.hidden = true;
+    const { error } = await sb.rpc("event_change_size", { p_order: card.dataset.orderId, p_size: size, p_note: size === "Custom" ? $("#ct-new-note").value : null });
+    btn.disabled = false;
+    if (error) { msg.textContent = error.message; msg.hidden = false; return; }
+    await openTicket(card.dataset.code);
+    note(`Saiz ditukar ke ${size}.`, "success");
+    if (!$("[data-pane=summary]").hidden) loadSummary();
   });
   dlg.addEventListener("close", () => {
     lastAt = Date.now();
