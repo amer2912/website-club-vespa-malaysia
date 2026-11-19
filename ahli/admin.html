@@ -64,13 +64,27 @@
           <label for="adm-search">Search</label>
           <input id="adm-search" type="search" placeholder="Name, email, phone, NRIC, member no. or plate">
         </div>
-        <div class="field" style="flex:0 1 220px">
-          <label for="adm-filter">Show</label>
+        <div class="field" style="flex:0 1 170px">
+          <label for="adm-year">Year · Tahun</label>
+          <select id="adm-year"><option value="all">All years</option></select>
+        </div>
+        <div class="field" style="flex:0 1 200px">
+          <label for="adm-kind">Type · Jenis</label>
+          <select id="adm-kind">
+            <option value="all">All · Semua</option>
+            <option value="new">New · Ahli baharu</option>
+            <option value="renewal">Renewal · Renew</option>
+            <option value="legacy">Old record · Rekod lama</option>
+          </select>
+        </div>
+        <div class="field" style="flex:0 1 200px">
+          <label for="adm-filter">Status</label>
           <select id="adm-filter">
             <option value="all">All members</option>
-            <option value="active">Active</option>
-            <option value="expired">Expired</option>
-            <option value="new">Never paid</option>
+            <option value="active">Active · Aktif</option>
+            <option value="inactive">Not active · Tidak aktif</option>
+            <option value="expired">&nbsp;&nbsp;Expired · Tamat tempoh</option>
+            <option value="new">&nbsp;&nbsp;Never paid · Belum bayar</option>
             <option value="incomplete">Profile incomplete</option>
           </select>
         </div>
@@ -245,7 +259,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
 <script src="../assets/js/supabase-config.js?v=47"></script>
 <script src="../assets/js/main.js?v=41"></script>
-<script src="../assets/js/admin.js?v=45"></script>
+<script src="../assets/js/admin.js?v=49"></script>
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d5a6ce81c260461195064cea2277394d"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
