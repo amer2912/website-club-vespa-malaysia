@@ -225,6 +225,8 @@
     $("#pf-declaration").checked = !!member.declaration_accepted_at;
     $("#pf-declaration").closest(".check").removeAttribute("aria-invalid");
     $("#pf-email").textContent = member.email;
+    $("#pf-vwc").removeAttribute("aria-invalid");
+    fillVwcField();
     $("#profile-required").hidden = !required;
     $("#profile-cancel").hidden = required;
     note($("#profile-msg"), "");
@@ -281,6 +283,14 @@
       age: Number(v.age),
       declaration_accepted_at: member.declaration_accepted_at || new Date().toISOString(),
     };
+    const vwcTyped = normVwc($("#pf-vwc").value);
+    const vwcEditable = !$("#pf-vwc-wrap").hidden && !$("#pf-vwc").disabled;
+    if (vwcEditable && vwcTyped && !/^MY\d{4,10}$/.test(vwcTyped)) {
+      $("#pf-vwc").setAttribute("aria-invalid", "true");
+      note(msg, "Please check: Vespa World Club no. (MY followed by numbers, e.g. MY1234567).", "error");
+      $("#pf-vwc").scrollIntoView({ block: "center", behavior: "smooth" });
+      return;
+    }
     const btn = e.submitter || $("#profile-form button[type=submit]");
     busy(btn, true, "Saving…");
     const { data, error } = await sb.from("members").update(values).eq("id", member.id).select().single();
@@ -296,6 +306,11 @@
       return;
     }
     member = data;
+    if (vwcEditable && vwcTyped !== (myVwc?.vwc_no || "")) {
+      const { error: vErr } = await sb.rpc("my_set_vwc_no", { p_vwc_no: vwcTyped });
+      if (vErr) { $("#pf-vwc").setAttribute("aria-invalid", "true"); note(msg, `Profile saved, but not the Vespa World Club no.: ${vErr.message}`, "error"); return; }
+      myVwc = { vwc_no: vwcTyped, confirmed: false };
+    }
     if (!member.profile_completed_at) { note(msg, "Some required details are still missing.", "error"); return; }
     await openDashboard("Profile saved.");
   });
@@ -320,6 +335,35 @@
     }[status] || null;
   }
 
+  /* Vespa World Club number (SQL 016): on the card, and typed by the member in the profile */
+  let myVwc;   // undefined = not loaded, null = SQL 016 not run, else { vwc_no, confirmed }
+  async function loadVwc() {
+    if (myVwc !== undefined) return myVwc;
+    const { data, error } = await sb.rpc("my_vwc_no");
+    myVwc = error ? null : ((Array.isArray(data) ? data[0] : data) || { vwc_no: "", confirmed: false });
+    return myVwc;
+  }
+  const normVwc = (s) => String(s || "").toUpperCase().replace(/[\s-]/g, "");
+  async function showVwc() {
+    $("#card-vwc-wrap").hidden = true;
+    if (!member?.member_no) return;
+    const v = await loadVwc();
+    if (!v?.vwc_no) return;
+    $("#card-vwc").textContent = v.vwc_no;
+    $("#card-vwc-wrap").hidden = false;
+  }
+  async function fillVwcField() {
+    const wrap = $("#pf-vwc-wrap"), input = $("#pf-vwc"), hint = $("#pf-vwc-hint");
+    const v = await loadVwc();
+    wrap.hidden = v === null;            // SQL 016 not run yet
+    if (v === null) return;
+    input.value = v.vwc_no || "";
+    input.disabled = !member.member_no || v.confirmed;
+    hint.textContent = !member.member_no ? "You can add it once you have a VCM member number."
+      : v.confirmed ? "Confirmed by the AJK. Contact the AJK to change it."
+      : "Optional. Given to VCM members up to 2023 and starts with MY. It appears on your member card.";
+  }
+
   /* ---------------- dashboard ---------------- */
   async function openDashboard(flash) {
     if (goNextIfReady()) return;
@@ -332,6 +376,7 @@
     $("#card-until").textContent = member.expires_on ? fmtDate(member.expires_on) : "—";
     $("#card-status").className = `pill pill--${st.key}`;
     $("#card-status").textContent = st.label;
+    showVwc();
     $("#dash-greeting").textContent = `Hi, ${(member.full_name || "").split(" ")[0] || "member"}`;
 
     const masked = (x) => (x ? `${"•".repeat(Math.max(0, x.length - 4))}${x.slice(-4)}` : "—");

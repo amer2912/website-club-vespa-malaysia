@@ -20,7 +20,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/style.css?v=50">
+<link rel="stylesheet" href="../assets/css/style.css?v=51">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -239,6 +239,11 @@
                 <input id="pf-claimed_member_no" maxlength="20" placeholder="e.g. VCM-0442" autocapitalize="characters">
                 <span class="hint">Optional. For reference only: the AJK will check it against the club records.</span>
               </div>
+              <div class="field" id="pf-vwc-wrap" hidden>
+                <label for="pf-vwc">Vespa World Club no. (if you have one)</label>
+                <input id="pf-vwc" maxlength="20" placeholder="e.g. MY1234567" autocapitalize="characters" autocomplete="off">
+                <span class="hint" id="pf-vwc-hint">Optional. Given to VCM members up to 2023 and starts with MY. It appears on your member card.</span>
+              </div>
               <div class="field">
                 <label for="pf-tshirt_size">T-shirt size <span class="req">*</span></label>
                 <select id="pf-tshirt_size" required>
@@ -306,14 +311,18 @@
           <div class="member-card" role="group" aria-label="Digital membership card">
             <div class="member-card__top">
               <div class="member-card__club">Vespa Club Malaysia<small>Member card</small></div>
-              <img src="../assets/img/logo.png" alt="" width="54" height="54">
+              <div class="member-card__logos">
+                <img src="../assets/img/logo.png" alt="Vespa Club Malaysia" width="54" height="54">
+                <img src="../assets/img/vwc-logo.png" alt="Vespa World Club" width="54" height="54">
+              </div>
             </div>
             <div>
               <div class="member-card__name" id="card-name"></div>
               <span id="card-status" class="pill" style="margin-top:10px"></span>
             </div>
             <div class="member-card__meta">
-              <div><small>Member no.</small><strong id="card-no"></strong></div>
+              <div><small>Member no.</small><strong id="card-no"></strong>
+                <div id="card-vwc-wrap" class="member-card__vwc" hidden><small>VWC no.</small><strong id="card-vwc"></strong></div></div>
               <div style="text-align:right"><small>Valid until</small><strong id="card-until"></strong></div>
             </div>
           </div>
@@ -397,7 +406,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
 <script src="../assets/js/supabase-config.js?v=47"></script>
 <script src="../assets/js/main.js?v=41"></script>
-<script src="../assets/js/portal.js?v=44"></script>
+<script src="../assets/js/portal.js?v=52"></script>
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d5a6ce81c260461195064cea2277394d"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
