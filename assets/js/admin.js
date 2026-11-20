@@ -37,6 +37,7 @@
   let members = [];
   let imports = [];
   let paidYears = new Map();
+  let vwc = new Map();   // VCM member no. -> VWC no. (SQL 016)
   let fees = { new_member_fee_cents: 13000, fee_cents: 6000 };
   let current = null;
   let editing = null;
@@ -69,7 +70,8 @@
     const [{ data, error }, paid] = await Promise.all([
       sb.from("members").select("*").order("member_no", { ascending: true, nullsFirst: false }),
       sb.from("payments").select("member_id, coverage_year, kind, method").eq("status", "paid"),
-    ]);
+      sb.from("vwc_numbers").select("member_no, vwc_no"),
+    ]).then(([a, b, c]) => { vwc = new Map((c.data || []).map((r) => [r.member_no, r.vwc_no])); return [a, b]; });
     if (error) { note($("#adm-msg"), `Could not load members: ${error.message}`, "error"); return; }
     members = data || [];
     // member id -> { year: "new" | "renewal" } from paid payments (portal, cash, transfer, old Google Form)
@@ -143,7 +145,7 @@
         } else if (!Object.values(ys).includes(kind)) return false;
       }
       if (!q) return true;
-      return [m.member_no, m.claimed_member_no, m.full_name, m.email, m.phone, m.plate_no, m.state, m.vespa_model, m.nric]
+      return [m.member_no, m.claimed_member_no, m.full_name, m.email, m.phone, m.plate_no, m.state, m.vespa_model, m.nric, vwc.get(m.member_no)]
         .some((v) => String(v || "").toLowerCase().includes(q));
     });
   }
@@ -162,7 +164,8 @@
       const st = statusOf(m);
       return `<tr>
         <td class="num">${esc(m.member_no || "—")}${m.claimed_member_no && !sameNo(m.claimed_member_no, m.member_no)
-          ? `<div class="claimed" title="Number typed by the member, for checking">claims ${esc(m.claimed_member_no)}</div>` : ""}</td>
+          ? `<div class="claimed" title="Number typed by the member, for checking">claims ${esc(m.claimed_member_no)}</div>` : ""}${vwc.get(m.member_no)
+          ? `<div class="muted" style="font-size:.78rem" title="Vespa World Club no.">VWC ${esc(vwc.get(m.member_no))}</div>` : ""}</td>
         <td><strong>${esc(m.full_name || "(no name yet)")}</strong>${m.profile_completed_at ? "" : '<div class="muted" style="font-size:.8rem">Profile incomplete</div>'}</td>
         <td><div>${esc(m.email)}</div><div class="muted">${esc(m.phone || "")}</div></td>
         <td>${esc(m.state || "—")}</td>
@@ -202,8 +205,8 @@
       "vespa_model", "plate_no", "tshirt_size", "club_group", "remark", "expires_on", "joined_on", "declaration_accepted_at"];
     const yearSel = $("#adm-year").value;
     const typeFor = (m) => { const ys = yearsOf(m); const y = yearSel !== "all" ? yearSel : Object.keys(ys).sort().pop(); return y && ys[y] ? `${KIND[ys[y]]} ${y}` : ""; };
-    const lines = [[...cols, "status", "membership_type"].join(",")].concat(
-      filtered().map((m) => [...cols.map((c) => csvCell(m[c])), LABEL[statusOf(m)], csvCell(typeFor(m))].join(","))
+    const lines = [[...cols, "status", "membership_type", "vwc_no"].join(",")].concat(
+      filtered().map((m) => [...cols.map((c) => csvCell(m[c])), LABEL[statusOf(m)], csvCell(typeFor(m)), csvCell(vwc.get(m.member_no))].join(","))
     );
     const blob = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a");
@@ -268,6 +271,7 @@
     editing = members.find((m) => m.id === btn.dataset.edit);
     if (!editing) return;
     ED.forEach((f) => { $(`#ed-${f}`).value = editing[f] ?? ""; });
+    $("#ed-vwc").value = vwc.get(editing.member_no) || "";
     $("#edit-email").textContent = editing.email;
     note($("#edit-msg"), "");
     editDialog.showModal();
@@ -309,8 +313,60 @@
       });
       return;
     }
+    const vwcErr = await saveVwc(v.member_no);
+    if (vwcErr) { note($("#edit-msg"), `Member saved, but the VWC number was not: ${vwcErr}`, "error"); await loadMembers(); return; }
     editDialog.close();
     note($("#adm-msg"), `Saved changes for ${v.full_name || editing.email}.`, "success");
+    await loadMembers();
+  });
+
+  /* ---------- Vespa World Club numbers ---------- */
+  const normVwc = (s) => String(s || "").toUpperCase().replace(/[\s-]/g, "");
+  // Saves the edit dialog's VWC field when it changed. Returns an error message or null.
+  async function saveVwc(memberNo) {
+    const typed = normVwc($("#ed-vwc").value);
+    const before = vwc.get(editing.member_no) || "";
+    if (typed === before && memberNo === editing.member_no) return null;
+    if (!typed && !before) return null;
+    if (!memberNo) return "give the member a VCM number first.";
+    const { error } = await sb.rpc("admin_set_vwc_no", { p_member_no: memberNo, p_vwc_no: typed });
+    return error ? error.message : null;
+  }
+  // Pasted from Google Sheets: tab-separated columns. Take the VCM number and the MY number from each line.
+  function parseVwc(text) {
+    const rows = [], skipped = [];
+    String(text || "").split(/\r?\n/).forEach((line) => {
+      if (!line.trim()) return;
+      const cells = line.split(/\t|,|;/).map((c) => c.trim().toUpperCase());
+      const vwcNo = cells.map(normVwc).find((c) => /^MY\d{4,10}$/.test(c));
+      // Prefer a cell that says VCM; a bare number is used only when no cell does.
+      const vcm = cells.map((c) => c.match(/^VCM[\s-]*0*(\d{1,4})$/)).find(Boolean)
+        || cells.map((c) => c.match(/^0*(\d{1,4})$/)).filter(Boolean).pop();
+      if (vwcNo && vcm) rows.push({ member_no: `VCM-${vcm[1].padStart(4, "0")}`, vwc_no: vwcNo });
+      else skipped.push(line.trim().slice(0, 40));
+    });
+    return { rows, skipped };
+  }
+  $("#vwc-paste").addEventListener("input", () => {
+    const { rows, skipped } = parseVwc($("#vwc-paste").value);
+    $("#vwc-preview").textContent = rows.length || skipped.length
+      ? `${rows.length} rows ready${rows.length ? ` (e.g. ${rows.slice(0, 2).map((r) => `${r.member_no} → ${r.vwc_no}`).join(", ")})` : ""}${skipped.length ? ` · ${skipped.length} lines without both numbers (headings are fine)` : ""}`
+      : "";
+  });
+  $("#vwc-import").addEventListener("click", async () => {
+    const { rows } = parseVwc($("#vwc-paste").value);
+    if (!rows.length) { note($("#vwc-msg"), "No rows with both a VCM number and an MY number found.", "error"); return; }
+    const btn = $("#vwc-import"); btn.disabled = true;
+    const { data, error } = await sb.rpc("admin_import_vwc", { p_rows: rows });
+    btn.disabled = false;
+    if (error) { note($("#vwc-msg"), error.message, "error"); return; }
+    const r = Array.isArray(data) ? data[0] : data;
+    const problems = r?.problems || [];
+    const box = $("#vwc-msg");
+    box.className = `notice notice--${problems.length ? "warn" : "success"}`; box.hidden = false;
+    box.innerHTML = `Saved ${esc(r?.saved ?? 0)}, already up to date ${esc(r?.unchanged ?? 0)}.${problems.length
+      ? `<br>Not saved (${problems.length}):<ul style="margin:6px 0 0 18px">${problems.slice(0, 30).map((p) => `<li>${esc(p)}</li>`).join("")}</ul>` : ""}`;
+    if (!problems.length) { $("#vwc-paste").value = ""; $("#vwc-preview").textContent = ""; }
     await loadMembers();
   });
 

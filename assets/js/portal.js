@@ -320,6 +320,16 @@
     }[status] || null;
   }
 
+  /* Vespa World Club number on the card (SQL 016; hidden until AJK add it) */
+  async function showVwc() {
+    $("#card-vwc-wrap").hidden = true;
+    if (!member?.member_no) return;
+    const { data, error } = await sb.rpc("my_vwc_no");
+    if (error || !data) return;
+    $("#card-vwc").textContent = data;
+    $("#card-vwc-wrap").hidden = false;
+  }
+
   /* ---------------- dashboard ---------------- */
   async function openDashboard(flash) {
     if (goNextIfReady()) return;
@@ -332,6 +342,7 @@
     $("#card-until").textContent = member.expires_on ? fmtDate(member.expires_on) : "—";
     $("#card-status").className = `pill pill--${st.key}`;
     $("#card-status").textContent = st.label;
+    showVwc();
     $("#dash-greeting").textContent = `Hi, ${(member.full_name || "").split(" ")[0] || "member"}`;
 
     const masked = (x) => (x ? `${"•".repeat(Math.max(0, x.length - 4))}${x.slice(-4)}` : "—");
