@@ -116,7 +116,7 @@
 
       <div class="panel" style="margin-top:28px" id="vwc-panel">
         <h2>Vespa World Club numbers</h2>
-        <p class="muted" style="margin:4px 0 0">Copy two columns from the Google Sheet (VCM member no. and VWC no.) and paste them here. One member per line; other columns are ignored. The VWC number appears on the member's card.</p>
+        <p class="muted" style="margin:4px 0 0">Copy two columns from the Google Sheet (VCM member no. and VWC no.) and paste them here. One member per line; other columns are ignored. The VWC number appears on the member's card. Members can also type their own number in their profile; it shows "from member" in the list until you confirm it here or with Edit.</p>
         <div class="field" style="margin-top:14px"><label for="vwc-paste">Paste rows</label>
           <textarea id="vwc-paste" rows="6" placeholder="VCM-0004	MY1234567&#10;VCM-0186	MY7654321"></textarea></div>
         <div class="form-actions"><button class="btn btn--small" type="button" id="vwc-import">Save VWC numbers</button><span class="muted" id="vwc-preview" style="font-size:.85rem"></span></div>
@@ -164,7 +164,7 @@
             <div class="field"><label for="ed-expires_on">Valid until</label><input id="ed-expires_on" type="date"><span class="hint">Clear it to mark as not paid.</span></div>
           </div>
           <div class="form-row">
-            <div class="field"><label for="ed-vwc">Vespa World Club no.</label><input id="ed-vwc" maxlength="20" placeholder="e.g. MY1234567" autocapitalize="characters"><span class="hint">Shown on the member card. Clear it to remove.</span></div>
+            <div class="field"><label for="ed-vwc">Vespa World Club no.</label><input id="ed-vwc" maxlength="20" placeholder="e.g. MY1234567" autocapitalize="characters"><span class="hint" id="ed-vwc-hint">Shown on the member card. Clear it to remove.</span></div>
           </div>
           <div class="field"><label for="ed-full_name">Full name</label><input id="ed-full_name" maxlength="120"></div>
           <div class="form-row">
@@ -271,7 +271,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
 <script src="../assets/js/supabase-config.js?v=47"></script>
 <script src="../assets/js/main.js?v=41"></script>
-<script src="../assets/js/admin.js?v=51"></script>
+<script src="../assets/js/admin.js?v=52"></script>
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d5a6ce81c260461195064cea2277394d"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
