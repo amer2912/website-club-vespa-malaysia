@@ -12,12 +12,6 @@
 //   SITE_URL                 https://vespaclubmalaysia.com
 // SUPABASE_URL and the project keys are provided by Supabase automatically.
 // Optional: VCM_SECRET_KEY (an sb_secret_ key) if Supabase stops providing one.
-// Optional: TOYYIBPAY_DUITNOW_QR       "0" turns DuitNow QR off (on by default:
-//                                     VCM's ToyyibPay account has DNQR approved)
-// Optional: TOYYIBPAY_CHARGE_DUITNOW_QR "1" member pays the DuitNow QR fee,
-//                                     "0" (default) VCM pays
-//                                     Keep "0": the callback checks the paid amount equals the
-//                                     price, and a buyer-paid fee could make it differ.
 
 import { createClient } from "npm:@supabase/supabase-js@2.118.0";
 
@@ -47,8 +41,6 @@ const TP_BASE = (Deno.env.get("TOYYIBPAY_BASE_URL") ?? "https://dev.toyyibpay.co
 const TP_SECRET = Deno.env.get("TOYYIBPAY_SECRET_KEY") ?? "";
 const TP_CATEGORY = Deno.env.get("TOYYIBPAY_CATEGORY_CODE") ?? "";
 const SITE_URL = (Deno.env.get("SITE_URL") ?? "https://vespaclubmalaysia.com").replace(/\/+$/, "");
-const DUITNOW_QR = Deno.env.get("TOYYIBPAY_DUITNOW_QR") !== "0";
-const DUITNOW_CHARGE = Deno.env.get("TOYYIBPAY_CHARGE_DUITNOW_QR") === "1" ? "1" : "0";
 
 const ALLOWED_ORIGINS = new Set([
   SITE_URL,
@@ -136,24 +128,15 @@ Deno.serve(async (req) => {
     billExpiryDays: "1",
   });
 
-  const createBill = async (f: URLSearchParams) => {
-    try {
-      const res = await fetch(`${TP_BASE}/index.php/api/createBill`, { method: "POST", body: f });
-      const raw = await res.text();
-      let parsed: unknown = null;
-      try { parsed = JSON.parse(raw); } catch { /* not JSON */ }
-      return { billCode: Array.isArray(parsed) ? (parsed[0] as { BillCode?: string })?.BillCode : undefined, raw };
-    } catch (err) {
-      return { billCode: undefined, raw: String(err) };
-    }
-  };
-  let { billCode, raw } = await createBill(DUITNOW_QR
-    ? new URLSearchParams([...form, ["enableDuitNowQR", "1"], ["chargeDuitNowQR", DUITNOW_CHARGE]])
-    : form);
-  if (!billCode && DUITNOW_QR) {
-    // DuitNow QR refused by ToyyibPay: never block a renewal, retry with FPX only.
-    console.error("ToyyibPay createBill with DuitNow QR failed, retrying without", raw.slice(0, 300));
-    ({ billCode, raw } = await createBill(form));
+  let billCode: string | undefined;
+  let raw = "";
+  try {
+    const res = await fetch(`${TP_BASE}/index.php/api/createBill`, { method: "POST", body: form });
+    raw = await res.text();
+    const parsed = JSON.parse(raw);
+    billCode = Array.isArray(parsed) ? parsed[0]?.BillCode : undefined;
+  } catch (_err) {
+    billCode = undefined;
   }
 
   if (!billCode) {
