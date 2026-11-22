@@ -37,60 +37,60 @@
 
 <main id="main" class="portal">
   <div class="wrap">
-    <div class="portal-head"><span class="eyebrow">Kaunter acara</span><h1>Kaunter</h1><p class="muted" id="ct-event-name"></p></div>
+    <div class="portal-head"><span class="eyebrow" data-en="Event counter" data-ms="Kaunter acara">Event counter</span><h1 data-en="Counter" data-ms="Kaunter">Counter</h1><p class="muted" id="ct-event-name"></p><button class="btn btn--line btn--small ct-lang" type="button" id="ct-lang">Bahasa Melayu</button></div>
     <div id="ct-msg" class="notice" hidden aria-live="polite" style="margin-bottom:16px"></div>
 
     <section class="panel panel--narrow" id="ct-login" hidden>
-      <h2>Log masuk petugas</h2>
+      <h2 data-en="Staff login" data-ms="Log masuk petugas">Staff login</h2>
       <form id="ct-pass-form" class="form" novalidate>
         <div class="field"><label for="ct-user">Username</label><input id="ct-user" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required></div>
-        <div class="field"><label for="ct-pass">Kata laluan</label><input id="ct-pass" type="password" autocomplete="current-password" required></div>
-        <button class="btn" type="submit">Log masuk</button>
-        <button class="text-btn" type="button" id="ct-use-email">Log masuk dengan emel (kod 6 digit)</button>
+        <div class="field"><label for="ct-pass" data-en="Password" data-ms="Kata laluan">Password</label><input id="ct-pass" type="password" autocomplete="current-password" required></div>
+        <button class="btn" type="submit" data-en="Log in" data-ms="Log masuk">Log in</button>
+        <button class="text-btn" type="button" id="ct-use-email" data-en="Log in with email (6-digit code)" data-ms="Log masuk dengan emel (kod 6 digit)">Log in with email (6-digit code)</button>
       </form>
       <form id="ct-email-form" class="form" novalidate hidden>
-        <div class="field"><label for="ct-email">Emel</label><input id="ct-email" type="email" inputmode="email" autocomplete="email" required></div>
-        <button class="btn" type="submit">Hantar kod</button>
-        <button class="text-btn" type="button" id="ct-use-pass">Log masuk dengan username</button>
+        <div class="field"><label for="ct-email" data-en="Email" data-ms="Emel">Email</label><input id="ct-email" type="email" inputmode="email" autocomplete="email" required></div>
+        <button class="btn" type="submit" data-en="Send code" data-ms="Hantar kod">Send code</button>
+        <button class="text-btn" type="button" id="ct-use-pass" data-en="Log in with username" data-ms="Log masuk dengan username">Log in with username</button>
       </form>
       <form id="ct-code-form" class="form" novalidate hidden>
-        <p>Kod 6 digit telah dihantar ke <strong id="ct-code-email"></strong>.</p>
-        <div class="field"><label for="ct-code">Kod</label><input id="ct-code" class="code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="10" required></div>
-        <button class="btn" type="submit">Log masuk</button>
+        <p><span data-en="A 6-digit code was sent to" data-ms="Kod 6 digit telah dihantar ke">A 6-digit code was sent to</span> <strong id="ct-code-email"></strong>.</p>
+        <div class="field"><label for="ct-code" data-en="Code" data-ms="Kod">Code</label><input id="ct-code" class="code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="10" required></div>
+        <button class="btn" type="submit" data-en="Log in" data-ms="Log masuk">Log in</button>
       </form>
     </section>
 
     <section id="ct-main" hidden>
       <div class="toolbar">
-        <div class="field" id="ct-event-field" hidden><label for="ct-event">Acara</label><select id="ct-event"></select></div>
-        <div class="form-actions" style="margin-left:auto"><button class="text-btn" type="button" id="ct-logout">Log keluar</button></div>
+        <div class="field" id="ct-event-field" hidden><label for="ct-event" data-en="Event" data-ms="Acara">Event</label><select id="ct-event"></select></div>
+        <div class="form-actions" style="margin-left:auto"><button class="text-btn" type="button" id="ct-logout" data-en="Log out" data-ms="Log keluar">Log out</button></div>
       </div>
       <div class="ct-tabs" role="tablist">
-        <button type="button" role="tab" data-tab="scan" aria-selected="true">Imbas QR</button>
-        <button type="button" role="tab" data-tab="search" aria-selected="false">Cari</button>
-        <button type="button" role="tab" data-tab="summary" aria-selected="false">Ringkasan</button>
+        <button type="button" role="tab" data-tab="scan" aria-selected="true" data-en="Scan QR" data-ms="Imbas QR">Scan QR</button>
+        <button type="button" role="tab" data-tab="search" aria-selected="false" data-en="Search" data-ms="Cari">Search</button>
+        <button type="button" role="tab" data-tab="summary" aria-selected="false" data-en="Summary" data-ms="Ringkasan">Summary</button>
       </div>
 
       <div class="panel" data-pane="scan">
         <div class="ct-camera" id="ct-camera" hidden><video id="ct-video" playsinline muted></video><span class="ct-frame" aria-hidden="true"></span></div>
-        <div class="form-actions"><button class="btn" type="button" id="ct-scan">Mula imbas</button><button class="btn btn--line" type="button" id="ct-stop" hidden>Berhenti</button></div>
+        <div class="form-actions"><button class="btn" type="button" id="ct-scan" data-en="Start scanning" data-ms="Mula imbas">Start scanning</button><button class="btn btn--line" type="button" id="ct-stop" hidden data-en="Stop" data-ms="Berhenti">Stop</button></div>
         <form id="ct-manual" class="toolbar" style="margin-top:16px" novalidate>
-          <div class="field"><label for="ct-code-in">Atau tampal pautan / kod tiket</label><input id="ct-code-in" autocomplete="off"></div>
-          <button class="btn btn--line btn--small" type="submit">Semak</button>
+          <div class="field"><label for="ct-code-in" data-en="Or paste the ticket link / code" data-ms="Atau tampal pautan / kod tiket">Or paste the ticket link / code</label><input id="ct-code-in" autocomplete="off"></div>
+          <button class="btn btn--line btn--small" type="submit" data-en="Check" data-ms="Semak">Check</button>
         </form>
       </div>
 
       <div class="panel" data-pane="search" hidden>
-        <div class="field"><label for="ct-q">Nama, no. telefon atau no. tempahan</label><input id="ct-q" type="search" autocomplete="off" placeholder="cth ALI, 0123, ISD-0012"></div>
+        <div class="field"><label for="ct-q" data-en="Name, phone or order number" data-ms="Nama, no. telefon atau no. tempahan">Name, phone or order number</label><input id="ct-q" type="search" autocomplete="off" placeholder="e.g. ALI, 0123, VD-0012" data-en-ph="e.g. ALI, 0123, VD-0012" data-ms-ph="cth ALI, 0123, VD-0012"></div>
         <ul class="history" id="ct-results"></ul>
       </div>
 
       <div class="panel" data-pane="summary" hidden>
         <div class="dash-kpis" id="ct-kpis"></div>
-        <div id="ct-interests-wrap" hidden><h3>Berminat menyertai (tinjauan)</h3><ul class="history" id="ct-interests"></ul></div>
-        <h3>Baju ikut saiz</h3>
-        <div class="table-scroll"><table class="table table--compact" style="min-width:0"><thead><tr><th>Saiz</th><th>Dibayar</th><th>Sudah diambil</th><th>Belum diambil</th></tr></thead><tbody id="ct-sizes"></tbody></table></div>
-        <div class="form-actions" style="margin-top:16px"><button class="btn btn--small" type="button" id="ct-csv">Muat turun senarai pembeli (CSV)</button></div>
+        <div id="ct-interests-wrap" hidden><h3 data-en="Interested in joining (survey)" data-ms="Berminat menyertai (tinjauan)">Interested in joining (survey)</h3><ul class="history" id="ct-interests"></ul></div>
+        <h3 data-en="T-shirts by size" data-ms="Baju ikut saiz">T-shirts by size</h3>
+        <div class="table-scroll"><table class="table table--compact" style="min-width:0"><thead><tr><th data-en="Size" data-ms="Saiz">Size</th><th data-en="Paid" data-ms="Dibayar">Paid</th><th data-en="Collected" data-ms="Sudah diambil">Collected</th><th data-en="Not collected" data-ms="Belum diambil">Not collected</th></tr></thead><tbody id="ct-sizes"></tbody></table></div>
+        <div class="form-actions" style="margin-top:16px"><button class="btn btn--small" type="button" id="ct-csv" data-en="Download buyer list (CSV)" data-ms="Muat turun senarai pembeli (CSV)">Download buyer list (CSV)</button></div>
       </div>
     </section>
 
@@ -142,6 +142,6 @@
 <script src="../assets/js/supabase-config.js?v=47"></script>
 <script src="../assets/js/main.js?v=56"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
-<script src="../assets/js/counter.js?v=50"></script>
+<script src="../assets/js/counter.js?v=57"></script>
 </body>
 </html>
