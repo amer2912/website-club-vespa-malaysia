@@ -734,3 +734,8 @@ button.hbar { width: 100%; background: none; border: 0; font: inherit; color: in
 .doc-links b { display: block; font-size: 1.02rem; }
 .doc-links small { display: block; color: var(--muted); font-size: .84rem; margin-top: 2px; }
 @media (max-width: 760px) { .constitution { grid-template-columns: 1fr; gap: 20px; } }
+
+/* help box: email (replaces the WhatsApp number) */
+.help-wa--email .help-wa__icon { background: var(--navy); }
+.help-wa--email a { color: var(--navy); }
+.help-wa .help-wa__how { display: block; color: var(--muted); font-size: .86rem; margin-top: 6px; }

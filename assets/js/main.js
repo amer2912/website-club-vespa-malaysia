@@ -287,7 +287,7 @@ function fillLinks() {
   $$("[data-year]").forEach((el) => (el.textContent = new Date().getFullYear()));
   const email = VCM.emailParts.join("@");
   $$("[data-email]").forEach((a) => {
-    a.href = `mailto:${email}`;
+    a.href = `mailto:${email}${a.dataset.subject ? `?subject=${encodeURIComponent(a.dataset.subject)}` : ""}`;
     if (a.textContent.includes("[at]")) a.textContent = email;
   });
 }

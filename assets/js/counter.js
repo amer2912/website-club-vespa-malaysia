@@ -13,7 +13,56 @@
   const time = (ts) => ts ? new Date(ts).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZone: "Asia/Kuala_Lumpur" }) : "";
   const codeFrom = (text) => (String(text || "").match(/[0-9a-fA-F]{32}/) || [])[0]?.toLowerCase() || null;
 
-  if (!cfg.url || !cfg.anonKey || !window.supabase?.createClient) { note("Sistem belum disediakan.", "error"); return; }
+  /* ---------- language: English (default) or Bahasa Melayu ---------- */
+  const STR = {
+    en: {
+      notSetUp: "The system is not set up yet.", fillLogin: "Please enter your username and password.", badLogin: "Wrong username or password.",
+      badEmail: "Please enter a valid email.", badCode: "Wrong or expired code.",
+      noAccess: "This account has no counter access for any event. Ask the VCM AJK to add your email as an organiser.",
+      viewOnly: " · view only", notFound: "Ticket not found.", otherEvent: (t) => `This ticket is for another event${t ? `: ${t}` : ""}.`,
+      close: "Close", unpaid: "⛔ NOT PAID", claimed: (w, by) => `⛔ ALREADY CLAIMED${w ? ` · ${w} by ${by}` : ""}`,
+      done: "✅ DONE: checked in and item handed over", valid: "✅ VALID · NOT CLAIMED YET",
+      size: "Size", changedFrom: (s, w, by) => `Changed from ${s} · ${w} (${by})`, checkedIn: "Checked in", yes: "Yes", no: "Not yet",
+      item: "T-shirt / pack", handed: "Handed over", notCollected: "Not collected yet",
+      markIn: "Check in", giveItem: "Hand over item", giveAll: "Hand over all", changeSize: "Change size",
+      changeSizeTitle: "Change T-shirt size", superOnly: "Super admin only. The buyer's original size is recorded.", newSize: "New size",
+      customSize: "Custom measurement", customEg: "e.g. chest 52 inches", saveSize: "Save size", cancel: "Cancel", sizeChanged: (s) => `Size changed to ${s}.`,
+      noScanner: "The scanner could not load. Use the box below or the Search tab.",
+      noCamera: "The camera could not open. Allow camera access for this site, or use the Search tab.",
+      badLink: "Not a valid ticket link or code.", collected: "Collected", notYet: "Not yet", noMatch: "No matches.",
+      kPaid: "Paid tickets", kSales: "Total sales", kIn: "Checked in", kGiven: "Items handed over", both: "Both", noSales: "No sales yet.",
+      lang: "Bahasa Melayu",
+    },
+    ms: {
+      notSetUp: "Sistem belum disediakan.", fillLogin: "Sila isi username dan kata laluan.", badLogin: "Username atau kata laluan salah.",
+      badEmail: "Sila masukkan emel yang sah.", badCode: "Kod salah atau sudah tamat tempoh.",
+      noAccess: "Akaun ini tiada akses kaunter untuk mana-mana acara. Minta AJK VCM tambah emel anda sebagai penganjur.",
+      viewOnly: " · lihat sahaja", notFound: "Tiket tidak dijumpai.", otherEvent: (t) => `Tiket ini untuk acara lain${t ? `: ${t}` : ""}.`,
+      close: "Tutup", unpaid: "⛔ BELUM DIBAYAR", claimed: (w, by) => `⛔ SUDAH DITUNTUT${w ? ` · ${w} oleh ${by}` : ""}`,
+      done: "✅ SELESAI: hadir dan baju diserahkan", valid: "✅ SAH · BELUM DITUNTUT",
+      size: "Saiz baju", changedFrom: (s, w, by) => `Ditukar dari ${s} · ${w} (${by})`, checkedIn: "Hadir", yes: "Ya", no: "Belum",
+      item: "Baju", handed: "Diserahkan", notCollected: "Belum diambil",
+      markIn: "Tanda hadir", giveItem: "Serah baju", giveAll: "Serah semua", changeSize: "Tukar saiz",
+      changeSizeTitle: "Tukar saiz baju", superOnly: "Hanya super admin. Saiz asal pembeli akan direkodkan.", newSize: "Saiz baharu",
+      customSize: "Ukuran custom", customEg: "cth dada 52 inci", saveSize: "Simpan saiz", cancel: "Batal", sizeChanged: (s) => `Saiz ditukar ke ${s}.`,
+      noScanner: "Pengimbas tidak dapat dimuatkan. Guna kotak di bawah atau tab Cari.",
+      noCamera: "Kamera tidak dapat dibuka. Benarkan akses kamera untuk laman ini, atau guna tab Cari.",
+      badLink: "Pautan atau kod tiket tidak sah.", collected: "Diambil", notYet: "Belum", noMatch: "Tiada padanan.",
+      kPaid: "Tiket dibayar", kSales: "Jumlah jualan", kIn: "Sudah hadir", kGiven: "Baju diserahkan", both: "Kedua-duanya", noSales: "Belum ada jualan.",
+      lang: "English",
+    },
+  };
+  let lang = "en";
+  try { lang = localStorage.getItem("vcm-ct-lang") === "ms" ? "ms" : "en"; } catch { /* storage blocked */ }
+  const tr = (k, ...a) => { const v = STR[lang][k]; return typeof v === "function" ? v(...a) : v; };
+  function applyStaticText() {
+    document.documentElement.lang = lang;
+    $$("[data-en]").forEach((el) => { el.textContent = lang === "ms" ? el.dataset.ms : el.dataset.en; });
+    $$("[data-en-ph]").forEach((el) => { el.placeholder = lang === "ms" ? el.dataset.msPh : el.dataset.enPh; });
+    $("#ct-lang").textContent = tr("lang");
+  }
+
+  if (!cfg.url || !cfg.anonKey || !window.supabase?.createClient) { note(tr("notSetUp"), "error"); return; }
   const sb = window.supabase.createClient(cfg.url, cfg.anonKey, { auth: { persistSession: true, autoRefreshToken: true } });
 
   let events = [];
@@ -30,12 +79,12 @@
     e.preventDefault();
     const user = $("#ct-user").value.trim();
     const password = $("#ct-pass").value;
-    if (!user || !password) { note("Sila isi username dan kata laluan.", "error"); return; }
+    if (!user || !password) { note(tr("fillLogin"), "error"); return; }
     const btn = $("#ct-pass-form button[type=submit]");
     btn.disabled = true;
     const { error } = await sb.auth.signInWithPassword({ email: loginEmail(user), password });
     btn.disabled = false;
-    if (error) { note("Username atau kata laluan salah.", "error"); return; }
+    if (error) { note(tr("badLogin"), "error"); return; }
     $("#ct-pass").value = "";
     start();
   });
@@ -45,7 +94,7 @@
   $("#ct-email-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     pendingEmail = $("#ct-email").value.trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(pendingEmail)) { note("Sila masukkan emel yang sah.", "error"); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(pendingEmail)) { note(tr("badEmail"), "error"); return; }
     const { error } = await sb.auth.signInWithOtp({ email: pendingEmail, options: { shouldCreateUser: true } });
     if (error) { note(error.message, "error"); return; }
     $("#ct-code-email").textContent = pendingEmail;
@@ -57,7 +106,7 @@
     e.preventDefault();
     const token = $("#ct-code").value.replace(/\s/g, "");
     const { error } = await sb.auth.verifyOtp({ email: pendingEmail, token, type: "email" });
-    if (error) { note("Kod salah atau sudah tamat tempoh.", "error"); return; }
+    if (error) { note(tr("badCode"), "error"); return; }
     start();
   });
   $("#ct-logout").addEventListener("click", async () => { stopScan(); await sb.auth.signOut(); location.reload(); });
@@ -69,7 +118,7 @@
     const { data, error } = await sb.rpc("event_my_events");
     events = data || [];
     if (error || !events.length) {
-      note("Akaun ini tiada akses kaunter untuk mana-mana acara. Minta AJK VCM tambah emel anda sebagai penganjur.", "error");
+      note(tr("noAccess"), "error");
       $("#ct-main").hidden = false;
       $$(".ct-tabs, [data-pane]").forEach((el) => { el.hidden = true; });
       return;
@@ -89,7 +138,7 @@
       const { data, error } = await sb.rpc("event_size_options", { p_event: id });
       if (current?.id === id) sizeOptions = !error && Array.isArray(data) && data.length ? data : null;
     }
-    $("#ct-event-name").textContent = `${current.title}${current.can_work ? "" : " · lihat sahaja"}`;
+    $("#ct-event-name").textContent = `${current.title}${current.can_work ? "" : tr("viewOnly")}`;
     $("#ct-results").innerHTML = "";
     if (!$("[data-pane=summary]").hidden) loadSummary();
   }
@@ -107,10 +156,10 @@
   async function openTicket(code, action = null) {
     const { data, error } = await sb.rpc("event_counter", { p_code: code, p_action: action });
     const t = Array.isArray(data) ? data[0] : data;
-    if (error || !t) { showCard(null, error?.message || "Tiket tidak dijumpai."); return; }
+    if (error || !t) { showCard(null, error?.message || tr("notFound")); return; }
     if (t.event_id !== current?.id) {
       const other = events.find((ev) => ev.id === t.event_id);
-      showCard(null, `Tiket ini untuk acara lain${other ? `: ${other.title}` : ""}.`);
+      showCard(null, tr("otherEvent", other?.title));
       return;
     }
     // Size note and size change record (the change columns exist once SQL 015 is run).
@@ -127,14 +176,14 @@
     const card = $("#ct-card");
     if (!t) {
       card.className = "panel ct-card is-bad";
-      card.innerHTML = `<div class="ct-badge">⛔ ${esc(error)}</div><div class="form-actions"><button class="btn" type="button" data-close>Tutup</button></div>`;
+      card.innerHTML = `<div class="ct-badge">⛔ ${esc(error)}</div><div class="form-actions"><button class="btn" type="button" data-close>${tr("close")}</button></div>`;
     } else {
       const paid = t.status === "paid";
       const allDone = t.checked_in_at && t.shirt_collected_at;
-      const state = !paid ? ["is-bad", "⛔ BELUM DIBAYAR"]
-        : t.already ? ["is-bad", `⛔ SUDAH DITUNTUT${t.shirt_collected_at ? ` · ${time(t.shirt_collected_at)} oleh ${t.shirt_collected_by}` : ""}`]
-        : allDone ? ["is-done", "✅ SELESAI: hadir dan baju diserahkan"]
-        : ["is-ok", "✅ SAH · BELUM DITUNTUT"];
+      const state = !paid ? ["is-bad", tr("unpaid")]
+        : t.already ? ["is-bad", tr("claimed", t.shirt_collected_at ? time(t.shirt_collected_at) : "", t.shirt_collected_by)]
+        : allDone ? ["is-done", tr("done")]
+        : ["is-ok", tr("valid")];
       card.className = `panel ct-card ${state[0]}`;
       const can = paid && current.can_work;
       card.innerHTML = `
@@ -143,27 +192,27 @@
         <h2>${esc(t.full_name)}</h2>
         <p class="muted">${esc(t.phone)} · ${esc([t.moto_type, t.moto_model].filter((v) => v && v !== "-").join(" "))}</p>
         <dl class="ticket__rows">
-          <div><dt>Saiz baju</dt><dd class="ct-size">${esc(t.shirt_size)}${t.size_note ? `<div class="muted" style="font-size:.85rem">${esc(t.size_note)}</div>` : ""}${t.size_changed_from && t.size_changed_from !== t.shirt_size ? `<div class="ct-size-changed">Ditukar dari ${esc(t.size_changed_from)} · ${esc(time(t.size_changed_at))} (${esc(t.size_changed_by || "")})</div>` : ""}</dd></div>
-          <div><dt>Hadir</dt><dd>${t.checked_in_at ? `Ya · ${esc(time(t.checked_in_at))} (${esc(t.checked_in_by || "")})` : "Belum"}</dd></div>
-          <div><dt>Baju</dt><dd>${t.shirt_collected_at ? `Diserahkan · ${esc(time(t.shirt_collected_at))} (${esc(t.shirt_collected_by || "")})` : "Belum diambil"}</dd></div>
+          <div><dt>${tr("size")}</dt><dd class="ct-size">${esc(t.shirt_size)}${t.size_note ? `<div class="muted" style="font-size:.85rem">${esc(t.size_note)}</div>` : ""}${t.size_changed_from && t.size_changed_from !== t.shirt_size ? `<div class="ct-size-changed">${esc(tr("changedFrom", t.size_changed_from, time(t.size_changed_at), t.size_changed_by || ""))}</div>` : ""}</dd></div>
+          <div><dt>${tr("checkedIn")}</dt><dd>${t.checked_in_at ? `${tr("yes")} · ${esc(time(t.checked_in_at))} (${esc(t.checked_in_by || "")})` : tr("no")}</dd></div>
+          <div><dt>${tr("item")}</dt><dd>${t.shirt_collected_at ? `${tr("handed")} · ${esc(time(t.shirt_collected_at))} (${esc(t.shirt_collected_by || "")})` : tr("notCollected")}</dd></div>
         </dl>
         <div class="form-actions">
-          ${can && !t.checked_in_at ? `<button class="btn btn--line" type="button" data-act="checkin">Tanda hadir</button>` : ""}
-          ${can && !t.shirt_collected_at ? `<button class="btn btn--line" type="button" data-act="shirt">Serah baju</button>` : ""}
-          ${can && !t.checked_in_at && !t.shirt_collected_at ? `<button class="btn btn--mint" type="button" data-act="both">Serah semua</button>` : ""}
-          ${paid && sizeOptions ? `<button class="btn btn--line" type="button" data-resize>Tukar saiz</button>` : ""}
-          <button class="btn ${can && !allDone ? "btn--line" : ""}" type="button" data-close>Tutup</button>
+          ${can && !t.checked_in_at ? `<button class="btn btn--line" type="button" data-act="checkin">${tr("markIn")}</button>` : ""}
+          ${can && !t.shirt_collected_at ? `<button class="btn btn--line" type="button" data-act="shirt">${tr("giveItem")}</button>` : ""}
+          ${can && !t.checked_in_at && !t.shirt_collected_at ? `<button class="btn btn--mint" type="button" data-act="both">${tr("giveAll")}</button>` : ""}
+          ${paid && sizeOptions ? `<button class="btn btn--line" type="button" data-resize>${tr("changeSize")}</button>` : ""}
+          <button class="btn ${can && !allDone ? "btn--line" : ""}" type="button" data-close>${tr("close")}</button>
         </div>
         ${paid && sizeOptions ? `
         <form class="ct-resize" data-resize-form hidden novalidate>
-          <h3>Tukar saiz baju</h3>
-          <p class="muted">Hanya super admin. Saiz asal pembeli akan direkodkan.</p>
-          <div class="field"><label for="ct-new-size">Saiz baharu</label>
+          <h3>${tr("changeSizeTitle")}</h3>
+          <p class="muted">${tr("superOnly")}</p>
+          <div class="field"><label for="ct-new-size">${tr("newSize")}</label>
             <select id="ct-new-size">${sizeOptions.map((s) => `<option value="${esc(s)}"${s === t.shirt_size ? " selected" : ""}>${esc(s)}</option>`).join("")}</select></div>
-          <div class="field" data-resize-note${t.shirt_size === "Custom" ? "" : " hidden"}><label for="ct-new-note">Ukuran custom</label>
-            <input id="ct-new-note" maxlength="100" value="${esc(t.size_note || "")}" placeholder="cth dada 52 inci"></div>
+          <div class="field" data-resize-note${t.shirt_size === "Custom" ? "" : " hidden"}><label for="ct-new-note">${tr("customSize")}</label>
+            <input id="ct-new-note" maxlength="100" value="${esc(t.size_note || "")}" placeholder="${tr("customEg")}"></div>
           <p class="notice notice--error" data-resize-msg hidden></p>
-          <div class="form-actions"><button class="btn btn--mint" type="submit">Simpan saiz</button><button class="text-btn" type="button" data-resize-cancel>Batal</button></div>
+          <div class="form-actions"><button class="btn btn--mint" type="submit">${tr("saveSize")}</button><button class="text-btn" type="button" data-resize-cancel>${tr("cancel")}</button></div>
         </form>` : ""}`;
       card.dataset.orderId = t.order_id;
       card.dataset.code = code;
@@ -195,7 +244,7 @@
     btn.disabled = false;
     if (error) { msg.textContent = error.message; msg.hidden = false; return; }
     await openTicket(card.dataset.code);
-    note(`Saiz ditukar ke ${size}.`, "success");
+    note(tr("sizeChanged", size), "success");
     if (!$("[data-pane=summary]").hidden) loadSummary();
   });
   dlg.addEventListener("close", () => {
@@ -211,11 +260,11 @@
   const video = $("#ct-video");
   const canvas = document.createElement("canvas");
   async function startScan() {
-    if (!window.jsQR) { note("Pengimbas tidak dapat dimuatkan. Guna kotak di bawah atau tab Cari.", "error"); return; }
+    if (!window.jsQR) { note(tr("noScanner"), "error"); return; }
     try {
       stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
     } catch {
-      note("Kamera tidak dapat dibuka. Benarkan akses kamera untuk laman ini, atau guna tab Cari.", "error");
+      note(tr("noCamera"), "error");
       return;
     }
     wantScan = true;
@@ -253,7 +302,7 @@
   $("#ct-manual").addEventListener("submit", (e) => {
     e.preventDefault();
     const code = codeFrom($("#ct-code-in").value);
-    if (!code) { note("Pautan atau kod tiket tidak sah.", "error"); return; }
+    if (!code) { note(tr("badLink"), "error"); return; }
     note("");
     openTicket(code);
   });
@@ -274,8 +323,8 @@
     $("#ct-results").innerHTML = (data || []).map((r) => `
       <li><button type="button" class="ct-row" data-code="${esc(r.ticket_code)}">
         <span><strong>${esc(r.full_name)}</strong><span class="muted"> · ${esc(r.order_no)} · ${esc(r.phone)}</span></span>
-        <span class="pill ${r.shirt_collected_at ? "pill--active" : "pill--new"}">${esc(r.shirt_size)}${r.size_note ? ` (${esc(r.size_note)})` : ""} · ${r.shirt_collected_at ? "Diambil" : "Belum"}</span>
-      </button></li>`).join("") || `<li class="muted">Tiada padanan.</li>`;
+        <span class="pill ${r.shirt_collected_at ? "pill--active" : "pill--new"}">${esc(r.shirt_size)}${r.size_note ? ` (${esc(r.size_note)})` : ""} · ${r.shirt_collected_at ? tr("collected") : tr("notYet")}</span>
+      </button></li>`).join("") || `<li class="muted">${tr("noMatch")}</li>`;
   }
   $("#ct-results").addEventListener("click", (e) => { const b = e.target.closest("[data-code]"); if (b) openTicket(b.dataset.code); });
 
@@ -294,22 +343,22 @@
     const n = paidRows.length;
     const cents = paidRows.reduce((s, r) => s + (r.amount_cents || 0), 0);
     const tiles = [
-      [n, "Tiket dibayar"], [`RM${(cents / 100).toLocaleString("en-MY")}`, "Jumlah jualan"],
-      [paidRows.filter((r) => r.checked_in_at).length, "Sudah hadir"], [paidRows.filter((r) => r.shirt_collected_at).length, "Baju diserahkan"],
+      [n, tr("kPaid")], [`RM${(cents / 100).toLocaleString("en-MY")}`, tr("kSales")],
+      [paidRows.filter((r) => r.checked_in_at).length, tr("kIn")], [paidRows.filter((r) => r.shirt_collected_at).length, tr("kGiven")],
     ];
     $("#ct-kpis").innerHTML = tiles.map(([v, l]) => `<div><strong>${esc(v)}</strong><span>${esc(l)}</span></div>`).join("");
     const interest = {};
     paidRows.forEach((r) => (r.interests || []).forEach((i) => { interest[i] = (interest[i] || 0) + 1; }));
     const both = paidRows.filter((r) => (r.interests || []).length >= 2).length;
     $("#ct-interests").innerHTML = Object.entries(interest).map(([k, v]) => `<li><span>${esc(k)}</span><strong>${v}</strong></li>`).join("")
-      + (Object.keys(interest).length >= 2 ? `<li><span>Kedua-duanya</span><strong>${both}</strong></li>` : "");
+      + (Object.keys(interest).length >= 2 ? `<li><span>${tr("both")}</span><strong>${both}</strong></li>` : "");
     $("#ct-interests-wrap").hidden = !Object.keys(interest).length;
     const sizes = {};
     paidRows.forEach((r) => { const s = (sizes[r.shirt_size] ||= { paid: 0, got: 0 }); s.paid++; if (r.shirt_collected_at) s.got++; });
-    const order = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL", "Custom"];
+    const order = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL", "6XL", "7XL", "Custom"];
     $("#ct-sizes").innerHTML = Object.keys(sizes).sort((a, b) => (order.indexOf(a) + 1 || 99) - (order.indexOf(b) + 1 || 99))
       .map((s) => `<tr><td><strong>${esc(s)}</strong></td><td class="num">${sizes[s].paid}</td><td class="num">${sizes[s].got}</td><td class="num">${sizes[s].paid - sizes[s].got}</td></tr>`).join("")
-      || `<tr><td colspan="4" class="muted">Belum ada jualan.</td></tr>`;
+      || `<tr><td colspan="4" class="muted">${tr("noSales")}</td></tr>`;
   }
   const csvCell = (v) => { let s = String(v ?? ""); if (/^[=+\-@]/.test(s)) s = `'${s}`; return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
   $("#ct-csv").addEventListener("click", async () => {
@@ -324,5 +373,16 @@
     setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
   });
 
+  /* ---------- language switch ---------- */
+  $("#ct-lang").addEventListener("click", () => {
+    lang = lang === "en" ? "ms" : "en";
+    try { localStorage.setItem("vcm-ct-lang", lang); } catch { /* storage blocked */ }
+    applyStaticText();
+    if (current) $("#ct-event-name").textContent = `${current.title}${current.can_work ? "" : tr("viewOnly")}`;
+    if (dlg.open && $("#ct-card").dataset.code) openTicket($("#ct-card").dataset.code);
+    if (!$("[data-pane=summary]").hidden) loadSummary();
+    if (!$("[data-pane=search]").hidden) search();
+  });
+  applyStaticText();
   start();
 })();
