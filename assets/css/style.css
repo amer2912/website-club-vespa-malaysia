@@ -702,3 +702,35 @@ button.hbar { width: 100%; background: none; border: 0; font: inherit; color: in
 .ct-resize { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line, #e3e3e3); }
 .ct-resize h3 { margin: 0 0 4px; font-size: 1rem; }
 .ct-resize .form-actions { margin-top: 12px; }
+
+/* event pages: no postage notice */
+.no-post { margin: 14px 0 4px; font-size: .92rem; line-height: 1.5; }
+.no-post strong { display: block; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 4px; }
+.no-post span { opacity: .85; }
+
+/* member portal: benefits before login */
+.benefits { margin-top: 48px; }
+.benefits h2 { margin: 10px 0 0; }
+.benefits__sub { margin: 4px 0 20px; }
+.benefits__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.benefits__grid li { background: var(--paper); border: 1px solid var(--line); padding: 16px 18px; font-size: .92rem; line-height: 1.5; color: var(--ink-2); }
+.benefits__grid b { display: block; color: var(--ink); font-size: 1rem; margin-bottom: 4px; }
+.benefits__grid span { display: block; margin-top: 6px; color: var(--muted); font-size: .84rem; }
+.benefits__grid .benefits__soon { border-style: dashed; background: transparent; }
+.benefits__fees { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 16px; }
+.benefits__fees > div { background: var(--navy); color: #fff; padding: 18px 20px; }
+.benefits__fees small { display: block; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; opacity: .75; }
+.benefits__fees strong { display: block; font-size: 1.8rem; font-weight: 800; margin: 4px 0 6px; }
+.benefits__fees span { font-size: .88rem; opacity: .9; line-height: 1.5; }
+.benefits__foot { margin-top: 16px; font-size: .88rem; }
+
+/* about: constitution */
+.constitution { display: grid; grid-template-columns: 1.3fr 1fr; gap: 32px; align-items: center; }
+.constitution > * { min-width: 0; }
+.doc-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.doc-links a { display: flex; gap: 16px; align-items: center; padding: 18px 20px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); text-decoration: none; transition: border-color .2s var(--ease), transform .2s var(--ease); }
+.doc-links a:hover, .doc-links a:focus-visible { border-color: var(--ink); transform: translateY(-2px); }
+.doc-links__tag { flex: 0 0 auto; display: grid; place-items: center; width: 46px; height: 56px; background: var(--red); color: #fff; font-size: .72rem; font-weight: 800; letter-spacing: .08em; }
+.doc-links b { display: block; font-size: 1.02rem; }
+.doc-links small { display: block; color: var(--muted); font-size: .84rem; margin-top: 2px; }
+@media (max-width: 760px) { .constitution { grid-template-columns: 1fr; gap: 20px; } }

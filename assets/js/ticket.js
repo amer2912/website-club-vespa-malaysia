@@ -45,7 +45,7 @@
     // Events that sell a merchandise pack (not just a T-shirt) say "pack".
     if (t.shirt_size === "Pack" || PACK_EVENTS.has(t.event_id)) {
       $("#tk-collected").parentElement.querySelector("dt").textContent = "Pack · Pek";
-      $("#tk-hint").innerHTML = 'Show this QR code at the counter to collect your pack. A screenshot works too.<br><span class="muted">Tunjukkan kod QR ini di kaunter untuk ambil pek anda. Screenshot pun boleh.</span>';
+      $("#tk-hint").innerHTML = 'Show this QR code at the counter to collect your pack. A screenshot works too. No postage: collect it at the event.<br><span class="muted">Tunjukkan kod QR ini di kaunter untuk ambil pek anda. Screenshot pun boleh. Tiada pos, sila ambil di tapak acara.</span>';
     }
     $("#tk-paid").textContent = t.status === "paid" ? `RM${(t.amount_cents / 100).toFixed(2)} · ${fmt(t.paid_at)}` : "Not yet";
     $("#tk-collected").textContent = t.shirt_collected_at ? `Collected · ${fmt(t.shirt_collected_at)}` : "Not collected yet";
