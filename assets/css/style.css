@@ -734,3 +734,35 @@ button.hbar { width: 100%; background: none; border: 0; font: inherit; color: in
 .doc-links b { display: block; font-size: 1.02rem; }
 .doc-links small { display: block; color: var(--muted); font-size: .84rem; margin-top: 2px; }
 @media (max-width: 760px) { .constitution { grid-template-columns: 1fr; gap: 20px; } }
+
+/* constitution page */
+.constitution-page .cl-note { max-width: 70ch; margin: 10px 0 0; }
+.cl-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 40px; align-items: start; margin-top: 28px; }
+.cl-toc { position: sticky; top: calc(var(--header-h) + 20px); max-height: calc(100vh - var(--header-h) - 40px); overflow: auto; border: 1px solid var(--line); background: var(--paper); padding: 18px; }
+.cl-toc h2 { font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+.cl-toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.cl-toc a { display: grid; grid-template-columns: 26px 1fr; gap: 6px; padding: 6px 8px; color: var(--ink-2); text-decoration: none; font-size: .86rem; line-height: 1.35; }
+.cl-toc a span { font-weight: 800; color: var(--mint-dark); font-variant-numeric: tabular-nums; }
+.cl-toc a:hover, .cl-toc a:focus-visible { background: var(--paper-2); color: var(--ink); }
+.cl-doc { background: var(--paper); border: 1px solid var(--line); padding: clamp(20px, 4vw, 44px); line-height: 1.7; color: var(--ink-2); }
+.clause { scroll-margin-top: calc(var(--header-h) + 16px); padding-bottom: 26px; margin-bottom: 26px; border-bottom: 1px solid var(--line); }
+.clause:last-of-type { border-bottom: 0; }
+.clause h2 { font-size: clamp(1.05rem, 2.6vw, 1.3rem); color: var(--ink); margin: 0 0 14px; letter-spacing: .02em; }
+.clause__no { display: inline-block; margin-right: 10px; padding: 3px 9px; background: var(--navy); color: #fff; font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; vertical-align: 2px; }
+.cl-intro { margin: 0 0 10px; }
+.cl-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.cl-list .cl-list { margin-top: 8px; gap: 6px; }
+.cl-list > li { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 6px; }
+.cl-label { font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+.cl-body { min-width: 0; overflow-wrap: anywhere; }
+.cl-line { display: block; }
+.cl-center { display: block; text-align: center; font-weight: 700; color: var(--ink); margin: 6px 0; }
+.cl-emblem { display: block; width: 120px; height: 120px; margin: 10px 0; }
+.cl-end { margin: 8px 0 0; font-size: .86rem; }
+@media (max-width: 900px) {
+  .cl-layout { grid-template-columns: 1fr; gap: 20px; }
+  .cl-toc { position: static; max-height: none; }
+  .cl-toc ol { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+}
+@media (max-width: 480px) { .cl-list > li { grid-template-columns: 28px minmax(0, 1fr); } }
+.doc-links__tag--web { background: var(--navy); }
