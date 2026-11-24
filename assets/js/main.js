@@ -42,7 +42,7 @@ const EVENTS = [
     subtitle: "80th Anniversary",
     date: "2026-11-28",
     place: "Putrajaya Challenge Park, Putrajaya",
-    image: "assets/img/events/vespaday2026-poster.jpg",
+    image: "assets/img/events/vespaday2026-poster-v2.jpg",
     tickets: "acara/vespa-day-2026.html",
     ticketLabel: "Buy Anniversary Pack",
     posterBg: "linear-gradient(#476364, #31494b)",

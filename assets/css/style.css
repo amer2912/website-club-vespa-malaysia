@@ -694,8 +694,17 @@ button.hbar { width: 100%; background: none; border: 0; font: inherit; color: in
 .member-box > .save-chip { justify-self: start; }
 
 /* Vespa Day: pack poster and size chart side by side */
-.vd-gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 1000px; margin: 28px auto 0; align-items: start; }
-@media (max-width: 720px) { .vd-gallery { grid-template-columns: 1fr; } }
+.vd-gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 1180px; margin: 28px auto 0; align-items: start; }
+@media (max-width: 960px) { .vd-gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .vd-gallery { grid-template-columns: 1fr; } }
+/* Vespa Day itinerary (text version of the itinerary poster) */
+.vd-itinerary { margin: 18px 0 6px; border: 1px solid var(--line); background: var(--paper); }
+.vd-itinerary summary { cursor: pointer; padding: 12px 16px; font-weight: 700; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; }
+.vd-itinerary summary span { font-weight: 500; color: var(--muted); font-size: .88rem; }
+.vd-itinerary ol { list-style: none; margin: 0; padding: 4px 16px 14px; display: grid; gap: 6px; font-size: .92rem; }
+.vd-itinerary li { display: grid; grid-template-columns: 78px minmax(0, 1fr); gap: 10px; }
+.vd-itinerary time { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); }
+.vd-itinerary li.draw { color: #8a6400; font-weight: 600; }
 
 /* counter: size change (super admin) */
 .ct-size-changed { margin-top: 4px; font-size: .8rem; font-weight: 600; color: #8a5a00; }
