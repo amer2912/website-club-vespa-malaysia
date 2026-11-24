@@ -1,7 +1,7 @@
 /* =========================================================
    Vespa Club Malaysia: member portal (ahli/index.html)
    Login by email code or link, mandatory profile, digital
-   membership card and FPX renewal through ToyyibPay.
+   membership card and FPX renewal through ToyyibPay or Billplz.
    ========================================================= */
 (() => {
   const cfg = window.VCM_SUPABASE || {};
@@ -316,15 +316,22 @@
   });
   $("#profile-cancel").addEventListener("click", () => openDashboard());
 
-  /* ---------------- payment return from ToyyibPay ---------------- */
+  /* ---------------- payment return from ToyyibPay or Billplz ---------------- */
   async function handlePaymentReturn() {
     const params = new URLSearchParams(location.search);
-    if (params.get("payment") !== "return") return;
+    // Billplz comes back to /ahli/ with billplz[id], billplz[paid], ...
+    const billplzId = params.get("billplz[id]") || "";
+    if (params.get("payment") !== "return" && !billplzId) return;
     const billcode = params.get("billcode") || "";
     history.replaceState(null, "", location.pathname);
-    if (!/^[A-Za-z0-9]{4,32}$/.test(billcode)) return;
 
-    const { data } = await sb.functions.invoke("toyyibpay-callback", { body: { billcode } });
+    let data = null;
+    if (/^[A-Za-z0-9_-]{4,40}$/.test(billplzId)) {
+      ({ data } = await sb.functions.invoke("billplz-callback", { body: { id: billplzId } }));
+      if (data?.status !== "paid" && params.get("billplz[paid]") === "false") data = { status: "failed" };
+    } else if (/^[A-Za-z0-9]{4,32}$/.test(billcode)) {
+      ({ data } = await sb.functions.invoke("toyyibpay-callback", { body: { billcode } }));
+    } else return;
     const { data: fresh } = await sb.from("members").select("*").eq("id", member.id).single();
     if (fresh) member = fresh;
     const status = data?.status || (params.get("status_id") === "3" ? "failed" : "pending");
