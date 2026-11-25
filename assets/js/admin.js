@@ -42,6 +42,7 @@
   let fees = { new_member_fee_cents: 13000, fee_cents: 6000 };
   let current = null;
   let editing = null;
+  let isViewer = false;   // viewers: no View button, CSV without NRIC, address and beneficiary
 
   // 'editor', 'viewer' or null. Falls back to is_admin() until 007 is run.
   async function adminRole() {
@@ -55,6 +56,7 @@
     const { data } = await sb.auth.getSession();
     if (!data.session) { deny("Please log in", "Log in on the member portal with your AJK email first."); return; }
     const role = await adminRole();
+    isViewer = role === "viewer";
     if (!role) { deny("Admins only", "Your account does not have AJK admin access. Ask the club secretary to add your email to the admins list."); return; }
     view("adm-main");
     if (role === "viewer") {
@@ -179,6 +181,7 @@
         <td class="num">${esc(fmtDate(m.expires_on))}</td>
         <td><span class="pill pill--${st}">${LABEL[st]}</span>${typeNote(m)}</td>
         <td><div class="form-actions" style="flex-wrap:nowrap">
+          <button class="btn btn--small" type="button" data-view="${esc(m.id)}">View</button>
           <button class="btn btn--line btn--small" type="button" data-edit="${esc(m.id)}">Edit</button>
           <button class="btn btn--line btn--small" type="button" data-pay="${esc(m.id)}">Payment</button>
         </div></td>
@@ -209,6 +212,11 @@
     const cols = ["member_no", "claimed_member_no", "full_name", "nationality", "nric", "gender", "age", "email", "phone",
       "address", "state", "beneficiary_name", "beneficiary_nric", "beneficiary_relation", "oku",
       "vespa_model", "plate_no", "tshirt_size", "club_group", "remark", "expires_on", "joined_on", "declaration_accepted_at"];
+    if (isViewer) {
+      // Personal identity data stays with editors: no NRIC, address or beneficiary for viewers.
+      const hide = new Set(["nric", "address", "beneficiary_name", "beneficiary_nric", "beneficiary_relation"]);
+      for (let i = cols.length - 1; i >= 0; i--) if (hide.has(cols[i])) cols.splice(i, 1);
+    }
     const yearSel = $("#adm-year").value;
     const typeFor = (m) => { const ys = yearsOf(m); const y = yearSel !== "all" ? yearSel : Object.keys(ys).sort().pop(); return y && ys[y] ? `${KIND[ys[y]]} ${y}` : ""; };
     const vwcSource = (m) => (!vwc.get(m.member_no) ? "" : vwcByMember.has(m.member_no) ? "member" : "ajk");
@@ -267,6 +275,61 @@
     note($("#adm-msg"), `Payment saved for ${current.full_name || current.email}.`, "success");
     await Promise.all([loadMembers(), loadPayments()]);
     await loadImports();
+  });
+
+  /* ---------- view full profile (editors only) ---------- */
+  const viewDialog = $("#view-dialog");
+  const kv = (label, value) => `<div><dt>${esc(label)}</dt><dd>${value === null || value === undefined || value === "" ? '<span class="muted">—</span>' : esc(value)}</dd></div>`;
+  const when = (ts) => ts ? new Date(ts).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit", timeZone: "Asia/Kuala_Lumpur" }) : "";
+  $("#adm-rows").addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-view]");
+    if (!btn || isViewer) return;
+    const m = members.find((x) => x.id === btn.dataset.view);
+    if (!m) return;
+    const st = statusOf(m);
+    const ys = yearsOf(m);
+    const years = Object.keys(ys).sort().reverse().map((y) => `${y} (${KIND[ys[y]]})`).join(", ");
+    $("#view-title").textContent = m.full_name || m.email;
+    $("#view-sub").innerHTML = `${esc(m.member_no || "No member number yet")} · <span class="pill pill--${st}">${LABEL[st]}</span>`;
+    $("#view-body").innerHTML = `
+      <section><h3>Membership · Keahlian</h3><dl class="kvgrid">
+        ${kv("Member no.", m.member_no)}${kv("Old no. typed by member", m.claimed_member_no)}
+        ${kv("Valid until", fmtDate(m.expires_on))}${kv("Member since", fmtDate(m.joined_on))}
+        ${kv("Membership years", years)}${kv("Vespa World Club no.", vwc.get(m.member_no) ? `${vwc.get(m.member_no)}${vwcByMember.has(m.member_no) ? " (from member)" : ""}` : "")}
+      </dl></section>
+      <section><h3>Personal · Peribadi</h3><dl class="kvgrid">
+        ${kv("Full name", m.full_name)}${kv("NRIC / passport", m.nric)}
+        ${kv("Nationality", m.nationality)}${kv("Gender", m.gender)}
+        ${kv("Age", m.age)}${kv("OKU", m.oku)}
+        ${kv("Email", m.email)}${kv("Mobile", m.phone)}
+        <div class="kvgrid__wide">${kv("Address", m.address).slice(5, -6)}</div>${kv("State", m.state)}
+      </dl></section>
+      <section><h3>Beneficiary · Waris</h3><dl class="kvgrid">
+        ${kv("Name", m.beneficiary_name)}${kv("NRIC", m.beneficiary_nric)}${kv("Relationship", m.beneficiary_relation)}
+      </dl></section>
+      <section><h3>Vespa & club</h3><dl class="kvgrid">
+        ${kv("Vespa model", m.vespa_model)}${kv("Plate no.", m.plate_no)}
+        ${kv("T-shirt size", m.tshirt_size)}${kv("Club / group", m.club_group)}
+        <div class="kvgrid__wide">${kv("Remark", m.remark).slice(5, -6)}</div>
+      </dl></section>
+      <section><h3>Record</h3><dl class="kvgrid">
+        ${kv("Declaration accepted", when(m.declaration_accepted_at))}${kv("Profile completed", when(m.profile_completed_at))}
+      </dl></section>
+      <section><h3>Payments · Bayaran</h3><ul class="history" id="view-pay"><li class="muted">Loading…</li></ul></section>`;
+    if (!viewDialog.open) viewDialog.showModal();
+    const { data: pays, error } = await sb.from("payments").select("coverage_year, amount_cents, method, kind, status, paid_at, created_at")
+      .eq("member_id", m.id).order("created_at", { ascending: false }).limit(30);
+    const list = (pays || []).filter((p) => p.status === "paid");
+    $("#view-pay").innerHTML = error ? `<li class="muted">${esc(error.message)}</li>`
+      : list.map((p) => `<li><span><strong>${esc(p.coverage_year)}</strong> · ${esc(p.kind === "new" ? "New member" : "Renewal")} · ${esc(p.method)}</span><span class="muted">${esc(rm(p.amount_cents))} · ${esc(when(p.paid_at))}</span></li>`).join("")
+        || '<li class="muted">No paid payments recorded (old Google Form records show only the valid-until date).</li>';
+    viewDialog.dataset.member = m.id;
+  });
+  $("#view-close").addEventListener("click", () => viewDialog.close());
+  $("#view-edit").addEventListener("click", () => {
+    const id = viewDialog.dataset.member;
+    viewDialog.close();
+    $(`#adm-rows [data-edit="${CSS.escape(id)}"]`)?.click();
   });
 
   /* ---------- edit member ---------- */

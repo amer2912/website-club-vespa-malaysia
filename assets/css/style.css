@@ -578,7 +578,7 @@ button.hbar { width: 100%; background: none; border: 0; font: inherit; color: in
 #rec-dialog .field { align-content: start; }
 #rec-today { white-space: nowrap; flex: none; }
 /* View-only AJK: hide change buttons (the database refuses changes anyway) */
-.is-viewer [data-edit], .is-viewer [data-pay], .is-viewer #pre-add, .is-viewer [data-pre-edit],
+.is-viewer [data-view], .is-viewer [data-edit], .is-viewer [data-pay], .is-viewer #pre-add, .is-viewer [data-pre-edit],
 .is-viewer [data-pre-del], .is-viewer [data-rec], .is-viewer #arch-add, .is-viewer #vwc-panel { display: none !important; }
 
 /* =========================================================
@@ -743,3 +743,14 @@ button.hbar { width: 100%; background: none; border: 0; font: inherit; color: in
 .doc-links b { display: block; font-size: 1.02rem; }
 .doc-links small { display: block; color: var(--muted); font-size: .84rem; margin-top: 2px; }
 @media (max-width: 760px) { .constitution { grid-template-columns: 1fr; gap: 20px; } }
+
+/* admin: full member profile (editors) */
+dialog.modal.modal--wide { width: min(860px, calc(100vw - 32px)); }
+.view-body { display: grid; gap: 18px; margin-top: 8px; }
+.view-body h3 { font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+.kvgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 20px; margin: 0; }
+.kvgrid > div, .kvgrid__wide > div { min-width: 0; }
+.kvgrid dt { font-size: .74rem; color: var(--muted); }
+.kvgrid dd { margin: 2px 0 0; font-weight: 600; overflow-wrap: anywhere; }
+.kvgrid__wide { grid-column: 1 / -1; }
+@media (max-width: 560px) { .kvgrid { grid-template-columns: 1fr; } }
