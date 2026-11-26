@@ -754,3 +754,11 @@ dialog.modal.modal--wide { width: min(860px, calc(100vw - 32px)); }
 .kvgrid dd { margin: 2px 0 0; font-weight: 600; overflow-wrap: anywhere; }
 .kvgrid__wide { grid-column: 1 / -1; }
 @media (max-width: 560px) { .kvgrid { grid-template-columns: 1fr; } }
+
+/* Vespa Day: sold out */
+.soldout-banner { margin: 6px 0 16px; padding: 16px 18px; background: var(--ink); color: #fff; line-height: 1.55; font-size: .95rem; }
+.soldout-banner strong { display: block; font-size: 1.35rem; letter-spacing: .08em; margin-bottom: 6px; color: var(--yellow); }
+.soldout-banner span { display: block; margin-top: 8px; opacity: .8; font-size: .88rem; }
+.event-price.is-soldout > span:first-child { text-decoration: line-through; opacity: .5; }
+.soldout-panel h2 { margin-top: 0; }
+.event-price.is-soldout .save-badge { display: none; }
