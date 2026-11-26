@@ -30,7 +30,7 @@ begin
    where o.event_id = new.event_id
      and (o.status = 'paid' or (o.status = 'pending' and o.created_at > now() - interval '30 minutes'));
   if v_taken >= v_max then
-    raise exception 'Sorry, all % packs are sold out. · Maaf, semua pek telah habis dijual.', v_max using errcode = 'P0001';
+    raise exception 'Sold out · Habis dijual.' using errcode = 'P0001';
   end if;
   return new;
 end;
