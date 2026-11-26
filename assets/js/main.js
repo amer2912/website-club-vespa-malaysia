@@ -44,9 +44,9 @@ const EVENTS = [
     place: "Putrajaya Challenge Park, Putrajaya",
     image: "assets/img/events/vespaday2026-poster-v2.jpg",
     tickets: "acara/vespa-day-2026.html",
-    ticketLabel: "Buy Anniversary Pack",
+    ticketLabel: "Sold out · Event details",
     posterBg: "linear-gradient(#476364, #31494b)",
-    summary: "Celebrating 80 years of Vespa, 4 PM to 10 PM. Free entrance for everyone. Vespa Anniversary Pack RM50 (VCM members 20% off: RM40): T-shirt, tote bag, badge, Vespa bib and food voucher, with an entry to the lucky draw.",
+    summary: "Celebrating 80 years of Vespa, 4 PM to 10 PM. Free entrance for everyone, with the Putrajaya Ride, lucky draws and live music. The Anniversary Pack is sold out; official Vespa merchandise is on sale at the Vespa booth at the venue.",
   },
   {
     title: "Italian Scooter Day",
